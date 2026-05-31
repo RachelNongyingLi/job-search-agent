@@ -1,0 +1,189 @@
+{
+  "name": "Nongying Li",
+  "headline": "Quantitative Data Science master's student focused on LLM/agent workflows, NLP, machine learning evaluation, causal inference, and psychometrics.",
+  "target_roles": [
+    "AI Automation Intern",
+    "Generative AI Agent Intern",
+    "Machine Learning Intern",
+    "Data Scientist Intern",
+    "NLP Engineer Intern",
+    "Research Assistant in AI Evaluation"
+  ],
+  "locations": [
+    "Germany",
+    "Europe",
+    "Remote"
+  ],
+  "education": [
+    {
+      "institution": "Eberhard Karls Universität Tübingen",
+      "degree": "M.Sc. Quantitative Data Science",
+      "focus": "Psychometrics, Econometrics and Machine Learning",
+      "dates": "Oct 2024 - Present",
+      "grade": "1.9 German scale"
+    },
+    {
+      "institution": "Hong Kong Baptist University",
+      "degree": "B.Sc. Data Science with Honours",
+      "focus": "Data Science",
+      "dates": "Sep 2020 - Jun 2024",
+      "grade": "3.41/4.0, Second-Class Scholarship, Top 15%"
+    }
+  ],
+  "skills": {
+    "programming": [
+      "Python",
+      "R",
+      "C++",
+      "Java",
+      "SQL",
+      "Excel"
+    ],
+    "python_stack": [
+      "PyTorch",
+      "Transformers",
+      "NumPy",
+      "Pandas",
+      "Scikit-learn"
+    ],
+    "ai_ml": [
+      "LLM",
+      "Large Language Model",
+      "Generative AI",
+      "Agent",
+      "Chatbot",
+      "Prompt Engineering",
+      "Machine Learning",
+      "Deep Learning",
+      "NLP",
+      "Information Extraction",
+      "Transformer",
+      "VAE",
+      "RNN",
+      "Model Evaluation",
+      "Experiment Design"
+    ],
+    "quantitative": [
+      "Causal Inference",
+      "Bayesian Modeling",
+      "Psychometrics",
+      "Item Response Theory",
+      "IRT",
+      "Econometrics",
+      "Latent Variable Modeling"
+    ],
+    "business": [
+      "Automation",
+      "RPA",
+      "Workflow",
+      "Data Preparation",
+      "Documentation",
+      "Stakeholder Communication",
+      "International Collaboration",
+      "As-Is/To-Be Analysis"
+    ]
+  },
+  "experiences": [
+    {
+      "title": "Research Assistant, Method Center, University of Tübingen",
+      "dates": "May 2025 - Jan 2026",
+      "keywords": [
+        "Causal Inference",
+        "RNN",
+        "Counterfactual Outcome Prediction",
+        "Experiment Design",
+        "Data Preprocessing",
+        "Model Implementation"
+      ],
+      "bullets": [
+        "Supported research on time-dependent confounding in causal inference.",
+        "Explored RNN-based counterfactual outcome prediction workflows.",
+        "Contributed to experiment design, data preprocessing, model implementation, and reproducible analysis pipelines."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "title": "Agentic AI Research: CALE Framework for LLM Reasoning and Evaluation",
+      "dates": "2025",
+      "keywords": [
+        "LLM",
+        "Agent",
+        "Prompt Engineering",
+        "Model Inference",
+        "Result Parsing",
+        "Automated Evaluation",
+        "Python Workflow",
+        "Reproducible Reports"
+      ],
+      "bullets": [
+        "Designed and evaluated an agentic AI workflow for structured reasoning, response generation, and automated evaluation.",
+        "Built Python-based pipelines for prompt construction, model inference, result parsing, and comparative analysis.",
+        "Summarized LLM behavior into reproducible reports and visual materials."
+      ]
+    },
+    {
+      "title": "NLP Project: Joint Entity and Relation Extraction",
+      "dates": "Jul 2023 - Nov 2023",
+      "keywords": [
+        "NLP",
+        "Information Extraction",
+        "Transformers",
+        "CasRel",
+        "TDEER",
+        "TPLinker",
+        "UniRel",
+        "Relation Extraction"
+      ],
+      "bullets": [
+        "Implemented and compared CasRel, TDEER, TPLinker, and UniRel for extracting structured triples from unstructured text.",
+        "Evaluated model suitability for overlapping entities and complex relation patterns.",
+        "Created case-study comparisons to explain trade-offs between model architectures."
+      ]
+    },
+    {
+      "title": "Mask-Aware VAE Imputation for Large-Scale Assessments",
+      "dates": "Nov 2025 - Mar 2026",
+      "keywords": [
+        "VAE",
+        "Item Response Theory",
+        "IRT",
+        "Missing Data",
+        "MCAR",
+        "MAR",
+        "MNAR",
+        "Evaluation",
+        "Simulation"
+      ],
+      "bullets": [
+        "Developed mask-aware VAE workflows for missing-value imputation in large response matrices.",
+        "Compared results with 2PL Item Response Theory baselines.",
+        "Evaluated missing-cell prediction accuracy and market-basket reporting stability."
+      ]
+    },
+    {
+      "title": "DenseNet for Galaxy Morphology Classification",
+      "dates": "Mar 2023 - Jun 2023",
+      "keywords": [
+        "DenseNet",
+        "Deep Learning",
+        "Image Preprocessing",
+        "Hyperparameter Tuning",
+        "Grad-CAM",
+        "Model Interpretation"
+      ],
+      "bullets": [
+        "Preprocessed image data for clarity, resolution, and noise quality.",
+        "Implemented DenseNet and tuned learning rate and batch size.",
+        "Used Grad-CAM and smooth saliency maps to interpret model predictions."
+      ]
+    }
+  ],
+  "languages": [
+    "English: professional working proficiency",
+    "Mandarin Chinese: native"
+  ],
+  "notes": [
+    "Public GitHub profile intentionally omits phone number, date of birth, student ID, transcript details, and private documents."
+  ]
+}

@@ -1,0 +1,25 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Private job-search material
+data/private/
+outputs/private/
+outputs/
+applications.csv
+*.docx
+*.pdf
+*.xlsx
+*.xls
+
+# Keep public examples explicit
+!examples/**
+!profiles/nongying_public.json

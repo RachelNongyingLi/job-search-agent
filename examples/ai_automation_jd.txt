@@ -1,0 +1,18 @@
+AI Automation Intern at Example Semiconductor
+
+We are looking for a student intern to support global business process automation.
+The intern will work with procurement and operations teams to identify automation potential,
+document As-Is and To-Be workflows, and prototype AI assistant concepts.
+
+Responsibilities
+- Analyze process data and prepare structured documentation for international stakeholders.
+- Build small Python prototypes for workflow automation, reporting, and data preparation.
+- Explore generative AI, chatbot, and LLM agent concepts for business copilots.
+- Collaborate with technical and non-technical colleagues to test ideas and summarize results.
+
+Qualifications
+- Currently enrolled in a master's degree in data science, computer science, statistics, or a related field.
+- Experience with Python, Excel, data analysis, and clear technical documentation.
+- Knowledge of machine learning, LLMs, prompt engineering, or NLP is a strong plus.
+- Interest in RPA, process improvement, and practical automation in business settings.
+- Professional English communication skills; international teamwork experience is welcome.

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "personal-job-search-agent"
+version = "0.1.0"
+description = "A local-first CLI agent for job matching, resume tailoring advice, and application tracking."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Nongying Li" }]
+dependencies = []
+
+[project.scripts]
+job-agent = "job_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
