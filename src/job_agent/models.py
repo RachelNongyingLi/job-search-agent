@@ -21,6 +21,8 @@ class CandidateProfile:
     experiences: list[dict]
     projects: list[dict]
     languages: list[str]
+    market_facts: dict = field(default_factory=dict)
+    ability_model: dict = field(default_factory=dict)
     notes: list[str] = field(default_factory=list)
 
     @property
@@ -99,6 +101,11 @@ class MatchResult:
     decision: str
     matched: list[tuple[str, list[Evidence]]]
     gaps: list[str]
+    root_matches: list[str]
+    upskill_matches: list[str]
+    irrelevant_or_low_signal: list[str]
+    market_risks: list[str]
+    memory_updates: list[str]
     job: JobAnalysis
 
 

@@ -42,6 +42,18 @@ KNOWN_KEYWORDS = [
     "international",
     "english",
     "german",
+    "visa",
+    "work authorization",
+    "work permit",
+    "relocation",
+    "onsite",
+    "on-site",
+    "hybrid",
+    "remote",
+    "commute",
+    "local candidate",
+    "b1",
+    "c1",
 ]
 
 

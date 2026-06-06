@@ -15,6 +15,8 @@ data/private/
 outputs/private/
 outputs/
 applications.csv
+memory.local.json
+*.local.json
 *.docx
 *.pdf
 *.xlsx
@@ -22,4 +24,4 @@ applications.csv
 
 # Keep public examples explicit
 !examples/**
-!profiles/nongying_public.json
+!profiles/sample_candidate.json

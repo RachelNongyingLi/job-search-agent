@@ -39,6 +39,35 @@ class MatcherTest(unittest.TestCase):
         self.assertTrue(any(keyword == "llm" for keyword, _ in result.matched))
         self.assertIn("Strong apply", result.decision)
 
+    def test_market_hard_filter_flags_unclaimed_german(self):
+        profile = CandidateProfile(
+            name="Test Candidate",
+            headline="AI automation student",
+            target_roles=["AI Automation Intern"],
+            locations=["Germany"],
+            education=[],
+            skills={"ai": ["Python", "LLM", "Agent", "Automation"]},
+            experiences=[],
+            projects=[],
+            languages=["English"],
+            market_facts={
+                "languages_claimed": ["English"],
+                "languages_not_claimed": ["German"],
+                "work_authorization": "Keep private.",
+            },
+            ability_model={"root_strengths": ["Python", "LLM", "Agent", "Automation"]},
+        )
+        job = analyze_job_text(
+            "AI automation intern. German B1 required. Work with Python and LLM agents.",
+            company="Example",
+            title="AI Automation Intern",
+        )
+
+        result = match_profile_to_job(profile, job)
+
+        self.assertTrue(any("German" in risk for risk in result.market_risks))
+        self.assertIn("verify", result.decision.lower())
+
 
 if __name__ == "__main__":
     unittest.main()

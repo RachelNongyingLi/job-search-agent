@@ -19,5 +19,7 @@ def load_profile(path: str | Path) -> CandidateProfile:
         experiences=list(data.get("experiences", [])),
         projects=list(data.get("projects", [])),
         languages=list(data.get("languages", [])),
+        market_facts=dict(data.get("market_facts", {})),
+        ability_model=dict(data.get("ability_model", {})),
         notes=list(data.get("notes", [])),
     )

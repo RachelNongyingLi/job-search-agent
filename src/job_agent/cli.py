@@ -6,11 +6,12 @@ from pathlib import Path
 from .generator import build_report, write_report
 from .job_parser import parse_job_file
 from .matcher import match_profile_to_job
+from .memory import update_memory
 from .profile import load_profile
 from .tracker import add_application, list_applications
 
 
-DEFAULT_PROFILE = Path("profiles/nongying_public.json")
+DEFAULT_PROFILE = Path("profiles/sample_candidate.json")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -23,6 +24,7 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--company", default="", help="Override company name")
     analyze.add_argument("--title", default="", help="Override role title")
     analyze.add_argument("--out", default="", help="Write Markdown report to this path")
+    analyze.add_argument("--memory", default="", help="Optional ignored local JSON memory file to update")
 
     track = subparsers.add_parser("track", help="Manage a CSV application tracker")
     track_sub = track.add_subparsers(dest="track_command", required=True)
@@ -56,6 +58,9 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         print(f"Wrote report: {path}")
     else:
         print(report)
+    if args.memory:
+        memory_path = update_memory(args.memory, result)
+        print(f"Updated memory: {memory_path}")
     return 0
 
 
