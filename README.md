@@ -1,21 +1,40 @@
-# Precision Job Search Agent
+# Apply Less, Fit More 🚀
 
-> **Stop applying harder. Start applying smarter.**
+> **A local-first job search agent that kills resume spam and turns applications into evidence.**
 
-The job market has entered a strange new era:
+Everyone is using AI now.
 
-- Companies use AI to screen you.
-- Candidates use AI to apply faster.
-- Everyone is generating more text.
-- Nobody is getting more signal.
+- Companies use AI to screen candidates.
+- Candidates use AI to blast out resumes.
+- Recruiters drown in generated text.
+- Applicants drown in silence.
 
-This project is a local-first job search agent for the part most AI tools still miss:
+So here is the uncomfortable truth:
 
-**Should you even apply, and what can you honestly change before you do?**
+**AI did not fix job search. It made low-quality applying cheaper.**
 
-It is not an auto-apply bot. It is a precision-application system that separates real fit from resume cosplay.
+This project is built for the missing layer:
 
-## System Flow
+```text
+Before writing a better resume,
+ask whether this job is worth a better resume.
+```
+
+It is not an auto-apply bot.
+
+It is a precision-application agent that tells you:
+
+- what is a real fit
+- what is a hard market blocker
+- what can be learned before interview
+- what should never be claimed
+- what the next application should remember
+
+No resume cosplay. No fake seniority. No “spray and pray” dashboard with nicer fonts.
+
+Just better judgment, saved locally. 🧠
+
+## The One-Picture Pitch
 
 ```mermaid
 flowchart LR
@@ -37,15 +56,27 @@ flowchart LR
     class Report,Decision output;
 ```
 
-## The Problem
+## The Resume Spam Era
 
-Most AI job tools optimize for volume:
+Most AI job tools are built around the same funnel:
 
 ```text
 resume + job description -> match score -> prettier resume -> more applications
 ```
 
-That sounds useful until reality arrives.
+Sounds great.
+
+Until you realize the market does not only ask:
+
+```text
+Can this person do the work?
+```
+
+It also asks:
+
+```text
+Can we hire this person, here, now, under these constraints?
+```
 
 A candidate can be technically strong and still lose because of:
 
@@ -59,17 +90,19 @@ A candidate can be technically strong and still lose because of:
 - local hiring preference
 - company-specific domain expectations
 
-Meanwhile, generic AI resume tools often do the one thing you cannot afford:
+And then generic AI resume tools make it worse.
 
-**They turn weak evidence into confident claims.**
+They do the one thing a serious candidate cannot afford:
+
+> **They turn weak evidence into confident claims.**
 
 They make you sound like you owned production systems you never touched, led teams you never led, or mastered tools you only saw in a tutorial. That may help with a keyword screen. It hurts the moment a human interviewer asks follow-up questions.
 
-## The Thesis
+## The Bet
 
-The next useful job-search agent is not the one that applies to 500 jobs.
+The next great job-search agent will not be the one that applies to 500 jobs while you sleep.
 
-It is the one that can say:
+It will be the one brave enough to say:
 
 ```text
 Do not spend three hours tailoring this.
@@ -91,11 +124,17 @@ Do not claim this.
 Put it into the upskill plan instead.
 ```
 
-## What Makes This Different
+That is the product.
 
-### 1. Market Hard Filters
+Not more applications.
 
-Before talking about skills, the agent checks whether the job may be blocked by market constraints.
+More correct applications.
+
+## The Three Filters 🔥
+
+### 1. Market Hard Filters: the stuff ATS tutorials ignore
+
+Before talking about skills, the agent checks whether the job may be blocked by real-world constraints.
 
 Examples:
 
@@ -106,7 +145,7 @@ Examples:
 
 This is where mass applying fails. It treats every job description like text. The real market treats some lines like gates.
 
-### 2. Ability Triage
+### 2. Ability Triage: stop pretending every gap is the same
 
 Every requirement is classified into one of three buckets.
 
@@ -120,7 +159,7 @@ This is the anti-hallucination layer.
 
 The goal is not to make the candidate sound bigger. The goal is to make the candidate harder to misunderstand.
 
-### 3. Local Application Memory
+### 3. Local Application Memory: every rejection should teach the next application
 
 One application should make the next one smarter.
 
@@ -140,7 +179,7 @@ job-agent analyze \
   --memory memory.local.json
 ```
 
-## Agent Architecture
+## Under The Hood
 
 ```mermaid
 flowchart TB
@@ -179,22 +218,30 @@ flowchart TB
     H --> N["applications.csv<br/>private, ignored"]
 ```
 
-## Why Now
+## Why This Should Exist Now
 
-Agent projects in 2025-2026 are converging on a few themes:
+Agent projects in 2025-2026 are converging on the same few truths:
 
 - **Local-first execution**: private data should stay on the user machine.
 - **Durable memory**: agents need continuity across sessions, not one-off prompts.
 - **Auditable artifacts**: the agent should leave behind reports, decisions, and traces.
 - **Workflow-specific agents**: generic chat is giving way to narrow agents with real constraints.
 
-Job search needs exactly that.
+Job search needs all four.
 
 Not another cover-letter generator.
 
 A local workflow that remembers what the market keeps telling you.
 
-## What It Does Today
+The brutal version:
+
+```text
+If the agent cannot remember why the last 30 applications failed,
+it is not a job-search agent.
+It is a text box with ambition.
+```
+
+## What It Does Today ✨
 
 - Reads a local `.txt` or `.md` job description.
 - Matches it against an anonymized structured candidate profile.
@@ -212,7 +259,7 @@ A local workflow that remembers what the market keeps telling you.
 - Optionally updates private local memory.
 - Runs without external APIs.
 
-## Example Output
+## Demo: From Vibes To Evidence
 
 ```mermaid
 quadrantChart
@@ -294,7 +341,7 @@ job-agent track add \
 job-agent track list
 ```
 
-## Privacy By Design
+## Privacy By Design 🔒
 
 This repo is safe for public GitHub because the default profile is anonymized:
 
@@ -357,7 +404,7 @@ job-search-agent/
 └── README.md
 ```
 
-## Roadmap
+## Roadmap: From MVP To Job-Search OS
 
 - Private memory dashboard.
 - Better extraction of language, visa, location, commute, and start-date filters.
@@ -367,7 +414,7 @@ job-search-agent/
 - Optional LLM provider with strict factuality guards.
 - Local web UI for reviewing the application pipeline.
 
-## Influences
+## Why This Is Not Just Another Resume Tool
 
 This README intentionally follows the 2025-2026 agent-project pattern: sharp thesis, local-first privacy, durable memory, visible workflow artifacts, and a clear anti-hype boundary.
 
@@ -394,8 +441,10 @@ Useful enough to show the idea.
 
 Small enough to stay honest.
 
-## Disclaimer
+## Final Line
 
-This is not a replacement for judgment. It is a tool for making judgment harder to skip.
+This is not a replacement for judgment.
+
+It is a tool for making judgment harder to skip.
 
 Do not use it to fabricate experience, hide hard constraints, or submit applications without review.
