@@ -2,7 +2,7 @@
 
 > **A local-first job search agent that kills resume spam and turns applications into evidence.**
 >
-> **我知道所有找工作的辅助，要不然出自一个10年前就找到工作的人，要不然出自一个还没有找到工作的人，我们都没得选。**
+> **"I know all these job-hunting tips come from either people who landed a job a decade ago, or people who haven't even found one yet. We literally have no good choices.我知道所有找工作的辅助，要不然出自一个10年前就找到工作的人，要不然出自一个还没有找到工作的人，我们都没得选。"**
 
 Everyone is using AI now.
 
