@@ -1,6 +1,8 @@
 # Apply Less, Fit More 🚀
 
-> **A local-first job search agent that kills resume spam and turns applications into evidence.**
+> **A local-first job search agent that kills resume spam and turns applications into evidence.
+>
+> 我知道所有找工作的辅助，要不然出自一个10年前就找到工作的人，要不然出自一个还没有找到工作的人，我们都没得选。**
 
 Everyone is using AI now.
 
