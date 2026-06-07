@@ -2,6 +2,39 @@
 
 This file keeps the detailed Codex / Claude / CV workflow out of the README.
 
+## Current Workflow Agents
+
+The CLI exposes a human-in-the-loop workflow:
+
+```bash
+job-agent workflow run \
+  --job inputs/jobs/company_role_YYYY-MM-DD.txt \
+  --profile profiles/me.local.json \
+  --out-dir outputs/private/company_role \
+  --memory memory.local.json
+```
+
+Internally, the workflow is split into small agents:
+
+- `IntakeAgent`: reads the JD and profile.
+- `DecisionGateAgent`: runs matching, market filters, and negative red-line checks.
+- `ReportAgent`: writes `report.md` and `decision.json`.
+- `CVPlanAgent`: writes `cv_plan.md` only when the gate allows it.
+- `MemoryAgent`: updates `memory.local.json` only when requested and confirmed.
+- `NextActionsAgent`: writes `next_actions.md`.
+
+The workflow asks for confirmation before non-blocking actions. A red-line block stops CV planning even if `--yes` is passed.
+
+For demos or CI:
+
+```bash
+job-agent workflow run \
+  --job examples/ai_automation_jd.txt \
+  --out-dir outputs/private/example_ai_automation \
+  --memory memory.local.json \
+  --yes
+```
+
 ## Codex And Claude
 
 - Codex reads `AGENTS.md`.
@@ -35,10 +68,10 @@ First run or mirror the local analyzer and produce:
 Run:
 
 ```bash
-job-agent analyze \
+job-agent workflow run \
   --job inputs/jobs/company_role_YYYY-MM-DD.txt \
   --profile profiles/me.local.json \
-  --out outputs/private/company_role_report.md \
+  --out-dir outputs/private/company_role \
   --memory memory.local.json
 ```
 
@@ -61,7 +94,7 @@ Use two steps.
 First, ask for a plan:
 
 ```text
-Read outputs/private/company_role_report.md and my current CV.
+Read outputs/private/company_role/report.md and my current CV.
 Create a CV targeting plan only.
 
 Separate:

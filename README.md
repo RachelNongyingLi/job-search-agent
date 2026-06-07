@@ -35,7 +35,35 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-Analyze the example job:
+Run the human-in-the-loop workflow:
+
+```bash
+job-agent workflow run \
+  --job examples/ai_automation_jd.txt \
+  --out-dir outputs/private/example_ai_automation \
+  --memory memory.local.json
+```
+
+The workflow writes:
+
+```text
+report.md        # full match report
+decision.json    # machine-readable decision
+next_actions.md  # what to do next
+cv_plan.md       # only when the gate allows CV planning
+```
+
+For scripting or demos, approve non-blocking prompts:
+
+```bash
+job-agent workflow run \
+  --job examples/ai_automation_jd.txt \
+  --out-dir outputs/private/example_ai_automation \
+  --memory memory.local.json \
+  --yes
+```
+
+Use the lower-level analyzer when you only want a report:
 
 ```bash
 job-agent analyze \
@@ -75,10 +103,10 @@ cp profiles/sample_candidate.json profiles/me.local.json
 Then run:
 
 ```bash
-job-agent analyze \
+job-agent workflow run \
   --job inputs/jobs/company_role_YYYY-MM-DD.txt \
   --profile profiles/me.local.json \
-  --out outputs/private/company_role_report.md \
+  --out-dir outputs/private/company_role \
   --memory memory.local.json
 ```
 
@@ -108,7 +136,7 @@ CLAUDE.md      # Claude Code instructions
 Use Codex or Claude to review reports, plan CV edits, or compare multiple roles. The important rule:
 
 ```text
-Run the local analyzer first. Do not tailor the CV until hard filters and red lines are checked.
+Run the workflow first. Do not tailor the CV until hard filters and red lines are checked.
 ```
 
 Advanced prompts and the planned one-page LaTeX CV workflow are in [docs/agent_workflow.md](docs/agent_workflow.md).

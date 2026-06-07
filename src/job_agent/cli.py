@@ -9,6 +9,7 @@ from .matcher import match_profile_to_job
 from .memory import update_memory
 from .profile import load_profile
 from .tracker import add_application, list_applications
+from .workflow import run_workflow
 
 
 DEFAULT_PROFILE = Path("profiles/sample_candidate.json")
@@ -40,11 +41,24 @@ def main(argv: list[str] | None = None) -> int:
     track_list = track_sub.add_parser("list", help="List applications")
     track_list.add_argument("--csv", default="applications.csv")
 
+    workflow = subparsers.add_parser("workflow", help="Run a human-in-the-loop application workflow")
+    workflow_sub = workflow.add_subparsers(dest="workflow_command", required=True)
+    workflow_run = workflow_sub.add_parser("run", help="Analyze a role, gate red lines, and optionally produce a CV plan")
+    workflow_run.add_argument("--job", required=True, help="Path to a .txt or .md job description")
+    workflow_run.add_argument("--profile", default=str(DEFAULT_PROFILE), help="Path to candidate profile JSON")
+    workflow_run.add_argument("--company", default="", help="Override company name")
+    workflow_run.add_argument("--title", default="", help="Override role title")
+    workflow_run.add_argument("--out-dir", default="", help="Directory for workflow artifacts")
+    workflow_run.add_argument("--memory", default="", help="Optional ignored local JSON memory file to update")
+    workflow_run.add_argument("--yes", action="store_true", help="Approve non-blocking workflow prompts")
+
     args = parser.parse_args(argv)
     if args.command == "analyze":
         return _cmd_analyze(args)
     if args.command == "track":
         return _cmd_track(args)
+    if args.command == "workflow":
+        return _cmd_workflow(args)
     return 1
 
 
@@ -88,6 +102,29 @@ def _cmd_track(args: argparse.Namespace) -> int:
         print("-+-".join("-" * widths[key] for key in rows[0]))
         for row in rows:
             print(" | ".join(row.get(key, "").ljust(widths[key]) for key in rows[0]))
+        return 0
+    return 1
+
+
+def _cmd_workflow(args: argparse.Namespace) -> int:
+    if args.workflow_command == "run":
+        run = run_workflow(
+            job_path=args.job,
+            profile_path=args.profile,
+            out_dir=args.out_dir or None,
+            memory_path=args.memory or None,
+            company=args.company,
+            title=args.title,
+            auto_approve=args.yes,
+        )
+        print(f"Workflow status: {run.status}")
+        print(f"Wrote report: {run.artifacts.report}")
+        print(f"Wrote decision: {run.artifacts.decision}")
+        print(f"Wrote next actions: {run.artifacts.next_actions}")
+        if run.artifacts.cv_plan:
+            print(f"Wrote CV plan: {run.artifacts.cv_plan}")
+        if run.artifacts.memory:
+            print(f"Updated memory: {run.artifacts.memory}")
         return 0
     return 1
 
