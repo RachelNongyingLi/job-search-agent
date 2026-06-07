@@ -1278,7 +1278,7 @@
                 <p data-i18n="runConfigDesc">The local backend reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.</p>
               </div>
             </div>
-            <div class="grid-2">
+            <div class="grid-3">
               <div class="field">
                 <label for="companyName" data-i18n="companyLabel">Company</label>
                 <input id="companyName" type="text" placeholder="Example Company">
@@ -1286,6 +1286,14 @@
               <div class="field">
                 <label for="roleTitle" data-i18n="titleLabel">Role title</label>
                 <input id="roleTitle" type="text" placeholder="AI Automation Intern">
+              </div>
+              <div class="field">
+                <label for="workflowEngine" data-i18n="workflowEngineLabel">Workflow engine</label>
+                <select id="workflowEngine">
+                  <option value="classic" data-i18n="engineClassic">Classic</option>
+                  <option value="langgraph" data-i18n="engineLangGraph">LangGraph</option>
+                </select>
+                <p data-i18n="workflowEngineNote">Classic is the default. LangGraph requires the optional install extra.</p>
               </div>
             </div>
 
@@ -1653,6 +1661,10 @@
         companyLabel: "Company",
         titleLabel: "Role title",
         commandStyleLabel: "Command style",
+        workflowEngineLabel: "Workflow engine",
+        engineClassic: "Classic",
+        engineLangGraph: "LangGraph",
+        workflowEngineNote: "Classic is the default. LangGraph requires: pip install -e '.[langgraph]'",
         aiReadsTitle: "Backend reads these local files",
         aiReadsNote: "Expected outputs: decision.json, report.md, next_actions.md, cv_plan.md, and llm_verification.json when a model draft is enabled.",
         advancedCliTitle: "Terminal fallback",
@@ -1727,7 +1739,7 @@
         gateTitle: "Gate logic",
         gateBody: "A blocked workflow means no substitute CV bullets, cover letter, or recruiter message.",
         futureCv: "Future command only: job-agent cv build is not implemented yet.\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
-        apiNotes: "Local server contract, bound to 127.0.0.1 only:\n\nGET /api/health\n  Check backend status and workspace root.\n\nPOST /api/workspace/create\n  Create private folders, memory.local.json, profile draft, and output directory.\n\nPOST /api/files/base-cv\n  Save the uploaded baseline CV inside private_resumes/.\n\nPOST /api/jobs/text\n  Save reviewed JD text into inputs/jobs/.\n\nPOST /api/workflows/run\n  Calls run_workflow and returns artifacts.\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  Load existing artifacts from the output directory.\n\nPOST /api/cv/build\n  Future only. Requires cv_plan.md, one-page PDF QA, verifier pass, and human confirmation.",
+        apiNotes: "Local server contract, bound to 127.0.0.1 only:\n\nGET /api/health\n  Check backend status and workspace root.\n\nPOST /api/workspace/create\n  Create private folders, memory.local.json, profile draft, and output directory.\n\nPOST /api/files/base-cv\n  Save the uploaded baseline CV inside private_resumes/.\n\nPOST /api/jobs/text\n  Save reviewed JD text into inputs/jobs/.\n\nPOST /api/workflows/run\n  Calls run_workflow with engine classic or langgraph and returns artifacts.\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  Load existing artifacts from the output directory.\n\nPOST /api/cv/build\n  Future only. Requires cv_plan.md, one-page PDF QA, verifier pass, and human confirmation.",
         codexPrompt: "Please read README.md and AGENTS.md.\nAct as the local operator for this application round.\nRead the reviewed JD at {jobPath}, my profile at {profilePath}, memory at {memoryPath}, and my initial CV baseline at {cvPath}.\nUse the baseline CV only as private evidence for understanding my current CV. Do not tailor my CV until the gate allows it.\nRun the deterministic workflow:\n\n{command}\n\nThen read the output folder {outDir}: decision.json, report.md, next_actions.md, cv_plan.md if it exists, and llm_verification.json if present.\nSummarize the fit gate, red lines, do-not-claim items, and next actions back to me. If cv_plan.md is missing, treat it as an intentional gate result unless the command failed.\nDo not bypass red lines, memory privacy, or the one-page CV contract.",
         invalidJson: "Could not parse JSON.",
         reportLoaded: "Report loaded locally.",
@@ -1845,6 +1857,10 @@
         companyLabel: "公司名",
         titleLabel: "岗位名",
         commandStyleLabel: "命令格式",
+        workflowEngineLabel: "Workflow engine",
+        engineClassic: "Classic",
+        engineLangGraph: "LangGraph",
+        workflowEngineNote: "默认使用 Classic。LangGraph 需要先安装：pip install -e '.[langgraph]'",
         aiReadsTitle: "后端会读取这些本地文件",
         aiReadsNote: "预期输出：decision.json、report.md、next_actions.md、cv_plan.md；开启模型草稿时还有 llm_verification.json。",
         advancedCliTitle: "终端兜底",
@@ -1919,7 +1935,7 @@
         gateTitle: "Gate 逻辑",
         gateBody: "被红线阻断时，不补写 CV bullet、cover letter 或 recruiter message。",
         futureCv: "仅未来命令：job-agent cv build 还没有实现。\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
-        apiNotes: "本地 server 契约，只绑定 127.0.0.1：\n\nGET /api/health\n  检测后端状态和真实 workspace root。\n\nPOST /api/workspace/create\n  创建 private 文件夹、memory.local.json、profile 草稿和输出目录。\n\nPOST /api/files/base-cv\n  把上传的初始 CV 保存到 private_resumes/。\n\nPOST /api/jobs/text\n  把用户确认过的 JD 文本保存到 inputs/jobs/。\n\nPOST /api/workflows/run\n  调用 run_workflow 并返回产物。\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  从输出目录加载已有产物。\n\nPOST /api/cv/build\n  仅未来功能。需要 cv_plan.md、一页 PDF QA、verifier 通过和人工确认。",
+        apiNotes: "本地 server 契约，只绑定 127.0.0.1：\n\nGET /api/health\n  检测后端状态和真实 workspace root。\n\nPOST /api/workspace/create\n  创建 private 文件夹、memory.local.json、profile 草稿和输出目录。\n\nPOST /api/files/base-cv\n  把上传的初始 CV 保存到 private_resumes/。\n\nPOST /api/jobs/text\n  把用户确认过的 JD 文本保存到 inputs/jobs/。\n\nPOST /api/workflows/run\n  用 classic 或 langgraph engine 调用 run_workflow 并返回产物。\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  从输出目录加载已有产物。\n\nPOST /api/cv/build\n  仅未来功能。需要 cv_plan.md、一页 PDF QA、verifier 通过和人工确认。",
         codexPrompt: "请阅读 README.md 和 AGENTS.md。\n你作为这一轮投递的本地 operator 工作。\n读取已确认 JD：{jobPath}，profile：{profilePath}，memory：{memoryPath}，以及初始 CV baseline：{cvPath}。\n初始 CV 只能作为私有证据来理解我当前 CV；不要在 gate 允许前修改 CV。\n运行 deterministic workflow：\n\n{command}\n\n然后读取输出目录 {outDir} 里的 decision.json、report.md、next_actions.md、如果存在的 cv_plan.md，以及如果存在的 llm_verification.json。\n把 fit gate、红线、do-not-claim 和下一步动作总结给我。如果 cv_plan.md 缺失，先判断是否是 gate 有意拦截，不要自行补写 CV bullet。\n不要绕过红线、memory 隐私或一页 CV 规则。",
         invalidJson: "无法解析 JSON。",
         reportLoaded: "Report 已在本地加载。",
@@ -2037,6 +2053,10 @@
         companyLabel: "Firma",
         titleLabel: "Rolle",
         commandStyleLabel: "Befehlsformat",
+        workflowEngineLabel: "Workflow-Engine",
+        engineClassic: "Classic",
+        engineLangGraph: "LangGraph",
+        workflowEngineNote: "Classic ist Standard. LangGraph erfordert: pip install -e '.[langgraph]'",
         aiReadsTitle: "Backend liest diese lokalen Dateien",
         aiReadsNote: "Erwartete Outputs: decision.json, report.md, next_actions.md, cv_plan.md und llm_verification.json, wenn ein Modellentwurf aktiviert ist.",
         advancedCliTitle: "Terminal-Fallback",
@@ -2111,7 +2131,7 @@
         gateTitle: "Gate-Logik",
         gateBody: "Ein blockierter Workflow bedeutet: keine Ersatz-CV-Bullets, kein Cover Letter und keine Recruiter-Nachricht.",
         futureCv: "Nur zukünftiger Befehl: job-agent cv build ist noch nicht implementiert.\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
-        apiNotes: "Lokaler Server-Vertrag, nur an 127.0.0.1 gebunden:\n\nGET /api/health\n  Prüft Backend-Status und Workspace-Root.\n\nPOST /api/workspace/create\n  Erstellt private Ordner, memory.local.json, Profilentwurf und Ausgabeverzeichnis.\n\nPOST /api/files/base-cv\n  Speichert den hochgeladenen Basis-CV in private_resumes/.\n\nPOST /api/jobs/text\n  Speichert geprüften JD-Text in inputs/jobs/.\n\nPOST /api/workflows/run\n  Ruft run_workflow auf und gibt Artefakte zurück.\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  Lädt vorhandene Artefakte aus dem Ausgabeverzeichnis.\n\nPOST /api/cv/build\n  Nur zukünftig. Erfordert cv_plan.md, Ein-Seiten-PDF-QA, bestandene Verifikation und menschliche Bestätigung.",
+        apiNotes: "Lokaler Server-Vertrag, nur an 127.0.0.1 gebunden:\n\nGET /api/health\n  Prüft Backend-Status und Workspace-Root.\n\nPOST /api/workspace/create\n  Erstellt private Ordner, memory.local.json, Profilentwurf und Ausgabeverzeichnis.\n\nPOST /api/files/base-cv\n  Speichert den hochgeladenen Basis-CV in private_resumes/.\n\nPOST /api/jobs/text\n  Speichert geprüften JD-Text in inputs/jobs/.\n\nPOST /api/workflows/run\n  Ruft run_workflow mit Engine classic oder langgraph auf und gibt Artefakte zurück.\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  Lädt vorhandene Artefakte aus dem Ausgabeverzeichnis.\n\nPOST /api/cv/build\n  Nur zukünftig. Erfordert cv_plan.md, Ein-Seiten-PDF-QA, bestandene Verifikation und menschliche Bestätigung.",
         codexPrompt: "Bitte lies README.md und AGENTS.md.\nHandle als lokaler Operator für diese Bewerbungsrunde.\nLies die geprüfte Stellenanzeige unter {jobPath}, mein Profil unter {profilePath}, Memory unter {memoryPath} und meinen Basis-CV unter {cvPath}.\nNutze den Basis-CV nur als private Evidenz, um meinen aktuellen CV zu verstehen. Passe meinen CV nicht an, bevor das Gate es erlaubt.\nFühre den deterministischen Workflow aus:\n\n{command}\n\nLies danach den Ausgabeordner {outDir}: decision.json, report.md, next_actions.md, cv_plan.md falls vorhanden und llm_verification.json falls vorhanden.\nFasse Fit-Gate, rote Linien, Do-not-claim-Punkte und nächste Schritte für mich zusammen. Wenn cv_plan.md fehlt, behandle das zuerst als beabsichtigtes Gate-Ergebnis, außer der Befehl ist fehlgeschlagen.\nUmgehe keine roten Linien, Memory-Privatsphäre oder den Ein-Seiten-CV-Vertrag.",
         invalidJson: "JSON konnte nicht geparst werden.",
         reportLoaded: "Report lokal geladen.",
@@ -2263,6 +2283,8 @@
       if (company) parts.push("--company " + quoteShell(company));
       const title = $("#roleTitle").value.trim();
       if (title) parts.push("--title " + quoteShell(title));
+      const engine = $("#workflowEngine").value;
+      if (engine !== "classic") parts.push("--engine " + quoteShell(engine));
       if ($("#approvePlan").checked) parts.push("--yes");
       const provider = $("#llmProvider").value;
       if (provider !== "none") {
@@ -2911,6 +2933,7 @@
         memory_path: relativePath($("#memoryPath").value),
         company: $("#companyName").value.trim(),
         title: $("#roleTitle").value.trim(),
+        engine: $("#workflowEngine").value,
         auto_approve: $("#approvePlan").checked,
         llm_provider: $("#llmProvider").value,
         llm_model: $("#llmModel").value.trim(),

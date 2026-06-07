@@ -172,6 +172,31 @@ Do not bypass red lines, private evidence rules, or the one-page CV contract.
 
 Codex reads `AGENTS.md`. Claude Code reads `CLAUDE.md`, which points back to the same rules.
 
+## Optional LangGraph Engine
+
+The default workflow engine is `classic`. It is simpler, has no extra dependency, and is recommended for normal release users.
+
+Use `langgraph` only if you want graph-style orchestration as the project grows toward resumable human checkpoints.
+
+Install the optional extra:
+
+```bash
+pip install -e ".[langgraph]"
+```
+
+Then choose **LangGraph** in the interface, or run:
+
+```bash
+job-agent workflow run \
+  --job inputs/jobs/company_role_YYYY-MM-DD.txt \
+  --profile profiles/me.local.json \
+  --out-dir outputs/private/company_role_YYYY-MM-DD \
+  --memory memory.local.json \
+  --engine langgraph
+```
+
+This does not change scoring, red lines, privacy rules, or artifact names. It only changes the workflow orchestrator.
+
 ## Terminal Fallback
 
 The interface includes a folded **Terminal fallback** command. Use it only when the backend is unavailable or you want to debug the CLI directly.

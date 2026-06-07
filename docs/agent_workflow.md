@@ -24,6 +24,11 @@ Internally, the workflow is split into small agents:
 - `MemoryAgent`: updates `memory.local.json` when a memory path is provided.
 - `NextActionsAgent`: writes `next_actions.md`.
 
+The public entry point remains `run_workflow()`. It currently supports two engines:
+
+- `classic`: the default linear orchestrator with no optional dependencies.
+- `langgraph`: an optional graph orchestrator that preserves the same gate logic, artifacts, and privacy boundaries.
+
 The workflow uses memory to learn recurring filters, risks, and evidence patterns across applications. Human confirmation is reserved for CV/public-output boundaries such as generating a CV plan, drafting application text, or accepting a final one-page PDF. A red-line block stops CV planning even if `--yes` is passed.
 
 For demos or CI:
@@ -100,10 +105,59 @@ Backend API shape:
 - `POST /api/workspace/create` creates private folders, `memory.local.json`, a starter profile, and the output folder. Use `job_path`, `profile_path`, `cv_path` or `initial_cv_path`, `out_dir`, and `memory_path`.
 - `POST /api/files/base-cv` saves the uploaded baseline CV under `private_resumes/`. Use `cv_path`; `path` is accepted as an alias for operator ergonomics.
 - `POST /api/jobs/text` saves reviewed JD text under `inputs/jobs/`. Use `job_path` and `content`; `path` and `text` are accepted as aliases.
-- `POST /api/workflows/run` calls `run_workflow` with `job_path`, `profile_path`, `out_dir`, `memory_path`, company/title overrides, strict boolean `auto_approve`, and optional local LLM flags.
+- `POST /api/workflows/run` calls `run_workflow` with `job_path`, `profile_path`, `out_dir`, `memory_path`, company/title overrides, strict boolean `auto_approve`, optional `engine` (`classic` or `langgraph`), and optional local LLM flags.
 - `GET /api/artifacts?out_dir=outputs/private/<slug>` reloads existing workflow artifacts.
 
 The server rejects workspace escapes, non-private output paths, remote LLM base URLs in local backend mode, and string booleans such as `"true"` for `auto_approve`.
+
+## Optional LangGraph Orchestration
+
+LangGraph is useful once the workflow needs explicit state, conditional edges, durable resume, and human-in-the-loop interruption. The project should not use it as a new source of truth for scoring. The deterministic matcher and negative-ability gate remain authoritative.
+
+Install it only when needed:
+
+```bash
+pip install -e ".[langgraph]"
+```
+
+Run the same workflow with a different orchestrator:
+
+```bash
+job-agent workflow run \
+  --job inputs/jobs/company_role_YYYY-MM-DD.txt \
+  --profile profiles/me.local.json \
+  --out-dir outputs/private/company_role \
+  --memory memory.local.json \
+  --engine langgraph
+```
+
+Current graph shape:
+
+```text
+intake
+  -> gate
+  -> report
+  -> cv_plan       # skipped on red_line_block
+  -> llm_draft     # only if cv_plan exists and LLM is enabled
+  -> memory
+  -> next_actions
+```
+
+Rules that must stay true in both engines:
+
+- `red_line_block` writes report, decision, memory when enabled, and next actions; it must not write `cv_plan.md` or `cv_plan.llm.md`.
+- `needs_verification` does not produce a CV plan unless the same confirmation policy allows it.
+- LLM drafting runs only after deterministic CV planning exists.
+- `decision.json`, `report.md`, `next_actions.md`, optional `cv_plan.md`, optional `cv_plan.llm.md`, and optional `llm_verification.json` keep the same names and meanings.
+- LangGraph state and future checkpoints must stay local and private; do not send full profile, CV, JD, memory, or checkpoints to remote tracing by default.
+
+Future durable-checkpoint mode should add a separate start/resume API instead of weakening the current run API:
+
+- `POST /api/workflows/start`: create a local graph run and stop at the first CV/public-output checkpoint.
+- `GET /api/workflows/<id>`: inspect gate, pending checkpoint, and artifacts.
+- `POST /api/workflows/<id>/resume`: continue only after explicit user approval.
+
+Until that API exists, the LangGraph engine is an optional orchestrator, not a different product mode.
 
 ### Mode 1: Codex Or Claude As Operator
 

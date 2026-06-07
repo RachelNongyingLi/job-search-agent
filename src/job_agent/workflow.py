@@ -17,6 +17,12 @@ from .profile import load_profile
 
 
 InputFn = Callable[[str], str]
+DEFAULT_WORKFLOW_ENGINE = "classic"
+WORKFLOW_ENGINES = {"classic", "langgraph"}
+
+
+class WorkflowEngineError(RuntimeError):
+    """Raised when a requested workflow orchestrator cannot run."""
 
 
 @dataclass(frozen=True)
@@ -207,6 +213,58 @@ def run_workflow(
     llm_base_url: str = "",
     llm_api_key_env: str = "OPENAI_API_KEY",
     llm_client: LLMClient | None = None,
+    engine: str = DEFAULT_WORKFLOW_ENGINE,
+) -> WorkflowRun:
+    workflow_engine = _normalize_engine(engine)
+    if workflow_engine == "langgraph":
+        from .langgraph_workflow import run_langgraph_workflow
+
+        return run_langgraph_workflow(
+            job_path=job_path,
+            profile_path=profile_path,
+            out_dir=out_dir,
+            memory_path=memory_path,
+            company=company,
+            title=title,
+            auto_approve=auto_approve,
+            input_fn=input_fn,
+            llm_provider=llm_provider,
+            llm_model=llm_model,
+            llm_base_url=llm_base_url,
+            llm_api_key_env=llm_api_key_env,
+            llm_client=llm_client,
+        )
+    return _run_classic_workflow(
+        job_path=job_path,
+        profile_path=profile_path,
+        out_dir=out_dir,
+        memory_path=memory_path,
+        company=company,
+        title=title,
+        auto_approve=auto_approve,
+        input_fn=input_fn,
+        llm_provider=llm_provider,
+        llm_model=llm_model,
+        llm_base_url=llm_base_url,
+        llm_api_key_env=llm_api_key_env,
+        llm_client=llm_client,
+    )
+
+
+def _run_classic_workflow(
+    job_path: str | Path,
+    profile_path: str | Path,
+    out_dir: str | Path | None = None,
+    memory_path: str | Path | None = None,
+    company: str = "",
+    title: str = "",
+    auto_approve: bool = False,
+    input_fn: InputFn = input,
+    llm_provider: str = "none",
+    llm_model: str = "",
+    llm_base_url: str = "",
+    llm_api_key_env: str = "OPENAI_API_KEY",
+    llm_client: LLMClient | None = None,
 ) -> WorkflowRun:
     out = Path(out_dir) if out_dir else Path("outputs/private") / _slug(Path(job_path).stem)
     out.mkdir(parents=True, exist_ok=True)
@@ -267,6 +325,14 @@ def run_workflow(
         memory=memory_written,
     )
     return WorkflowRun(status=status, result=result, artifacts=artifacts)
+
+
+def _normalize_engine(engine: str) -> str:
+    normalized = (engine or DEFAULT_WORKFLOW_ENGINE).strip().lower()
+    if normalized not in WORKFLOW_ENGINES:
+        allowed = ", ".join(sorted(WORKFLOW_ENGINES))
+        raise ValueError(f"Unknown workflow engine: {engine}. Expected one of: {allowed}.")
+    return normalized
 
 
 def _confirm(prompt: str, default: bool, auto_approve: bool, input_fn: InputFn) -> bool:

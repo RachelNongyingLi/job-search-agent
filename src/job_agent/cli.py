@@ -9,7 +9,7 @@ from .matcher import match_profile_to_job
 from .memory import update_memory
 from .profile import load_profile
 from .tracker import add_application, list_applications
-from .workflow import run_workflow
+from .workflow import WORKFLOW_ENGINES, run_workflow
 
 
 DEFAULT_PROFILE = Path("profiles/sample_candidate.json")
@@ -50,6 +50,12 @@ def main(argv: list[str] | None = None) -> int:
     workflow_run.add_argument("--title", default="", help="Override role title")
     workflow_run.add_argument("--out-dir", default="", help="Directory for workflow artifacts")
     workflow_run.add_argument("--memory", default="", help="Optional ignored local JSON memory file to update")
+    workflow_run.add_argument(
+        "--engine",
+        choices=sorted(WORKFLOW_ENGINES),
+        default="classic",
+        help="Workflow orchestrator. Use langgraph only after installing the optional extra.",
+    )
     workflow_run.add_argument("--yes", action="store_true", help="Approve non-blocking workflow prompts")
     workflow_run.add_argument(
         "--llm-provider",
@@ -137,6 +143,7 @@ def _cmd_workflow(args: argparse.Namespace) -> int:
             llm_model=args.llm_model,
             llm_base_url=args.llm_base_url,
             llm_api_key_env=args.llm_api_key_env,
+            engine=args.engine,
         )
         print(f"Workflow status: {run.status}")
         print(f"Wrote report: {run.artifacts.report}")

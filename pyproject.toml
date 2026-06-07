@@ -11,6 +11,9 @@ requires-python = ">=3.10"
 authors = [{ name = "Sample Candidate" }]
 dependencies = []
 
+[project.optional-dependencies]
+langgraph = ["langgraph>=0.2"]
+
 [project.scripts]
 job-agent = "job_agent.cli:main"
 job-agent-web = "job_agent.server:main"

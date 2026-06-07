@@ -1,4 +1,5 @@
 import json
+import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
@@ -181,6 +182,40 @@ class WorkflowTest(unittest.TestCase):
             self.assertEqual(run.status, "red_line_block")
             self.assertTrue(memory.exists())
             self.assertFalse((out_dir / "cv_plan.md").exists())
+
+    def test_unknown_workflow_engine_is_rejected(self):
+        with self.assertRaises(ValueError):
+            run_workflow("job.txt", "profile.json", engine="surprise")
+
+    def test_langgraph_engine_reports_missing_optional_dependency(self):
+        if importlib.util.find_spec("langgraph") is not None:
+            self.skipTest("LangGraph is installed in this environment.")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with self.assertRaises(RuntimeError) as raised:
+                run_workflow(root / "job.txt", root / "profile.json", out_dir=root / "out", engine="langgraph")
+            self.assertIn("pip install -e '.[langgraph]'", str(raised.exception))
+
+    def test_langgraph_engine_matches_classic_when_installed(self):
+        if importlib.util.find_spec("langgraph") is None:
+            self.skipTest("LangGraph optional dependency is not installed.")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profile = root / "profile.local.json"
+            job = root / "job.txt"
+            profile.write_text(json.dumps(PROFILE_JSON), encoding="utf-8")
+            job.write_text(
+                "Build Python workflow automation with LLM agents, prompt engineering, documentation, Excel, and international stakeholders.",
+                encoding="utf-8",
+            )
+
+            classic = run_workflow(job, profile, out_dir=root / "classic", auto_approve=True)
+            graph = run_workflow(job, profile, out_dir=root / "graph", auto_approve=True, engine="langgraph")
+
+            self.assertEqual(graph.status, classic.status)
+            self.assertEqual(graph.result.score, classic.result.score)
+            self.assertTrue((root / "graph/decision.json").exists())
+            self.assertTrue((root / "graph/next_actions.md").exists())
 
 
 if __name__ == "__main__":

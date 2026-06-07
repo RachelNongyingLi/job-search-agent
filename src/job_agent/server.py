@@ -9,7 +9,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from .workflow import run_workflow
+from .workflow import (
+    DEFAULT_WORKFLOW_ENGINE,
+    WORKFLOW_ENGINES,
+    WorkflowEngineError,
+    run_workflow,
+)
 
 
 DEFAULT_HOST = "127.0.0.1"
@@ -225,6 +230,14 @@ def _parse_bool(payload: dict, key: str, default: bool = False) -> bool:
     raise ApiError(400, f"{key} must be a boolean")
 
 
+def _validate_workflow_engine(value: object) -> str:
+    engine = str(value or DEFAULT_WORKFLOW_ENGINE).strip().lower()
+    if engine not in WORKFLOW_ENGINES:
+        allowed = ", ".join(sorted(WORKFLOW_ENGINES))
+        raise ApiError(400, f"Workflow engine must be one of: {allowed}")
+    return engine
+
+
 def _is_local_origin(origin: str) -> bool:
     parsed = urlparse(origin)
     return parsed.scheme in {"http", "https"} and _is_loopback_host(parsed.hostname or "")
@@ -377,6 +390,7 @@ def _run_workflow_api(root: Path, payload: dict) -> dict:
         raise ApiError(400, f"Profile file not found: {_relative_display(root, profile_path)}")
 
     auto_approve = _parse_bool(payload, "auto_approve", default=False)
+    engine = _validate_workflow_engine(payload.get("engine"))
     llm_provider = str(payload.get("llm_provider") or "none")
     llm_base_url = str(payload.get("llm_base_url") or "")
     _validate_llm_base_url(llm_provider, llm_base_url)
@@ -393,9 +407,13 @@ def _run_workflow_api(root: Path, payload: dict) -> dict:
         "llm_model": str(payload.get("llm_model") or ""),
         "llm_base_url": llm_base_url,
         "llm_api_key_env": str(payload.get("llm_api_key_env") or "OPENAI_API_KEY"),
+        "engine": engine,
     }
     with WORKFLOW_LOCK:
-        run = run_workflow(**run_kwargs)
+        try:
+            run = run_workflow(**run_kwargs)
+        except WorkflowEngineError as exc:
+            raise ApiError(400, str(exc)) from exc
     artifacts = {
         "decision": run.artifacts.decision,
         "report": run.artifacts.report,
@@ -408,6 +426,7 @@ def _run_workflow_api(root: Path, payload: dict) -> dict:
     return {
         "ok": True,
         "status": run.status,
+        "engine": engine,
         "artifacts": _artifact_payload(root, run.artifacts.out_dir, artifacts),
     }
 

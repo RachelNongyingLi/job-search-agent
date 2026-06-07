@@ -64,6 +64,25 @@ class ServerApiTests(unittest.TestCase):
                     },
                 )
 
+    def test_run_workflow_api_rejects_unknown_engine(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "inputs/jobs").mkdir(parents=True)
+            (root / "profiles").mkdir(parents=True)
+            (root / "inputs/jobs/demo.txt").write_text("AI Automation Intern\nPython workflow", encoding="utf-8")
+            (root / "profiles/me.local.json").write_text(_profile_json(), encoding="utf-8")
+
+            with self.assertRaises(ApiError):
+                _run_workflow_api(
+                    root,
+                    {
+                        "job_path": "inputs/jobs/demo.txt",
+                        "profile_path": "profiles/me.local.json",
+                        "out_dir": "outputs/private/demo",
+                        "engine": "surprise",
+                    },
+                )
+
     def test_write_base_cv_requires_private_resumes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -112,11 +131,13 @@ class ServerApiTests(unittest.TestCase):
                 "profile_path": "profiles/me.local.json",
                 "out_dir": "outputs/private/demo",
                 "auto_approve": True,
+                "engine": "classic",
                 "llm_provider": "none",
             }
             result = _run_workflow_api(root, payload)
 
             self.assertTrue(result["ok"])
+            self.assertEqual(result["engine"], "classic")
             self.assertIn(result["status"], {"ready_for_cv_plan", "selective_cv_plan", "low_fit", "needs_verification"})
             self.assertIsInstance(result["artifacts"]["decision"], dict)
             self.assertIn("Job Match Report", result["artifacts"]["report"])
