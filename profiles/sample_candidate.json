@@ -28,7 +28,8 @@
       "German"
     ],
     "work_authorization": "Keep private. Do not publish in a public profile.",
-    "commute_or_relocation": "Keep private. The agent should ask locally before recommending location-sensitive applications."
+    "commute_or_relocation": "Keep private. The agent should ask locally before recommending location-sensitive applications.",
+    "mandatory_internship_proof": "Keep private. Treat mandatory-internship requirements as verify-first unless a private local profile confirms proof."
   },
   "ability_model": {
     "root_strengths": [
@@ -60,6 +61,11 @@
       "Claims of senior production ownership",
       "Unsupported leadership claims",
       "Technologies not used in projects"
+    ],
+    "negative_ability_red_lines": [
+      "Do not claim mandatory internship eligibility without private proof.",
+      "Do not treat a far or unverified commute as solved because technical fit is high.",
+      "Do not rewrite AI, NLP, or research projects into unrelated domains without direct evidence."
     ]
   },
   "education": [

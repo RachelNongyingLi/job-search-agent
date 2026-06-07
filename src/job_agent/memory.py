@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from dataclasses import asdict
 from datetime import date
 from pathlib import Path
 
@@ -20,6 +21,7 @@ def update_memory(path: str | Path, result: MatchResult) -> Path:
         "root_strengths": result.root_matches,
         "interview_upskill": result.upskill_matches,
         "market_risks": result.market_risks,
+        "negative_signals": [asdict(signal) for signal in result.negative_signals],
         "gaps": result.gaps,
     }
     memory.setdefault("applications", []).append(entry)
@@ -39,14 +41,17 @@ def _summarize(applications: list[dict]) -> dict:
     root = Counter()
     upskill = Counter()
     risks = Counter()
+    negative = Counter()
     for app in applications:
         root.update(app.get("root_strengths", []))
         upskill.update(app.get("interview_upskill", []))
         risks.update(_risk_label(risk) for risk in app.get("market_risks", []))
+        negative.update(_negative_label(signal) for signal in app.get("negative_signals", []))
     return {
         "top_root_strengths": root.most_common(10),
         "top_interview_upskill": upskill.most_common(10),
         "top_market_risks": risks.most_common(10),
+        "top_negative_signals": negative.most_common(10),
         "application_count": len(applications),
     }
 
@@ -60,3 +65,11 @@ def _risk_label(risk: str) -> str:
     if "location" in lower or "commute" in lower or "relocation" in lower or "onsite" in lower:
         return "location_or_commute"
     return "other_market_filter"
+
+
+def _negative_label(signal: dict | str) -> str:
+    if isinstance(signal, dict):
+        code = str(signal.get("code", ""))
+        category = str(signal.get("category", ""))
+        return code or category or "other_negative_signal"
+    return str(signal) or "other_negative_signal"

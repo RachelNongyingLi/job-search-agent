@@ -45,6 +45,11 @@ KNOWN_KEYWORDS = [
     "visa",
     "work authorization",
     "work permit",
+    "mandatory internship",
+    "compulsory internship",
+    "pflichtpraktikum",
+    "student status",
+    "enrollment",
     "relocation",
     "onsite",
     "on-site",
@@ -54,6 +59,15 @@ KNOWN_KEYWORDS = [
     "local candidate",
     "b1",
     "c1",
+    "embedded",
+    "firmware",
+    "microcontroller",
+    "hardware design",
+    "frontend",
+    "react",
+    "sap abap",
+    "salesforce",
+    "security clearance",
 ]
 
 

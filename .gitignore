@@ -12,11 +12,14 @@ build/
 
 # Private job-search material
 data/private/
+inputs/jobs/
+private_resumes/
 outputs/private/
 outputs/
 applications.csv
 memory.local.json
 *.local.json
+CLAUDE.local.md
 *.docx
 *.pdf
 *.xlsx

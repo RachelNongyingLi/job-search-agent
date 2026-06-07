@@ -96,6 +96,17 @@ class JobAnalysis:
 
 
 @dataclass(frozen=True)
+class NegativeSignal:
+    code: str
+    severity: str
+    category: str
+    message: str
+    evidence_required: str
+    suggested_action: str
+    score_cap: int
+
+
+@dataclass(frozen=True)
 class MatchResult:
     score: int
     decision: str
@@ -107,6 +118,7 @@ class MatchResult:
     market_risks: list[str]
     memory_updates: list[str]
     job: JobAnalysis
+    negative_signals: list[NegativeSignal] = field(default_factory=list)
 
 
 def _important_phrases(text: str) -> list[str]:

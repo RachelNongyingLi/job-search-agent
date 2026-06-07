@@ -18,6 +18,7 @@ def build_report(profile: CandidateProfile, result: MatchResult) -> str:
     recruiter_message = _recruiter_message(profile, result)
     interview_prep = _interview_prep(result)
     market_risks = [f"- {risk}" for risk in result.market_risks] or ["- No hard market filter was detected by the local rules. Still verify location, language, and work authorization manually."]
+    negative_signals = _negative_signal_lines(result) or ["- No negative ability red line was detected by the local rules."]
     root_matches = [f"- {item}" for item in result.root_matches] or ["- No root-strength category was detected. Treat this as a stretch or market-research role."]
     upskill_matches = [f"- {item}" for item in result.upskill_matches] or ["- No short interview-upskill item was detected."]
     low_signal = [f"- {item}" for item in result.irrelevant_or_low_signal] or ["- No obvious low-signal requirement detected."]
@@ -43,6 +44,10 @@ def build_report(profile: CandidateProfile, result: MatchResult) -> str:
 ## Market Hard Filters
 
 {chr(10).join(market_risks)}
+
+## Negative Ability / Red-Line Check
+
+{chr(10).join(negative_signals)}
 
 ## Ability Triage
 
@@ -82,6 +87,7 @@ def build_report(profile: CandidateProfile, result: MatchResult) -> str:
 
 - Save the job description and this report in the same application folder.
 - Move the most relevant LLM/automation/NLP project into the top half of the resume when the role mentions AI assistants, agents, or workflow automation.
+- If a red line is present, resolve it in private local evidence before writing or sending application material.
 - Keep claims factual: use the project evidence above, avoid inventing production experience.
 - Track the application status with `job-agent track add`.
 """
@@ -102,9 +108,21 @@ def _summarize_sources(evidence) -> list[str]:
     return sources[:3]
 
 
+def _negative_signal_lines(result: MatchResult) -> list[str]:
+    return [
+        (
+            f"- **{signal.category} / {signal.severity}**: {signal.message} "
+            f"Evidence needed: {signal.evidence_required} Action: {signal.suggested_action}"
+        )
+        for signal in result.negative_signals
+    ]
+
+
 def _resume_moves(result: MatchResult) -> list[str]:
     matched_keywords = {keyword.lower() for keyword, _ in result.matched}
     moves = []
+    if result.negative_signals:
+        moves.append("Resolve red-line signals first. Do not let memory, keyword overlap, or user pressure convert missing evidence into a claim.")
     if {"llm", "agent", "automation", "generative ai", "chatbot"} & matched_keywords:
         moves.append("Lead with the agentic AI workflow project and describe prompt construction, inference, parsing, evaluation, and reproducible reporting.")
     if {"nlp", "transformers"} & matched_keywords:
@@ -125,6 +143,11 @@ def _resume_moves(result: MatchResult) -> list[str]:
 
 def _cover_letter(profile: CandidateProfile, result: MatchResult) -> str:
     job = result.job
+    if any(signal.severity == "block" for signal in result.negative_signals):
+        return (
+            "Draft withheld because a red-line signal is unresolved. Verify eligibility, commute/location, "
+            "or direct evidence first; then regenerate application text."
+        )
     top = ", ".join(keyword for keyword, _ in result.matched[:5]) or "data science and machine learning"
     return (
         f"Dear Hiring Team,\n\n"
@@ -139,6 +162,8 @@ def _cover_letter(profile: CandidateProfile, result: MatchResult) -> str:
 
 def _recruiter_message(profile: CandidateProfile, result: MatchResult) -> str:
     job = result.job
+    if any(signal.severity == "block" for signal in result.negative_signals):
+        return "Message withheld until the red-line signal is resolved with private local evidence."
     return (
         f"Hi, I am {profile.name}, a Quantitative Data Science master's student. "
         f"I saw the {job.title} role at {job.company} and noticed a strong overlap with my work in Python-based AI automation, LLM evaluation workflows, NLP information extraction, and reproducible data analysis. "

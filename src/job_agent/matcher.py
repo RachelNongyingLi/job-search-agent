@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from .models import CandidateProfile, JobAnalysis, MatchResult
+from .models import CandidateProfile, JobAnalysis, MatchResult, NegativeSignal
+from .negative_ability import detect_negative_signals
 
 
 ROLE_KEYWORDS = {
@@ -29,12 +30,14 @@ def match_profile_to_job(profile: CandidateProfile, job: JobAnalysis) -> MatchRe
 
     root_matches, upskill_matches, irrelevant_or_low_signal = _classify_abilities(profile, job_keywords)
     market_risks = _market_risks(profile, job)
-    memory_updates = _memory_updates(job, root_matches, upskill_matches, market_risks)
+    negative_signals = detect_negative_signals(profile, job, root_matches, upskill_matches)
+    memory_updates = _memory_updates(job, root_matches, upskill_matches, market_risks, negative_signals)
     coverage = len(matched) / max(len(job_keywords), 1)
     role_bonus = _role_alignment_bonus(profile, job_keywords)
     market_penalty = min(18, len(market_risks) * 6)
-    score = max(0, min(98, round((coverage * 78) + role_bonus - market_penalty)))
-    decision = _decision(score, gaps, market_risks)
+    base_score = max(0, min(98, round((coverage * 78) + role_bonus - market_penalty)))
+    score = min(base_score, _negative_score_cap(negative_signals))
+    decision = _decision(score, gaps, market_risks, negative_signals)
     return MatchResult(
         score=score,
         decision=decision,
@@ -46,6 +49,7 @@ def match_profile_to_job(profile: CandidateProfile, job: JobAnalysis) -> MatchRe
         market_risks=market_risks,
         memory_updates=memory_updates,
         job=job,
+        negative_signals=negative_signals,
     )
 
 
@@ -114,8 +118,17 @@ def _market_risks(profile: CandidateProfile, job: JobAnalysis) -> list[str]:
     return risks
 
 
-def _memory_updates(job: JobAnalysis, root_matches: list[str], upskill_matches: list[str], market_risks: list[str]) -> list[str]:
+def _memory_updates(
+    job: JobAnalysis,
+    root_matches: list[str],
+    upskill_matches: list[str],
+    market_risks: list[str],
+    negative_signals: list[NegativeSignal],
+) -> list[str]:
     updates = []
+    if negative_signals:
+        labels = ", ".join(signal.code for signal in negative_signals[:4])
+        updates.append(f"Preserve negative evidence separately; do not let memory convert red lines into strengths: {labels}.")
     if root_matches:
         updates.append(f"Strengthen memory for this market cluster: {', '.join(root_matches[:6])}.")
     if upskill_matches:
@@ -135,7 +148,17 @@ def _soft_contains(keyword: str, values: set[str]) -> bool:
     return any(keyword in value or value in keyword for value in values)
 
 
-def _decision(score: int, gaps: list[str], market_risks: list[str]) -> str:
+def _negative_score_cap(negative_signals: list[NegativeSignal]) -> int:
+    if not negative_signals:
+        return 98
+    return min(signal.score_cap for signal in negative_signals)
+
+
+def _decision(score: int, gaps: list[str], market_risks: list[str], negative_signals: list[NegativeSignal]) -> str:
+    if any(signal.severity == "block" for signal in negative_signals):
+        return "Red-line block: verify or skip before tailoring; do not turn missing evidence into resume claims."
+    if negative_signals:
+        return "Verify first: negative ability signals cap this match until local evidence is confirmed."
     if market_risks and score >= 78:
         return "Strong technical fit, but verify market hard filters before applying."
     if market_risks:

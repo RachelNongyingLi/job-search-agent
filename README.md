@@ -41,18 +41,25 @@ flowchart LR
     JD["Job Description"] --> Parser["JD Parser"]
     Profile["Anonymized Candidate Profile"] --> Matcher["Evidence Matcher"]
     Private["Private Local Facts<br/>language, location, work authorization"] --> Filters["Market Hard Filters"]
+    RedLines["Negative Ability<br/>Red-Line Check"]
     Parser --> Filters
+    Parser --> RedLines
     Parser --> Matcher
+    Profile --> RedLines
     Matcher --> Triage["Ability Triage"]
     Filters --> Decision["Apply / Skip / Verify First"]
+    RedLines --> Decision
     Triage --> Decision
     Decision --> Report["Markdown Application Report"]
     Report --> Memory["Local Memory<br/>ignored by Git"]
     Memory --> Matcher
+    Memory --> RedLines
 
     classDef private fill:#fff4e6,stroke:#c76b00,color:#331b00;
     classDef output fill:#eef6ff,stroke:#2878bd,color:#102a43;
+    classDef redline fill:#ffecec,stroke:#c62828,color:#3b0b0b;
     class Private,Memory private;
+    class RedLines redline;
     class Report,Decision output;
 ```
 
@@ -130,7 +137,7 @@ Not more applications.
 
 More correct applications.
 
-## The Three Filters 🔥
+## The Four Filters 🔥
 
 ### 1. Market Hard Filters: the stuff ATS tutorials ignore
 
@@ -159,7 +166,28 @@ This is the anti-hallucination layer.
 
 The goal is not to make the candidate sound bigger. The goal is to make the candidate harder to misunderstand.
 
-### 3. Local Application Memory: every rejection should teach the next application
+### 3. Negative Ability / Red-Line Check: stop memory from becoming a hype engine
+
+More memory is useful only if the system also remembers what must not be softened.
+
+This layer looks for negative evidence and absolute red lines before the report can recommend tailoring.
+
+Examples:
+
+- The JD requires proof of a mandatory or compulsory internship, but no private local proof is confirmed.
+- The JD uses hard onsite/local/commute language, and the local commute or relocation facts are blocked or unknown.
+- The JD requires an unrelated domain, and the only way to sound matched would be to rewrite an existing project into something it never did.
+
+When a red line is triggered:
+
+- the score is capped
+- the decision becomes verify-first or skip-first
+- generated cover-letter and recruiter-message drafts are withheld for block-level signals
+- memory stores the negative signal separately so future applications cannot convert it into a strength
+
+This is the counterweight to long-context sycophancy and score inflation.
+
+### 4. Local Application Memory: every rejection should teach the next application
 
 One application should make the next one smarter.
 
@@ -192,6 +220,7 @@ flowchart TB
     subgraph Core
         D["job_parser.py<br/>extract role signals"]
         E["matcher.py<br/>score + classify"]
+        R["negative_ability.py<br/>red-line detector"]
         F["generator.py<br/>write report"]
         G["memory.py<br/>learn across applications"]
         H["tracker.py<br/>CSV pipeline"]
@@ -200,18 +229,24 @@ flowchart TB
     subgraph Outputs
         I["Fit score"]
         J["Market hard filters"]
+        R2["Negative red lines"]
         K["Root / Upskill / Low-signal triage"]
         L["Resume targeting plan"]
         M["Cover letter + recruiter message"]
     end
 
     A --> D --> E
+    D --> R
     B --> E
+    B --> R
     C --> E
+    C --> R
+    R --> E
     E --> F
     E --> G
     F --> I
     F --> J
+    F --> R2
     F --> K
     F --> L
     F --> M
@@ -250,6 +285,7 @@ It is a text box with ambition.
   - apply decision
   - evidence-backed strengths
   - market hard-filter warnings
+  - negative ability / red-line signals
   - root strength / interview-upskill / low-signal triage
   - resume targeting plan
   - memory updates
@@ -284,6 +320,9 @@ Decision: Strong apply: tailor the resume and apply.
 Market Hard Filters
 - No hard market filter was detected by the local rules.
 - Still verify location, language, and work authorization manually.
+
+Negative Ability / Red-Line Check
+- No negative ability red line was detected by the local rules.
 
 Ability Triage
 Root Strengths
@@ -329,6 +368,12 @@ job-agent analyze \
   --memory memory.local.json
 ```
 
+Run tests:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests
+```
+
 Track an application:
 
 ```bash
@@ -340,6 +385,180 @@ job-agent track add \
 
 job-agent track list
 ```
+
+## Use With Codex Or Claude Code
+
+This repo is designed to work well with coding agents because the durable rules live in files, not in vibes.
+
+```text
+AGENTS.md      # Codex project instructions
+CLAUDE.md      # Claude Code entrypoint; imports AGENTS.md
+README.md      # human workflow and copy-paste prompts
+*.local.json   # private facts, ignored by Git
+memory.local.json
+outputs/private/
+```
+
+Codex reads `AGENTS.md` project guidance. Claude Code reads `CLAUDE.md`; this repo's `CLAUDE.md` imports `AGENTS.md` so both agents follow the same privacy, memory, red-line, and CV rules.
+
+### One-Time Local Setup
+
+Keep public demo data and real private data separate.
+
+```bash
+mkdir -p inputs/jobs data/private outputs/private private_resumes
+cp profiles/sample_candidate.json profiles/me.local.json
+```
+
+Then edit `profiles/me.local.json` locally with your real, private profile. Keep sensitive facts compact and decision-oriented:
+
+```json
+{
+  "market_facts": {
+    "languages_claimed": ["English"],
+    "languages_not_claimed": ["German"],
+    "mandatory_internship_proof": "verified_private",
+    "commute_or_relocation": "ask locally before recommending onsite roles"
+  }
+}
+```
+
+Do not paste certificates, transcripts, full addresses, visa documents, or recruiter conversations into tracked files. Store real CVs under `private_resumes/`, real JD files under `inputs/jobs/`, and real outputs under `outputs/private/`.
+
+### Recommended Agent Prompt
+
+Use this prompt in Codex or Claude Code when you add a new job:
+
+```text
+You are my local job-search agent for this repo.
+
+Before judging this role, read:
+- README.md
+- AGENTS.md or CLAUDE.md
+- profiles/me.local.json if present
+- memory.local.json if present
+- the JD at inputs/jobs/<company_role_date>.txt
+
+Do not tailor my CV yet.
+First run or mirror the local analyzer and produce:
+1. apply / selective apply / verify-first / skip decision
+2. market hard filters
+3. negative ability red lines
+4. root strengths
+5. interview-upskill items
+6. do-not-claim items
+7. what memory should remember
+```
+
+Run the local analyzer:
+
+```bash
+job-agent analyze \
+  --job inputs/jobs/company_role_YYYY-MM-DD.txt \
+  --profile profiles/me.local.json \
+  --out outputs/private/company_role_report.md \
+  --memory memory.local.json
+```
+
+### Multi-Round Applications
+
+When you have applied to several related roles, keep the agent anchored to local evidence instead of the conversation history.
+
+```text
+Read memory.local.json and the latest report in outputs/private/.
+Tell me whether this new role is genuinely better, worse, or just keyword-similar.
+
+Do not raise the score because I want the role.
+If old memory contains a red line, preserve it unless a private local fact explicitly resolves it.
+```
+
+After applying, track the outcome:
+
+```bash
+job-agent track add \
+  --company "Company" \
+  --role "Role" \
+  --status "applied" \
+  --link "https://..." \
+  --resume-version "company_role_YYYY-MM-DD" \
+  --notes "Verified location; used AI workflow + NLP version"
+```
+
+### CV Tailoring Prompt
+
+Use two steps. First ask for a plan:
+
+```text
+Read outputs/private/company_role_report.md and my current CV.
+Create a CV targeting plan only.
+
+Separate:
+- supported claims I can safely emphasize
+- claims that need weaker wording
+- things that belong in interview prep, not the CV
+- things I must not claim
+
+Show a claim-evidence table before drafting bullets.
+```
+
+Then ask for edits:
+
+```text
+Now revise my CV bullets for this role.
+
+Rules:
+- Do not invent company names, production ownership, deployment, leadership, metrics, tools, authorization, or language fluency.
+- Every strong claim must cite evidence from my profile, current CV, project, or report.
+- If evidence is missing, write it as an upskill/interview-prep item instead.
+- Preserve red-line warnings from memory.local.json and the report.
+- Label every bullet as safe, needs verification, or too strong / do not use.
+```
+
+### Future LaTeX CV Contract
+
+The planned CV workflow is a truth-preserving one-page LaTeX compiler, not a resume optimizer.
+
+```text
+templates/cv.tex                  # public-safe one-page LaTeX template
+profiles/sample_candidate.json    # anonymized demo profile
+profiles/me.local.json            # real private profile, ignored by Git
+outputs/private/                  # generated CVs and QA reports, ignored by Git
+```
+
+A future command may look like this:
+
+```bash
+job-agent cv build \
+  --job inputs/jobs/company_role_YYYY-MM-DD.txt \
+  --profile profiles/me.local.json \
+  --template templates/cv.tex \
+  --out outputs/private/company_role_cv.pdf
+```
+
+The CV builder should accept an output only after QA passes:
+
+- LaTeX compiles successfully
+- the PDF is exactly one page
+- no private data leaks into public outputs
+- no unsupported claim appears
+- no red-line rule is violated
+- a `.qa.json` report is written next to the PDF
+
+If the CV does not fit on one page, the agent should remove the weakest and least relevant content first. If it still cannot fit cleanly, it should fail with a clear explanation instead of producing an ugly or misleading resume.
+
+### Safe Use Checklist
+
+- Use `profiles/sample_candidate.json` for public demos only.
+- Put your real profile in a `*.local.json` file.
+- Treat `memory.local.json` as sensitive; it can reveal your job-search history and eligibility constraints.
+- Keep visa, address, phone, email, student ID, transcripts, certificates, commute details, and application history out of Git.
+- Store real application outputs under `outputs/private/`.
+- Never ask an agent to commit generated CVs, cover letters, application trackers, or private memory.
+- Before publishing a CV or report, check that every claim is public-safe and evidence-backed.
+- If a job requires work authorization, mandatory internship proof, relocation, onsite work, or local language fluency, verify privately before generating application text.
+- Run `git status --short` before every commit and inspect any profile, report, CSV, PDF, DOCX, TeX, or JSON file that appears.
+
+Rule of thumb: if you would not paste it into a public GitHub issue, do not put it in a tracked file.
 
 ## Privacy By Design 🔒
 
@@ -367,11 +586,14 @@ Ignored by default:
 
 ```text
 data/private/
+inputs/jobs/
+private_resumes/
 outputs/private/
 outputs/
 applications.csv
 memory.local.json
 *.local.json
+CLAUDE.local.md
 *.docx
 *.pdf
 *.xlsx
@@ -395,10 +617,15 @@ job-search-agent/
 │   ├── matcher.py
 │   ├── memory.py
 │   ├── models.py
+│   ├── negative_ability.py
 │   ├── profile.py
 │   └── tracker.py
 ├── tests/
-│   └── test_matcher.py
+│   ├── test_generator.py
+│   ├── test_matcher.py
+│   └── test_memory.py
+├── AGENTS.md
+├── CLAUDE.md
 ├── .gitignore
 ├── pyproject.toml
 └── README.md
@@ -408,7 +635,9 @@ job-search-agent/
 
 - Private memory dashboard.
 - Better extraction of language, visa, location, commute, and start-date filters.
+- Calibrated sub-scores for technical evidence, market constraints, claim safety, and tailoring ROI.
 - Resume planner that refuses unsupported claims.
+- One-page LaTeX CV builder with compile, page-count, privacy, and unsupported-claim QA.
 - Interview prep mode based on upskill items.
 - Role-cluster analytics across applications.
 - Optional LLM provider with strict factuality guards.
@@ -426,8 +655,16 @@ Related signals:
 
 Useful references:
 
+- [Codex AGENTS.md guidance](https://developers.openai.com/codex/guides/agents-md) explains how Codex loads repository instructions.
+- [Codex memories](https://developers.openai.com/codex/memories) motivates keeping required project rules in checked-in instructions instead of relying only on platform memory.
+- [Claude Code memory docs](https://code.claude.com/docs/zh-CN/memory) explain `CLAUDE.md`, local memory files, and importing `AGENTS.md`.
 - [MemoryArena](https://digitaleconomy.stanford.edu/publication/memoryarena-benchmarking-agent-memory-in-interdependent-multi-session-agentic-tasks/) frames agent memory as multi-session learning, not just long context.
 - [MemoryAgentBench](https://huggingface.co/papers/2507.05257) highlights retrieval, test-time learning, long-range understanding, and conflict resolution as memory-agent capabilities.
+- [LongMemEval](https://proceedings.iclr.cc/paper_files/paper/2025/hash/d813d324dbf0598bbdc9c8e79740ed01-Abstract-Conference.html) treats abstention and knowledge updates as core long-term memory abilities.
+- [Extended AI Interactions Shape Sycophancy and Perspective Mimesis](https://arxiv.org/abs/2509.12517) motivates testing long-context and memory profiles for increased sycophancy.
+- [Overconfidence in LLM-as-a-Judge](https://arxiv.org/abs/2508.06225) motivates score calibration instead of trusting a single confident judge score.
+- [OpenAI Agents SDK Guardrails](https://openai.github.io/openai-agents-js/guides/guardrails/) and [NVIDIA NeMo Guardrails](https://docs.nvidia.com/nemo-guardrails/index.html) show the engineering pattern of running explicit checks before accepting agent outputs.
+- [LangGraph Memory](https://langchain-ai.github.io/langgraph/how-tos/memory/manage-conversation-history/) and [LlamaIndex Memory](https://developers.llamaindex.ai/python/examples/memory/memory/) show the current split between short-term context, long-term memory, and structured memory blocks.
 - [Memoria](https://github.com/matrixorigin/Memoria) positions agent memory around privacy, audit trails, snapshots, and rollback.
 - [Sediment](https://github.com/rendro/sediment) is an example of the local-first memory README style: clear benchmark table, data location, and privacy promise.
 - [resuml](https://github.com/phoinixi/resuml) shows the current resume-as-code direction: structured resume data, ATS checks, and AI-agent integration.

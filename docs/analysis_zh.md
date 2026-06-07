@@ -83,7 +83,32 @@
 
 这些内容不应该为了 ATS 而硬塞进简历。
 
-## 5. 第三个模块：Application Memory
+## 5. 第三个模块：负面能力与红线检测
+
+多轮投递以后，memory 会变多，但这也会带来一个新风险：
+
+- agent 看到越来越多候选人信息，开始把“可能相关”解释成“已经具备”。
+- 用户多轮施压时，模型更容易妥协，说“也可以这么写”。
+- 分数可能因为关键词和历史偏好不断上升，而忘记某些条件其实是硬门槛。
+
+所以需要增加一层 **Negative Ability / Red-Line Check**。
+
+这一层不是再找匹配点，而是专门找不能被美化的负面证据：
+
+- JD 要求 mandatory / compulsory internship proof，但本地 profile 没有确认的强制实习证明。
+- JD 使用 onsite、local candidates only、commutable distance 等强地点语言，但通勤或 relocation 在本地事实中未确认，甚至明确不可行。
+- JD 要求一个完全不相关的硬技能或行业方向，而候选人只能通过“改写项目”来显得匹配。
+
+如果触发红线，系统应该：
+
+- 给总分设置上限，而不是继续给高分。
+- 把 decision 改成 verify-first / skip-first。
+- 暂缓生成 cover letter 和 recruiter message，避免用户误用不安全文本。
+- 把红线作为单独 memory 写入，不能把它和 root strengths 混在一起。
+
+这一步的目标是对冲长上下文、长期 memory、LLM judge 高分偏置和 sycophancy。
+
+## 6. 第四个模块：Application Memory
 
 一次投递的价值不只是投出去，还应该反过来完善 memory：
 
@@ -95,13 +120,14 @@
 
 后续版本可以把这些信息存到本地 memory 文件中，让 agent 越投越懂用户，而不是每次都从零开始。
 
-## 6. 当前 MVP Workflow
+## 7. 当前 MVP Workflow
 
 1. 用户把 JD 保存成 `.txt` 或 `.md`。
 2. agent 读取匿名或本地私有 profile。
 3. agent 输出：
    - fit score
    - market hard filters
+   - negative ability / red-line signals
    - root strengths
    - interview-upskill items
    - low-signal/unsupported items
@@ -112,7 +138,7 @@
 5. 用户用 CSV 记录投递状态。
 6. 如果需要长期学习，运行 `job-agent analyze --memory memory.local.json`，把 root strengths、interview-upskill items 和 market risks 写入本地私有 memory。
 
-## 7. 隐私原则
+## 8. 隐私原则
 
 公开仓库只保留匿名 sample profile。
 
@@ -127,10 +153,11 @@
 
 这些内容应该只存在于 `.gitignore` 覆盖的本地私有文件中。
 
-## 8. 后续扩展
+## 9. 后续扩展
 
 - 本地 private memory store。
 - 更强的 market filter parser。
+- calibrated sub-scores：technical evidence、market constraints、claim safety、tailoring ROI。
 - 基于 root/upskill/irrelevant 的 resume version planner。
 - 面试准备模式，把 upskill items 转成 3 天或 7 天学习计划。
 - 可选 LLM provider，但必须带 anti-hallucination guard。
