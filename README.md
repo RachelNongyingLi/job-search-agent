@@ -30,12 +30,36 @@ This public-safe demo shows the ideal output shape after a job has been analyzed
 
 See the companion walkthrough: [docs/demo_fit_analysis.md](docs/demo_fit_analysis.md).
 
-## Start Here
+## Download
 
-Install the project:
+For normal use, download the curated release zip from [GitHub Releases](https://github.com/RachelNongyingLi/job-search-agent/releases):
+
+```text
+apply-less-fit-more-v0.1.0.zip
+```
+
+GitHub also shows auto-generated `Source code` archives. Prefer the curated zip above because it is built by the release script and checked for private files before publishing.
+
+Optional integrity check:
 
 ```bash
-cd job-search-agent
+shasum -a 256 apply-less-fit-more-v0.1.0.zip
+```
+
+Compare it with the `.sha256` file attached to the release.
+
+## Start Here
+
+Unzip the release and enter the folder:
+
+```bash
+unzip apply-less-fit-more-v0.1.0.zip
+cd apply-less-fit-more-v0.1.0
+```
+
+Then install the local app:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
