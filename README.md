@@ -33,6 +33,16 @@ cv_plan.md           # only when the gate allows CV planning
 
 Use `--yes` only when you want to approve non-blocking prompts for demos or scripting.
 
+## Local Web Console
+
+You can also open the bilingual local console:
+
+```text
+web/index.html
+```
+
+It helps you prepare JD input, generate workflow commands, configure optional LLM flags, import `decision.json` / `report.md`, and copy a Codex prompt. It is static HTML: it does not upload data, store API keys, or directly run the Python CLI.
+
 ## Two Ways To Use It
 
 ### 1. Codex Or Claude As Operator
@@ -75,15 +85,20 @@ llm_verification.json
 
 The model draft is wording help only. It cannot override red-line blocks, missing proof, unsupported claims, or verifier failures.
 
-## Human Checkpoints
+## Memory And Checkpoints
 
-Before tailoring or sending anything, confirm:
+Across applications, memory should learn recurring signals:
 
-- Mandatory internship proof exists when the JD requires it.
-- Commute, relocation, location, language, and work authorization are real and safe to state.
-- Every CV bullet has profile, project, current CV, or report evidence.
-- A red-line block means no CV bullets, cover letter, or recruiter message yet.
-- A final LaTeX CV must compile cleanly to exactly one page.
+- hard filters such as mandatory internship proof, commute, relocation, location, language, and work authorization
+- repeated red lines, blocked roles, verify-first facts, and do-not-claim patterns
+- evidence-backed strengths and recurring interview-upskill gaps
+
+Human confirmation is needed when the workflow is about to change or send application material:
+
+- editing CV bullets or LaTeX
+- turning a private fact into public wording
+- sending a CV, cover letter, or recruiter message
+- accepting the final PDF as a clean, exactly one-page LaTeX CV
 
 ## Your Own Profile
 

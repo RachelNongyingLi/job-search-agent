@@ -151,9 +151,9 @@ def _cover_letter(profile: CandidateProfile, result: MatchResult) -> str:
     top = ", ".join(keyword for keyword, _ in result.matched[:5]) or "data science and machine learning"
     return (
         f"Dear Hiring Team,\n\n"
-        f"I am a Quantitative Data Science master's student, and I am excited to apply for the {job.title} role at {job.company}. "
+        f"I am {profile.name}, {profile.headline.lower()}, and I am excited to apply for the {job.title} role at {job.company}. "
         f"My background combines {top} with hands-on Python workflows for model evaluation, data preparation, and reproducible analysis.\n\n"
-        f"In recent projects, I worked on agentic AI evaluation pipelines, NLP information extraction, causal inference workflows, and mask-aware VAE imputation for large-scale assessment data. "
+        f"In recent projects, I worked with evidence-backed project material related to {top}, using local profile evidence rather than unsupported claims. "
         f"These experiences trained me to translate ambiguous analytical requirements into structured experiments, clear documentation, and practical automation outputs.\n\n"
         f"I would welcome the opportunity to bring this mix of AI, automation, and rigorous evaluation to {job.company}.\n\n"
         f"Best regards,\n{profile.name}"
@@ -164,9 +164,10 @@ def _recruiter_message(profile: CandidateProfile, result: MatchResult) -> str:
     job = result.job
     if any(signal.severity == "block" for signal in result.negative_signals):
         return "Message withheld until the red-line signal is resolved with private local evidence."
+    top = ", ".join(keyword for keyword, _ in result.matched[:5]) or "the role requirements"
     return (
-        f"Hi, I am {profile.name}, a Quantitative Data Science master's student. "
-        f"I saw the {job.title} role at {job.company} and noticed a strong overlap with my work in Python-based AI automation, LLM evaluation workflows, NLP information extraction, and reproducible data analysis. "
+        f"Hi, I am {profile.name}, {profile.headline.lower()}. "
+        f"I saw the {job.title} role at {job.company} and noticed overlap with my evidence-backed work in {top}. "
         f"I would be grateful if you could take a look at my application or let me know whether this profile fits the team."
     )
 

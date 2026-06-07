@@ -1,0 +1,1365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apply Less, Fit More - Local Console</title>
+  <style>
+    :root {
+      --bg: #f6f7f3;
+      --panel: #ffffff;
+      --ink: #17211f;
+      --muted: #5e6866;
+      --line: #d8ded8;
+      --line-strong: #bcc8c3;
+      --teal: #0f766e;
+      --teal-soft: #e4f3ef;
+      --blue: #275fba;
+      --blue-soft: #e6eefb;
+      --amber: #a85d00;
+      --amber-soft: #fff0d8;
+      --red: #b42318;
+      --red-soft: #fde5e2;
+      --green: #1f7a4d;
+      --green-soft: #e5f4eb;
+      --shadow: 0 18px 42px rgba(26, 40, 36, 0.08);
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(246, 247, 243, 0.94);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 230px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--teal);
+      font-weight: 800;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.15;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav {
+      display: flex;
+      flex: 1;
+      justify-content: center;
+      gap: 6px;
+      scrollbar-width: none;
+    }
+
+    .nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav a,
+    .lang-toggle button,
+    .segmented button {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav a {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible {
+      border-color: var(--line);
+      color: var(--ink);
+      background: var(--panel);
+      outline: none;
+    }
+
+    .lang-toggle,
+    .segmented {
+      display: inline-flex;
+      gap: 4px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .lang-toggle button,
+    .segmented button {
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .lang-toggle button.active,
+    .segmented button.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    main {
+      width: min(1360px, calc(100% - 36px));
+      margin: 22px auto 44px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .surface,
+    .side-panel,
+    .result-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .surface {
+      padding: 20px;
+    }
+
+    .side {
+      position: sticky;
+      top: 82px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .side-panel {
+      padding: 16px;
+      box-shadow: none;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    h2 {
+      font-size: 22px;
+    }
+
+    h3 {
+      font-size: 15px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .section-head p,
+    .side-panel p,
+    .field p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    input,
+    select {
+      height: 40px;
+      padding: 0 11px;
+    }
+
+    textarea {
+      min-height: 118px;
+      resize: vertical;
+      padding: 10px 11px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+    }
+
+    .mode-help {
+      margin: 12px 0 16px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      background: var(--blue-soft);
+      color: #183d76;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn.primary {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .btn.secondary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .btn:hover:not(:disabled),
+    .btn:focus-visible {
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .check-row input {
+      width: 18px;
+      height: 18px;
+    }
+
+    .command-box,
+    .code-box {
+      position: relative;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #101b18;
+      color: #e9f4ef;
+      overflow: hidden;
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .copy-floating {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border-color: rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 4px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pill.good {
+      border-color: #b9dcc7;
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .pill.warn {
+      border-color: #f0d3a5;
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .pill.danger {
+      border-color: #f2b9b4;
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .score {
+      display: grid;
+      min-height: 190px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: conic-gradient(var(--teal) calc(var(--score, 0) * 1%), #e7ebe5 0);
+    }
+
+    .score-inner {
+      display: grid;
+      width: 128px;
+      height: 128px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--panel);
+      text-align: center;
+    }
+
+    .score-value {
+      display: block;
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .result-box {
+      padding: 14px;
+      box-shadow: none;
+    }
+
+    .list-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .list {
+      min-height: 120px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .list ul,
+    .side-panel ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+
+    .list li,
+    .side-panel li {
+      margin: 6px 0;
+    }
+
+    .empty {
+      display: grid;
+      min-height: 170px;
+      place-items: center;
+      border: 1px dashed var(--line-strong);
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+      padding: 18px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tab-button {
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .tab-button.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 30;
+      max-width: 360px;
+      padding: 12px 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1050px) {
+      .topbar {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .nav {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        position: static;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        padding: 12px 14px;
+      }
+
+      main {
+        width: min(100% - 24px, 1360px);
+      }
+
+      .grid-2,
+      .grid-3,
+      .results-grid,
+      .list-grid,
+      .side {
+        grid-template-columns: 1fr;
+      }
+
+      .surface {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">AF</div>
+      <div>
+        <h1 data-i18n="appTitle">Apply Less, Fit More</h1>
+        <p data-i18n="appSubtitle">Local job-search workflow console</p>
+      </div>
+    </div>
+    <nav class="nav" aria-label="Page sections">
+      <a href="#workflow" data-i18n="navWorkflow">Workflow</a>
+      <a href="#results" data-i18n="navResults">Fit analysis</a>
+      <a href="#cv" data-i18n="navCv">CV plan</a>
+      <a href="#guides" data-i18n="navGuides">Guides</a>
+    </nav>
+    <div class="lang-toggle" aria-label="Language">
+      <button type="button" class="active" data-lang="en">EN</button>
+      <button type="button" data-lang="zh">中文</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="layout">
+      <div class="stack">
+        <section class="surface" id="workflow">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="workflowEyebrow">Local workflow</p>
+              <h2 data-i18n="workflowTitle">Turn a job post into a safe workflow command</h2>
+              <p data-i18n="workflowDesc">Static HTML cannot run Python. It prepares local files, CLI commands, and Codex prompts without uploading your data.</p>
+            </div>
+            <span class="pill good" data-i18n="privateLocal">Local only</span>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Job input type">
+            <button type="button" class="tab-button active" data-source="website" data-i18n="sourceWebsite">Website</button>
+            <button type="button" class="tab-button" data-source="pdf" data-i18n="sourcePdf">PDF</button>
+            <button type="button" class="tab-button" data-source="txt" data-i18n="sourceText">TXT / MD</button>
+          </div>
+
+          <div class="mode-help" id="sourceHelp" data-i18n="websiteHelp">
+            Paste the job URL for reference, copy the JD text from the website, and save it as a local .txt file before running the workflow.
+          </div>
+
+          <div class="grid-2">
+            <div class="field" data-source-panel="website">
+              <label for="jobUrl" data-i18n="jobUrlLabel">Job URL</label>
+              <input id="jobUrl" type="url" placeholder="https://company.example/jobs/role">
+            </div>
+            <div class="field" data-source-panel="pdf">
+              <label for="pdfFile" data-i18n="pdfLabel">PDF JD</label>
+              <input id="pdfFile" type="file" accept="application/pdf,.pdf">
+              <p data-i18n="pdfNote">PDF text extraction needs a future local server. For now, paste extracted text below.</p>
+            </div>
+            <div class="field" data-source-panel="txt">
+              <label for="txtFile" data-i18n="txtLabel">TXT / MD JD</label>
+              <input id="txtFile" type="file" accept=".txt,.md,text/plain,text/markdown">
+            </div>
+            <div class="field">
+              <label for="jobPath" data-i18n="jobPathLabel">Local JD path</label>
+              <input id="jobPath" type="text" value="inputs/jobs/company_role_YYYY-MM-DD.txt">
+            </div>
+          </div>
+
+          <div class="field" style="margin-top: 12px;">
+            <label for="jdText" data-i18n="jdTextLabel">Paste JD text</label>
+            <textarea id="jdText" data-i18n-placeholder="jdTextPlaceholder" placeholder="Paste website text, PDF text, or TXT/MD content here."></textarea>
+          </div>
+
+          <div class="toolbar">
+            <button type="button" class="btn" id="downloadText"><span aria-hidden="true">↓</span><span data-i18n="downloadTxt">Download JD text</span></button>
+            <span class="muted" id="fileStatus" data-i18n="fileStatusEmpty">No local file loaded.</span>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--line); margin: 18px 0;">
+
+          <div class="grid-3">
+            <div class="field">
+              <label for="profilePath" data-i18n="profilePathLabel">Profile path</label>
+              <input id="profilePath" type="text" value="profiles/me.local.json">
+            </div>
+            <div class="field">
+              <label for="outDir" data-i18n="outDirLabel">Output directory</label>
+              <input id="outDir" type="text" value="outputs/private/company_role">
+            </div>
+            <div class="field">
+              <label for="memoryPath" data-i18n="memoryPathLabel">Memory path</label>
+              <input id="memoryPath" type="text" value="memory.local.json">
+            </div>
+            <div class="field">
+              <label for="companyName" data-i18n="companyLabel">Company override</label>
+              <input id="companyName" type="text" placeholder="Example Company">
+            </div>
+            <div class="field">
+              <label for="roleTitle" data-i18n="titleLabel">Role title override</label>
+              <input id="roleTitle" type="text" placeholder="AI Automation Intern">
+            </div>
+            <div class="field">
+              <label for="commandStyle" data-i18n="commandStyleLabel">Command style</label>
+              <select id="commandStyle">
+                <option value="module">PYTHONPATH module</option>
+                <option value="installed">job-agent</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="check-row">
+            <input id="approvePlan" type="checkbox">
+            <label for="approvePlan" data-i18n="approvePlanLabel">I confirm non-blocking CV planning prompts can be approved (--yes)</label>
+          </div>
+
+          <div class="command-box">
+            <button type="button" class="btn copy-floating" data-copy="workflowCommand"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
+            <pre id="workflowCommand"></pre>
+          </div>
+        </section>
+
+        <section class="surface" id="llm">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="llmEyebrow">Optional model layer</p>
+              <h2 data-i18n="llmTitle">LLM API settings</h2>
+              <p data-i18n="llmDesc">The default is no model. If enabled, the model can draft wording only after the deterministic gate allows CV planning.</p>
+            </div>
+            <span class="pill warn" data-i18n="draftOnly">Draft only</span>
+          </div>
+          <div class="grid-3">
+            <div class="field">
+              <label for="llmProvider" data-i18n="providerLabel">Provider</label>
+              <select id="llmProvider">
+                <option value="none">none</option>
+                <option value="mock">mock</option>
+                <option value="openai-compatible">openai-compatible</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="llmBase" data-i18n="baseUrlLabel">Base URL</label>
+              <input id="llmBase" type="text" value="http://localhost:11434/v1">
+            </div>
+            <div class="field">
+              <label for="llmModel" data-i18n="modelLabel">Model</label>
+              <input id="llmModel" type="text" placeholder="your-local-model">
+            </div>
+            <div class="field">
+              <label for="llmKeyEnv" data-i18n="keyEnvLabel">API key env var</label>
+              <input id="llmKeyEnv" type="text" value="OPENAI_API_KEY">
+              <p data-i18n="keyEnvNote">Do not paste API keys into this page; use an environment variable name.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="surface" id="results">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="resultsEyebrow">Artifact viewer</p>
+              <h2 data-i18n="resultsTitle">Import workflow results</h2>
+              <p data-i18n="resultsDesc">Load decision.json and report.md from outputs/private to inspect the fit gate locally.</p>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="decisionFile" data-i18n="decisionLabel">decision.json</label>
+              <input id="decisionFile" type="file" accept="application/json,.json">
+            </div>
+            <div class="field">
+              <label for="reportFile" data-i18n="reportLabel">report.md</label>
+              <input id="reportFile" type="file" accept=".md,text/markdown,text/plain">
+            </div>
+          </div>
+
+          <div id="decisionEmpty" class="empty" style="margin-top: 14px;" data-i18n="decisionEmpty">
+            Import decision.json to see score, status, risks, red lines, strengths, and do-not-claim items.
+          </div>
+
+          <div id="decisionView" class="hidden" style="margin-top: 14px;">
+            <div class="results-grid">
+              <div class="score" id="scoreDial">
+                <div class="score-inner">
+                  <span class="score-value" id="scoreValue">0</span>
+                  <span class="muted">/100</span>
+                </div>
+              </div>
+              <div class="result-box">
+                <div class="pill-row" id="statusPills"></div>
+                <h3 style="margin-top: 12px;" id="decisionText"></h3>
+                <p class="muted" id="roleText"></p>
+              </div>
+            </div>
+            <div class="list-grid">
+              <div class="list">
+                <h3 data-i18n="negativeSignalsTitle">Negative signals</h3>
+                <ul id="negativeList"></ul>
+              </div>
+              <div class="list">
+                <h3 data-i18n="marketRisksTitle">Market risks</h3>
+                <ul id="riskList"></ul>
+              </div>
+              <div class="list">
+                <h3 data-i18n="strengthsTitle">Root strengths</h3>
+                <ul id="strengthList"></ul>
+              </div>
+              <div class="list">
+                <h3 data-i18n="doNotClaimTitle">Do not claim</h3>
+                <ul id="claimList"></ul>
+              </div>
+            </div>
+          </div>
+
+          <div id="reportPreview" class="code-box hidden">
+            <pre id="reportText"></pre>
+          </div>
+        </section>
+
+        <section class="surface" id="cv">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="cvEyebrow">CV boundary</p>
+              <h2 data-i18n="cvTitle">CV plan and future LaTeX build</h2>
+              <p data-i18n="cvDesc">Today the workflow creates cv_plan.md. Final PDF generation is a future local-server feature with one-page QA.</p>
+            </div>
+            <span class="pill warn" data-i18n="humanGate">Human gate</span>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="cvPlanFile" data-i18n="cvPlanLabel">cv_plan.md</label>
+              <input id="cvPlanFile" type="file" accept=".md,text/markdown,text/plain">
+            </div>
+            <div class="field">
+              <label for="verificationFile" data-i18n="verificationLabel">llm_verification.json</label>
+              <input id="verificationFile" type="file" accept="application/json,.json">
+            </div>
+          </div>
+          <div class="mode-help" style="margin-top: 14px;" data-i18n="cvBoundary">
+            Memory can remember facts. Human confirmation is still required before editing CV bullets, turning private facts into public wording, sending materials, or accepting the final one-page PDF.
+          </div>
+          <div class="command-box">
+            <button type="button" class="btn copy-floating" data-copy="futureCvCommand"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
+            <pre id="futureCvCommand"></pre>
+          </div>
+        </section>
+
+        <section class="surface" id="guides">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="guidesEyebrow">Operator guide</p>
+              <h2 data-i18n="guidesTitle">Codex prompt and local API notes</h2>
+              <p data-i18n="guidesDesc">Use Codex as the operator around the CLI. A future local server can wrap run_workflow behind localhost APIs.</p>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <h3 data-i18n="codexPromptTitle">Prompt for Codex</h3>
+              <div class="code-box">
+                <button type="button" class="btn copy-floating" data-copy="codexPrompt"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
+                <pre id="codexPrompt"></pre>
+              </div>
+            </div>
+            <div>
+              <h3 data-i18n="apiNotesTitle">Future localhost API shape</h3>
+              <div class="code-box">
+                <pre id="apiNotes"></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side" aria-label="Safety guidance">
+        <section class="side-panel">
+          <h3 data-i18n="privacyTitle">Privacy defaults</h3>
+          <ul>
+            <li data-i18n="privacyOne">Keep real profiles, CVs, reports, memory, PDFs, and application history in ignored private paths.</li>
+            <li data-i18n="privacyTwo">This static page does not upload data and does not store secrets.</li>
+            <li data-i18n="privacyThree">Never paste API keys here; use an env var name.</li>
+          </ul>
+        </section>
+        <section class="side-panel">
+          <h3 data-i18n="memoryVsTitle">Memory vs checkpoint</h3>
+          <p data-i18n="memoryVsBody">Memory learns recurring filters and fact status. Human confirmation is for CV edits, public wording, sending messages, and final PDF acceptance.</p>
+        </section>
+        <section class="side-panel">
+          <h3 data-i18n="gateTitle">Gate logic</h3>
+          <div class="pill-row" style="margin-top: 10px;">
+            <span class="pill danger">red_line_block</span>
+            <span class="pill warn">needs_verification</span>
+            <span class="pill good">ready_for_cv_plan</span>
+          </div>
+          <p data-i18n="gateBody">A blocked workflow means no substitute CV bullets, cover letter, or recruiter message.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const I18N = {
+      en: {
+        appTitle: "Apply Less, Fit More",
+        appSubtitle: "Local job-search workflow console",
+        navWorkflow: "Workflow",
+        navResults: "Fit analysis",
+        navCv: "CV plan",
+        navGuides: "Guides",
+        workflowEyebrow: "Local workflow",
+        workflowTitle: "Turn a job post into a safe workflow command",
+        workflowDesc: "Static HTML cannot run Python. It prepares local files, CLI commands, and Codex prompts without uploading your data.",
+        privateLocal: "Local only",
+        sourceWebsite: "Website",
+        sourcePdf: "PDF",
+        sourceText: "TXT / MD",
+        websiteHelp: "Paste the job URL for reference, copy the JD text from the website, and save it as a local .txt file before running the workflow.",
+        pdfHelp: "Choose a PDF for reference. This page does not parse PDFs yet; paste extracted text below or use a future local server.",
+        txtHelp: "Load a .txt or .md JD, or paste the text directly. The CLI currently works from a local .txt/.md path.",
+        jobUrlLabel: "Job URL",
+        pdfLabel: "PDF JD",
+        pdfNote: "PDF text extraction needs a future local server. For now, paste extracted text below.",
+        txtLabel: "TXT / MD JD",
+        jobPathLabel: "Local JD path",
+        jdTextLabel: "Paste JD text",
+        jdTextPlaceholder: "Paste website text, PDF text, or TXT/MD content here.",
+        downloadTxt: "Download JD text",
+        fileStatusEmpty: "No local file loaded.",
+        loadedFile: "Loaded",
+        profilePathLabel: "Profile path",
+        outDirLabel: "Output directory",
+        memoryPathLabel: "Memory path",
+        companyLabel: "Company override",
+        titleLabel: "Role title override",
+        commandStyleLabel: "Command style",
+        approvePlanLabel: "I confirm non-blocking CV planning prompts can be approved (--yes)",
+        copy: "Copy",
+        copied: "Copied.",
+        llmEyebrow: "Optional model layer",
+        llmTitle: "LLM API settings",
+        llmDesc: "The default is no model. If enabled, the model can draft wording only after the deterministic gate allows CV planning.",
+        draftOnly: "Draft only",
+        providerLabel: "Provider",
+        baseUrlLabel: "Base URL",
+        modelLabel: "Model",
+        keyEnvLabel: "API key env var",
+        keyEnvNote: "Do not paste API keys into this page; use an environment variable name.",
+        resultsEyebrow: "Artifact viewer",
+        resultsTitle: "Import workflow results",
+        resultsDesc: "Load decision.json and report.md from outputs/private to inspect the fit gate locally.",
+        decisionLabel: "decision.json",
+        reportLabel: "report.md",
+        decisionEmpty: "Import decision.json to see score, status, risks, red lines, strengths, and do-not-claim items.",
+        negativeSignalsTitle: "Negative signals",
+        marketRisksTitle: "Market risks",
+        strengthsTitle: "Root strengths",
+        doNotClaimTitle: "Do not claim",
+        noneDetected: "None detected.",
+        cvEyebrow: "CV boundary",
+        cvTitle: "CV plan and future LaTeX build",
+        cvDesc: "Today the workflow creates cv_plan.md. Final PDF generation is a future local-server feature with one-page QA.",
+        humanGate: "Human gate",
+        cvPlanLabel: "cv_plan.md",
+        verificationLabel: "llm_verification.json",
+        cvBoundary: "Memory can remember facts. Human confirmation is still required before editing CV bullets, turning private facts into public wording, sending materials, or accepting the final one-page PDF.",
+        guidesEyebrow: "Operator guide",
+        guidesTitle: "Codex prompt and local API notes",
+        guidesDesc: "Use Codex as the operator around the CLI. A future local server can wrap run_workflow behind localhost APIs.",
+        codexPromptTitle: "Prompt for Codex",
+        apiNotesTitle: "Future localhost API shape",
+        privacyTitle: "Privacy defaults",
+        privacyOne: "Keep real profiles, CVs, reports, memory, PDFs, and application history in ignored private paths.",
+        privacyTwo: "This static page does not upload data and does not store secrets.",
+        privacyThree: "Never paste API keys here; use an env var name.",
+        memoryVsTitle: "Memory vs checkpoint",
+        memoryVsBody: "Memory learns recurring filters and fact status. Human confirmation is for CV edits, public wording, sending messages, and final PDF acceptance.",
+        gateTitle: "Gate logic",
+        gateBody: "A blocked workflow means no substitute CV bullets, cover letter, or recruiter message.",
+        futureCv: "Future command only: job-agent cv build is not implemented yet.\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
+        apiNotes: "Future local server contract, bound to 127.0.0.1 only:\n\nPOST /api/jobs/text\n  Save reviewed JD text into inputs/jobs/.\n\nPOST /api/workflows\n  Calls run_workflow with explicit UI confirmations.\n\nGET /api/workflows/{id}/decision\nGET /api/workflows/{id}/report\nGET /api/workflows/{id}/next-actions\n\nPOST /api/cv/build\n  Future only. Requires cv_plan.md, one-page PDF QA, verifier pass, and human confirmation.",
+        codexPrompt: "Please read README.md and AGENTS.md.\nUse the local workflow for this JD.\nDo not tailor my CV until the gate allows it.\nRun:\n\n{command}\n\nAfter running, read report.md, decision.json, and next_actions.md from the output folder.\nIf cv_plan.md is missing, treat it as an intentional gate result unless the command failed.\nDo not bypass red lines, do-not-claim items, memory privacy, or the one-page CV contract.",
+        invalidJson: "Could not parse JSON.",
+        reportLoaded: "Report loaded locally.",
+        cvPlanLoaded: "CV plan loaded locally.",
+        verificationPassed: "LLM verification passed.",
+        verificationFailed: "LLM verification did not pass.",
+        downloadEmpty: "Paste JD text before downloading.",
+        txtDownloaded: "JD text downloaded.",
+        redLine: "Red-line block",
+        verifyFirst: "Verify first",
+        ready: "Ready for CV plan",
+        selective: "Selective CV plan",
+        lowFit: "Low fit"
+      },
+      zh: {
+        appTitle: "少投一点，投准一点",
+        appSubtitle: "本地求职工作流控制台",
+        navWorkflow: "工作流",
+        navResults: "适配度分析",
+        navCv: "CV 计划",
+        navGuides: "指南",
+        workflowEyebrow: "本地工作流",
+        workflowTitle: "把岗位信息转成本地安全 workflow 命令",
+        workflowDesc: "静态 HTML 不能直接运行 Python。它负责准备本地文件路径、CLI 命令和 Codex 提示词，不上传你的数据。",
+        privateLocal: "仅本地",
+        sourceWebsite: "网站",
+        sourcePdf: "PDF",
+        sourceText: "TXT / MD",
+        websiteHelp: "粘贴岗位 URL 作为参考，从网页复制 JD 正文，保存成本地 .txt 后再运行 workflow。",
+        pdfHelp: "可以选择 PDF 作为参考。这个页面暂不解析 PDF；请先粘贴提取出的文本，或未来使用本地 server。",
+        txtHelp: "加载 .txt/.md JD，或直接粘贴文本。当前 CLI 使用本地 .txt/.md 路径。",
+        jobUrlLabel: "岗位 URL",
+        pdfLabel: "PDF 岗位文件",
+        pdfNote: "PDF 文本提取需要未来本地 server。现在请先把提取出的文本粘贴到下方。",
+        txtLabel: "TXT / MD 岗位文件",
+        jobPathLabel: "本地 JD 路径",
+        jdTextLabel: "粘贴 JD 文本",
+        jdTextPlaceholder: "把网页、PDF 提取文本，或 TXT/MD 内容粘贴在这里。",
+        downloadTxt: "下载 JD 文本",
+        fileStatusEmpty: "尚未加载本地文件。",
+        loadedFile: "已加载",
+        profilePathLabel: "Profile 路径",
+        outDirLabel: "输出目录",
+        memoryPathLabel: "Memory 路径",
+        companyLabel: "公司名覆盖",
+        titleLabel: "岗位名覆盖",
+        commandStyleLabel: "命令格式",
+        approvePlanLabel: "我确认可以批准非阻断 CV planning 提示（--yes）",
+        copy: "复制",
+        copied: "已复制。",
+        llmEyebrow: "可选模型层",
+        llmTitle: "LLM API 设置",
+        llmDesc: "默认不使用模型。开启后，模型只能在 deterministic gate 允许 CV planning 之后做措辞草稿。",
+        draftOnly: "仅草稿",
+        providerLabel: "Provider",
+        baseUrlLabel: "Base URL",
+        modelLabel: "模型",
+        keyEnvLabel: "API key 环境变量",
+        keyEnvNote: "不要把 API key 粘贴进页面；这里只填写环境变量名。",
+        resultsEyebrow: "产物查看器",
+        resultsTitle: "导入 workflow 结果",
+        resultsDesc: "从 outputs/private 加载 decision.json 和 report.md，本地查看适配度 gate。",
+        decisionLabel: "decision.json",
+        reportLabel: "report.md",
+        decisionEmpty: "导入 decision.json 后可以查看分数、状态、风险、红线、根优势和 do-not-claim。",
+        negativeSignalsTitle: "负面信号 / 红线",
+        marketRisksTitle: "市场硬过滤",
+        strengthsTitle: "根优势",
+        doNotClaimTitle: "不能声称",
+        noneDetected: "未检测到。",
+        cvEyebrow: "CV 边界",
+        cvTitle: "CV 计划与未来 LaTeX 生成",
+        cvDesc: "当前 workflow 生成 cv_plan.md。最终 PDF 生成是未来本地 server 功能，需要一页 QA。",
+        humanGate: "人工确认",
+        cvPlanLabel: "cv_plan.md",
+        verificationLabel: "llm_verification.json",
+        cvBoundary: "Memory 可以记住事实。改 CV bullet、把私密事实写成公开表达、发送材料、接受最终一页 PDF 之前仍需要人工确认。",
+        guidesEyebrow: "Operator 指南",
+        guidesTitle: "Codex 提示词与本地 API 说明",
+        guidesDesc: "Codex 是 CLI 外面的 operator。未来本地 server 可以把 run_workflow 包成本机 API。",
+        codexPromptTitle: "复制给 Codex 的提示词",
+        apiNotesTitle: "未来 localhost API 形状",
+        privacyTitle: "隐私默认规则",
+        privacyOne: "真实 profile、CV、报告、memory、PDF 和申请历史都放在 ignored private 路径。",
+        privacyTwo: "这个静态页面不上传数据，也不存储密钥。",
+        privacyThree: "不要在这里粘贴 API key；使用环境变量名。",
+        memoryVsTitle: "Memory vs 人工确认",
+        memoryVsBody: "Memory 学习反复出现的过滤项和事实状态。人工确认只用于改 CV、公开表述、发送消息和最终 PDF。",
+        gateTitle: "Gate 逻辑",
+        gateBody: "被红线阻断时，不补写 CV bullet、cover letter 或 recruiter message。",
+        futureCv: "仅未来命令：job-agent cv build 还没有实现。\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
+        apiNotes: "未来本地 server 契约，只绑定 127.0.0.1：\n\nPOST /api/jobs/text\n  把用户确认过的 JD 文本保存到 inputs/jobs/。\n\nPOST /api/workflows\n  在明确 UI 确认下调用 run_workflow。\n\nGET /api/workflows/{id}/decision\nGET /api/workflows/{id}/report\nGET /api/workflows/{id}/next-actions\n\nPOST /api/cv/build\n  仅未来功能。需要 cv_plan.md、一页 PDF QA、verifier 通过和人工确认。",
+        codexPrompt: "请阅读 README.md 和 AGENTS.md。\n针对这个 JD 使用本地 workflow。\n不要在 gate 允许前修改我的 CV。\n运行：\n\n{command}\n\n运行后读取输出目录里的 report.md、decision.json、next_actions.md。\n如果 cv_plan.md 缺失，先判断是否是 gate 有意拦截，不要自行补写 CV bullet。\n不要绕过红线、do-not-claim、memory 隐私或一页 CV 规则。",
+        invalidJson: "无法解析 JSON。",
+        reportLoaded: "Report 已在本地加载。",
+        cvPlanLoaded: "CV plan 已在本地加载。",
+        verificationPassed: "LLM verification 已通过。",
+        verificationFailed: "LLM verification 未通过。",
+        downloadEmpty: "请先粘贴 JD 文本再下载。",
+        txtDownloaded: "JD 文本已下载。",
+        redLine: "红线阻断",
+        verifyFirst: "先核实",
+        ready: "可进入 CV plan",
+        selective: "谨慎 CV plan",
+        lowFit: "低匹配"
+      }
+    };
+
+    let lang = "en";
+    let source = "website";
+    let currentDecision = null;
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function text(key) {
+      return I18N[lang][key] || I18N.en[key] || key;
+    }
+
+    function quoteShell(value) {
+      const trimmed = String(value || "").trim();
+      if (!trimmed) return "";
+      return "'" + trimmed.replace(/'/g, "'\"'\"'") + "'";
+    }
+
+    function workflowCommand() {
+      const root = $("#commandStyle").value === "module"
+        ? "PYTHONPATH=src python3 -m job_agent.cli"
+        : "job-agent";
+      const parts = [
+        root,
+        "workflow run",
+        "--job " + quoteShell($("#jobPath").value),
+        "--profile " + quoteShell($("#profilePath").value),
+        "--out-dir " + quoteShell($("#outDir").value)
+      ];
+      const memory = $("#memoryPath").value.trim();
+      if (memory) parts.push("--memory " + quoteShell(memory));
+      const company = $("#companyName").value.trim();
+      if (company) parts.push("--company " + quoteShell(company));
+      const title = $("#roleTitle").value.trim();
+      if (title) parts.push("--title " + quoteShell(title));
+      if ($("#approvePlan").checked) parts.push("--yes");
+      const provider = $("#llmProvider").value;
+      if (provider !== "none") {
+        parts.push("--llm-provider " + quoteShell(provider));
+        const model = $("#llmModel").value.trim();
+        if (model) parts.push("--llm-model " + quoteShell(model));
+        const base = $("#llmBase").value.trim();
+        if (base) parts.push("--llm-base-url " + quoteShell(base));
+        const keyEnv = $("#llmKeyEnv").value.trim();
+        if (keyEnv) parts.push("--llm-api-key-env " + quoteShell(keyEnv));
+      }
+      return parts.join(" \\\n  ");
+    }
+
+    function renderCommand() {
+      const command = workflowCommand();
+      $("#workflowCommand").textContent = command;
+      $("#futureCvCommand").textContent = text("futureCv")
+        .replace("{jobPath}", quoteShell($("#jobPath").value))
+        .replace("{profilePath}", quoteShell($("#profilePath").value));
+      $("#codexPrompt").textContent = text("codexPrompt").replace("{command}", command);
+      $("#apiNotes").textContent = text("apiNotes");
+    }
+
+    function setLanguage(nextLang) {
+      lang = nextLang;
+      document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+      $$("[data-i18n]").forEach((node) => {
+        node.textContent = text(node.dataset.i18n);
+      });
+      $$("[data-i18n-placeholder]").forEach((node) => {
+        node.placeholder = text(node.dataset.i18nPlaceholder);
+      });
+      $$(".lang-toggle button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.lang === lang);
+      });
+      updateSource(source);
+      renderCommand();
+      if (currentDecision) renderDecision(currentDecision);
+    }
+
+    function updateSource(nextSource) {
+      source = nextSource;
+      $$(".tab-button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.source === source);
+      });
+      $$("[data-source-panel]").forEach((panel) => {
+        panel.classList.toggle("hidden", panel.dataset.sourcePanel !== source);
+      });
+      const key = source === "website" ? "websiteHelp" : source === "pdf" ? "pdfHelp" : "txtHelp";
+      $("#sourceHelp").textContent = text(key);
+    }
+
+    function showToast(message) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1900);
+    }
+
+    async function copyNode(id) {
+      const value = $("#" + id).textContent;
+      try {
+        await navigator.clipboard.writeText(value);
+        showToast(text("copied"));
+      } catch {
+        const helper = document.createElement("textarea");
+        helper.value = value;
+        document.body.appendChild(helper);
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+        showToast(text("copied"));
+      }
+    }
+
+    function readTextFile(file, callback) {
+      const reader = new FileReader();
+      reader.onload = () => callback(String(reader.result || ""));
+      reader.readAsText(file);
+    }
+
+    function setList(id, items, mapItem) {
+      const list = $("#" + id);
+      list.innerHTML = "";
+      const values = Array.isArray(items) ? items.filter(Boolean) : [];
+      if (!values.length) {
+        const li = document.createElement("li");
+        li.textContent = text("noneDetected");
+        list.appendChild(li);
+        return;
+      }
+      values.slice(0, 10).forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = mapItem ? mapItem(item) : String(item);
+        list.appendChild(li);
+      });
+    }
+
+    function statusLabel(status) {
+      const map = {
+        red_line_block: text("redLine"),
+        needs_verification: text("verifyFirst"),
+        ready_for_cv_plan: text("ready"),
+        selective_cv_plan: text("selective"),
+        low_fit: text("lowFit")
+      };
+      return map[status] || status || "unknown";
+    }
+
+    function statusClass(status) {
+      if (status === "red_line_block") return "danger";
+      if (status === "needs_verification" || status === "selective_cv_plan") return "warn";
+      if (status === "ready_for_cv_plan") return "good";
+      return "";
+    }
+
+    function renderDecision(data) {
+      currentDecision = data;
+      $("#decisionEmpty").classList.add("hidden");
+      $("#decisionView").classList.remove("hidden");
+      const score = Number(data.score || 0);
+      $("#scoreDial").style.setProperty("--score", Math.max(0, Math.min(100, score)));
+      $("#scoreValue").textContent = Number.isFinite(score) ? String(score) : "0";
+      $("#decisionText").textContent = data.decision || "No decision";
+      $("#roleText").textContent = [data.company, data.role].filter(Boolean).join(" - ");
+      const status = data.agent_status || "";
+      const pills = $("#statusPills");
+      pills.innerHTML = "";
+      const statusPill = document.createElement("span");
+      statusPill.className = "pill " + statusClass(status);
+      statusPill.textContent = status ? status + " · " + statusLabel(status) : "unknown";
+      pills.appendChild(statusPill);
+      if (data.llm_policy) {
+        const llm = document.createElement("span");
+        llm.className = "pill warn";
+        llm.textContent = "LLM verified only";
+        pills.appendChild(llm);
+      }
+      setList("negativeList", data.negative_signals, (signal) => {
+        if (typeof signal === "string") return signal;
+        return [signal.severity, signal.category, signal.message].filter(Boolean).join(" - ");
+      });
+      setList("riskList", data.market_risks);
+      setList("strengthList", data.root_strengths);
+      setList("claimList", data.do_not_claim);
+    }
+
+    function downloadText() {
+      const value = $("#jdText").value;
+      if (!value.trim()) {
+        showToast(text("downloadEmpty"));
+        return;
+      }
+      const name = ($("#jobPath").value.split("/").pop() || "job.txt").replace(/[^a-zA-Z0-9._-]+/g, "_");
+      const blob = new Blob([value], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast(text("txtDownloaded"));
+    }
+
+    $$(".lang-toggle button").forEach((button) => {
+      button.addEventListener("click", () => setLanguage(button.dataset.lang));
+    });
+
+    $$(".tab-button").forEach((button) => {
+      button.addEventListener("click", () => updateSource(button.dataset.source));
+    });
+
+    $$("input, select, textarea").forEach((node) => {
+      node.addEventListener("input", renderCommand);
+      node.addEventListener("change", renderCommand);
+    });
+
+    $$("[data-copy]").forEach((button) => {
+      button.addEventListener("click", () => copyNode(button.dataset.copy));
+    });
+
+    $("#downloadText").addEventListener("click", downloadText);
+
+    $("#txtFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      readTextFile(file, (content) => {
+        $("#jdText").value = content;
+        $("#fileStatus").textContent = text("loadedFile") + ": " + file.name;
+      });
+    });
+
+    $("#pdfFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      $("#fileStatus").textContent = text("loadedFile") + ": " + file.name + " · " + text("pdfNote");
+    });
+
+    $("#decisionFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      readTextFile(file, (content) => {
+        try {
+          renderDecision(JSON.parse(content));
+        } catch {
+          showToast(text("invalidJson"));
+        }
+      });
+    });
+
+    $("#reportFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      readTextFile(file, (content) => {
+        $("#reportText").textContent = content.slice(0, 9000);
+        $("#reportPreview").classList.remove("hidden");
+        showToast(text("reportLoaded"));
+      });
+    });
+
+    $("#cvPlanFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) showToast(text("cvPlanLoaded"));
+    });
+
+    $("#verificationFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      readTextFile(file, (content) => {
+        try {
+          const data = JSON.parse(content);
+          showToast(data.passed ? text("verificationPassed") : text("verificationFailed"));
+        } catch {
+          showToast(text("invalidJson"));
+        }
+      });
+    });
+
+    updateSource(source);
+    setLanguage("en");
+  </script>
+</body>
+</html>

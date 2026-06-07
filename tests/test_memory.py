@@ -15,7 +15,7 @@ class MemoryTest(unittest.TestCase):
             name="Test Candidate",
             headline="AI automation student",
             target_roles=["AI Automation Intern"],
-            locations=["Germany"],
+            locations=["Sample City"],
             education=[],
             skills={"ai": ["Python", "LLM", "Agent", "Automation"]},
             experiences=[],

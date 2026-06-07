@@ -252,7 +252,7 @@ def run_workflow(
                 llm_cv_plan_path, llm_verification_path = llm_drafter.write(result, out, client)
 
     memory_written: Path | None = None
-    if memory_path and _confirm("Update local application memory?", default=True, auto_approve=auto_approve, input_fn=input_fn):
+    if memory_path:
         memory_written = memory_agent.update(memory_path, result)
 
     next_actions_path = next_actions.write(status, result, out, cv_plan_path, llm_cv_plan_path, llm_verification_path)

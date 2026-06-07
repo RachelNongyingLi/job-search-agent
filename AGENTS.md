@@ -16,7 +16,7 @@ This repo is a local-first precision job-search agent. The goal is not to make a
 
 - Codex/Claude as operator: read these instructions, run the CLI, inspect `report.md`, `decision.json`, and `next_actions.md`, then help the user decide. You may add reasoning on top of CLI output, but you must not bypass the workflow gate.
 - Local LLM drafting: use `job-agent workflow run --llm-provider ...` only when the user explicitly wants model-assisted drafting. LLM output is optional wording help, not a source of truth.
-- In both modes, the deterministic matcher, negative ability check, human confirmation, verifier, privacy rules, and one-page CV contract remain mandatory.
+- In both modes, the deterministic matcher, negative ability check, memory discipline, CV/public-output confirmation, verifier, privacy rules, and one-page CV contract remain mandatory.
 - Missing `cv_plan.md` is often intentional gate output, not a generation failure. Do not write substitute CV bullets when the gate withheld the plan.
 - You may be more conservative than the CLI. You must not be less conservative than the CLI.
 
@@ -28,9 +28,18 @@ This repo is a local-first precision job-search agent. The goal is not to make a
 - Do not copy private facts from chat or local files into `README.md`, tests, sample profiles, examples, or public CV artifacts.
 - Before any commit or final publication step, run `git status --short` and inspect any JSON, CSV, PDF, DOCX, TeX, Markdown report, or profile file that would be included.
 
+## Web Frontend Rules
+
+- `web/index.html` is a static local console. It may generate commands, Codex prompts, and artifact previews; it must not claim to execute the Python workflow by itself.
+- Do not add analytics, remote fonts, remote scripts, cloud upload, API key storage, or localStorage persistence for private job-search data.
+- Website/PDF/TXT JD input must converge to a local `.txt` or `.md` JD path before workflow analysis.
+- A future local server must bind to localhost, use allowlisted private directories, call `run_workflow`, and keep CV/public-output confirmation at the UI boundary.
+- The frontend must preserve the same gate semantics as the CLI: red-line blocks prevent CV planning and LLM drafting.
+
 ## Judgment Rules
 
 - Check market hard filters before CV tailoring: language, location, onsite, commute, relocation, work authorization, mandatory internship proof, start date, and student status.
+- Treat hard filters and repeated red lines as memory signals that can be learned across applications.
 - Run or preserve the negative ability / red-line check before recommending deep tailoring.
 - If a fact is private, unknown, unverified, or marked "ask locally", do not convert it into a positive resume claim.
 - Negative memory must never be reinterpreted as strength.
@@ -56,6 +65,7 @@ This repo is a local-first precision job-search agent. The goal is not to make a
 ## CV Tailoring Rules
 
 - LaTeX CV work is the final step after `report.md`, `decision.json`, and an allowed `cv_plan.md`; do not start by editing `.tex` directly for a new role.
+- Human confirmation is required at the CV/public-output boundary: editing CV bullets, turning private facts into public wording, sending messages, or accepting the final PDF.
 - For LaTeX CV work, preserve a one-page contract: the final PDF must be exactly one page.
 - Prefer reordering, shortening, and evidence-first wording over adding new claims.
 - Every proposed bullet should be labeled `safe`, `needs verification`, or `too strong / do not use`.
@@ -69,6 +79,8 @@ This repo is a local-first precision job-search agent. The goal is not to make a
 - Read it before analysis when present.
 - Update it through `job-agent analyze --memory memory.local.json` unless the user explicitly asks for manual editing.
 - Memory should preserve repeated root strengths, upskill gaps, market blockers, negative signals, and red lines.
+- Memory can remember that proof, commute, relocation, language, or authorization is confirmed, unverified, blocked, or private; it is not by itself permission to publish that fact in CV text.
+- Do not ask for human confirmation just to remember a recurring risk. Ask when the workflow would edit CV content, publish private facts, send application text, or mark a final one-page PDF as ready.
 - Platform memory is optional recall. Required project behavior belongs in `AGENTS.md`, `CLAUDE.md`, README, tests, or code.
 
 ## Verification Commands

@@ -21,10 +21,10 @@ Internally, the workflow is split into small agents:
 - `ReportAgent`: writes `report.md` and `decision.json`.
 - `CVPlanAgent`: writes `cv_plan.md` only when the gate allows it.
 - `LLMDraftAgent`: optionally asks a local/OpenAI-compatible LLM for wording help after CV planning is allowed, then verifies the draft before accepting it.
-- `MemoryAgent`: updates `memory.local.json` only when requested and confirmed.
+- `MemoryAgent`: updates `memory.local.json` when a memory path is provided.
 - `NextActionsAgent`: writes `next_actions.md`.
 
-The workflow asks for confirmation before non-blocking actions. A red-line block stops CV planning even if `--yes` is passed.
+The workflow uses memory to learn recurring filters, risks, and evidence patterns across applications. Human confirmation is reserved for CV/public-output boundaries such as generating a CV plan, drafting application text, or accepting a final one-page PDF. A red-line block stops CV planning even if `--yes` is passed.
 
 For demos or CI:
 
@@ -37,6 +37,23 @@ job-agent workflow run \
 ```
 
 ## Two Operating Modes
+
+### Local Web Console
+
+The repo includes a static bilingual console at `web/index.html`.
+
+Use it to:
+
+- choose a JD source type: website, PDF, TXT, or Markdown
+- prepare local paths for JD, profile, output, and memory
+- generate `job-agent workflow run` commands
+- configure optional LLM flags without storing API keys
+- import `decision.json`, `report.md`, `cv_plan.md`, and `llm_verification.json`
+- copy a Codex operator prompt
+
+Current boundary: static HTML cannot run the Python CLI, parse PDFs reliably, scrape websites, or build a final PDF CV. Website and PDF inputs should be reviewed by the user, converted to local text, and then passed to the CLI as `.txt` or `.md`.
+
+Future boundary: a local server may wrap `run_workflow` behind localhost APIs, but it must keep allowlisted private directories, no remote upload by default, and explicit CV/public-output confirmation.
 
 ### Mode 1: Codex Or Claude As Operator
 
@@ -83,7 +100,8 @@ The local LLM layer is deliberately late in the pipeline:
 JD + profile
   -> deterministic matcher
   -> market and negative ability gate
-  -> human confirmation
+  -> memory signal update when --memory is provided
+  -> CV/public-output confirmation
   -> deterministic cv_plan.md
   -> optional LLM draft
   -> verifier
@@ -104,7 +122,7 @@ job-agent workflow run \
 
 ## Why This Is Still An Agent
 
-The project is an agentic workflow because it has specialized agents, persistent memory, explicit gates, generated artifacts, and human confirmation points. It is not yet an autonomous auto-apply bot, and it should not become one by default.
+The project is an agentic workflow because it has specialized agents, persistent memory, explicit gates, generated artifacts, and human confirmation at CV/public-output boundaries. It is not yet an autonomous auto-apply bot, and it should not become one by default.
 
 The key design choice is separation:
 
@@ -114,6 +132,23 @@ The key design choice is separation:
 - The verifier decides whether an LLM draft is acceptable.
 
 Required project behavior belongs in checked-in instruction files, code, and tests, not only in platform memory. Local private facts belong in ignored files such as `profiles/me.local.json`, `data/private/*.local.json`, and `memory.local.json`.
+
+## Memory Signals Vs Human Checkpoints
+
+Memory should learn across rounds:
+
+- whether hard filters tend to appear for certain roles
+- whether mandatory internship proof, commute, relocation, language, or authorization is confirmed, unverified, blocked, or private
+- recurring root strengths, upskill gaps, red lines, and do-not-claim items
+
+Human confirmation is needed when the workflow would change public-facing application material:
+
+- editing CV bullets or LaTeX
+- turning a private fact into public wording
+- sending a CV, cover letter, or recruiter message
+- accepting the final one-page PDF as ready
+
+Memory may remind the agent that something is confirmed or blocked. It still cannot publish private facts or invent evidence.
 
 ## Suggested Prompt For A New Job
 

@@ -10,7 +10,7 @@ PROFILE_JSON = {
     "name": "Test Candidate",
     "headline": "AI automation student",
     "target_roles": ["AI Automation Intern", "Machine Learning Intern"],
-    "locations": ["Germany"],
+    "locations": ["Sample City"],
     "education": [],
     "skills": {
         "ai": ["Python", "LLM", "Agent", "Prompt Engineering", "Machine Learning", "Documentation", "Excel"],
@@ -153,6 +153,34 @@ class WorkflowTest(unittest.TestCase):
             self.assertEqual(run.status, "red_line_block")
             self.assertFalse((out_dir / "cv_plan.llm.md").exists())
             self.assertFalse((out_dir / "llm_verification.json").exists())
+
+    def test_memory_update_is_opt_in_not_human_checkpoint(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profile = root / "profile.local.json"
+            job = root / "job.txt"
+            out_dir = root / "out"
+            memory = root / "memory.local.json"
+            profile.write_text(json.dumps(PROFILE_JSON), encoding="utf-8")
+            job.write_text(
+                "AI automation intern. Proof of mandatory internship is required. Work with Python and LLM agents.",
+                encoding="utf-8",
+            )
+
+            def fail_on_prompt(prompt):
+                raise AssertionError(f"Unexpected human checkpoint: {prompt}")
+
+            run = run_workflow(
+                job,
+                profile,
+                out_dir=out_dir,
+                memory_path=memory,
+                input_fn=fail_on_prompt,
+            )
+
+            self.assertEqual(run.status, "red_line_block")
+            self.assertTrue(memory.exists())
+            self.assertFalse((out_dir / "cv_plan.md").exists())
 
 
 if __name__ == "__main__":

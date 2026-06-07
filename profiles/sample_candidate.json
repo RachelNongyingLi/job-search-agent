@@ -1,35 +1,28 @@
 {
-  "name": "Sample Candidate",
-  "headline": "Quantitative Data Science master's student focused on LLM/agent workflows, NLP, machine learning evaluation, causal inference, and psychometrics.",
+  "name": "Demo Applicant",
+  "headline": "Fictional early-career applicant used only for local workflow demos.",
   "target_roles": [
     "AI Automation Intern",
-    "Generative AI Agent Intern",
     "Machine Learning Intern",
-    "Data Scientist Intern",
-    "NLP Engineer Intern",
-    "Research Assistant in AI Evaluation"
+    "Data Analyst Intern",
+    "Workflow Automation Intern"
   ],
   "locations": [
-    "Germany",
-    "Europe",
+    "Sample City",
     "Remote"
   ],
   "market_facts": {
     "location_preference": [
-      "Germany",
-      "Europe",
+      "Sample City",
       "Remote"
     ],
     "languages_claimed": [
-      "English",
-      "Mandarin Chinese"
+      "English"
     ],
-    "languages_not_claimed": [
-      "German"
-    ],
-    "work_authorization": "Keep private. Do not publish in a public profile.",
-    "commute_or_relocation": "Keep private. The agent should ask locally before recommending location-sensitive applications.",
-    "mandatory_internship_proof": "Keep private. Treat mandatory-internship requirements as verify-first unless a private local profile confirms proof."
+    "languages_not_claimed": [],
+    "work_authorization": "Demo placeholder. Keep real work authorization in a private local profile.",
+    "commute_or_relocation": "Demo placeholder. Ask locally before treating commute or relocation as solved.",
+    "mandatory_internship_proof": "Demo placeholder. Treat mandatory-internship requirements as verify-first unless a private local profile confirms proof."
   },
   "ability_model": {
     "root_strengths": [
@@ -38,23 +31,16 @@
       "Agent",
       "Prompt Engineering",
       "Machine Learning",
-      "NLP",
-      "Information Extraction",
       "Model Evaluation",
-      "Experiment Design",
-      "Causal Inference",
-      "Psychometrics",
-      "Item Response Theory",
       "Documentation",
       "Workflow",
       "Data Preparation"
     ],
     "interview_upskill": [
-      "RPA tool basics",
       "Cloud deployment basics",
       "Production monitoring basics",
       "Company-specific domain vocabulary",
-      "Lightweight dashboarding"
+      "Dashboarding basics"
     ],
     "irrelevant_or_low_signal": [
       "Long unrelated tool lists",
@@ -64,38 +50,26 @@
     ],
     "negative_ability_red_lines": [
       "Do not claim mandatory internship eligibility without private proof.",
-      "Do not treat a far or unverified commute as solved because technical fit is high.",
-      "Do not rewrite AI, NLP, or research projects into unrelated domains without direct evidence."
+      "Do not treat an unverified commute as solved because technical fit is high.",
+      "Do not rewrite automation projects into unrelated domains without direct evidence."
     ]
   },
   "education": [
     {
-      "institution": "European research university",
-      "degree": "M.Sc. Quantitative Data Science",
-      "focus": "Psychometrics, Econometrics and Machine Learning",
-      "dates": "2024 - Present",
-      "grade": "Strong academic performance"
-    },
-    {
-      "institution": "International university",
-      "degree": "B.Sc. Data Science with Honours",
-      "focus": "Data Science",
-      "dates": "2020 - 2024",
-      "grade": "Scholarship recipient, top cohort performance"
+      "institution": "Example University",
+      "degree": "M.Sc. Applied Computing",
+      "focus": "Machine learning and automation",
+      "dates": "2025 - Present",
+      "grade": "Demo placeholder"
     }
   ],
   "skills": {
     "programming": [
       "Python",
-      "R",
-      "C++",
-      "Java",
       "SQL",
       "Excel"
     ],
     "python_stack": [
-      "PyTorch",
-      "Transformers",
       "NumPy",
       "Pandas",
       "Scikit-learn"
@@ -105,122 +79,75 @@
       "Large Language Model",
       "Generative AI",
       "Agent",
-      "Chatbot",
       "Prompt Engineering",
       "Machine Learning",
-      "Deep Learning",
-      "NLP",
-      "Information Extraction",
-      "Transformer",
-      "VAE",
-      "RNN",
-      "Model Evaluation",
-      "Experiment Design"
-    ],
-    "quantitative": [
-      "Causal Inference",
-      "Bayesian Modeling",
-      "Psychometrics",
-      "Item Response Theory",
-      "IRT",
-      "Econometrics",
-      "Latent Variable Modeling"
+      "Model Evaluation"
     ],
     "business": [
       "Automation",
-      "RPA",
       "Workflow",
       "Data Preparation",
       "Documentation",
-      "Stakeholder Communication",
-      "International Collaboration",
-      "As-Is/To-Be Analysis"
+      "Stakeholder Communication"
     ]
   },
   "experiences": [
     {
-      "title": "Research Assistant, Quantitative Methods Lab",
-      "dates": "2025 - 2026",
+      "title": "Automation Assistant, Example Operations Team",
+      "dates": "2025",
       "keywords": [
-        "Causal Inference",
-        "RNN",
-        "Counterfactual Outcome Prediction",
-        "Experiment Design",
-        "Data Preprocessing",
-        "Model Implementation"
+        "Python",
+        "Workflow",
+        "Documentation",
+        "Data Preparation"
       ],
       "bullets": [
-        "Supported research on time-dependent confounding in causal inference.",
-        "Explored RNN-based counterfactual outcome prediction workflows.",
-        "Contributed to experiment design, data preprocessing, model implementation, and reproducible analysis pipelines."
+        "Created a small Python workflow for cleaning sample operational data.",
+        "Documented repeatable steps so a non-technical teammate could review the output.",
+        "Prepared a demo report comparing manual and automated workflow steps."
       ]
     }
   ],
   "projects": [
     {
-      "title": "Agentic AI Workflow for LLM Reasoning and Evaluation",
+      "title": "Demo LLM Workflow Evaluation",
       "dates": "2025",
       "keywords": [
         "LLM",
         "Agent",
         "Prompt Engineering",
-        "Model Inference",
-        "Result Parsing",
-        "Automated Evaluation",
+        "Model Evaluation",
         "Python Workflow",
         "Reproducible Reports"
       ],
       "bullets": [
-        "Designed and evaluated an agentic AI workflow for structured reasoning, response generation, and automated evaluation.",
-        "Built Python-based pipelines for prompt construction, model inference, result parsing, and comparative analysis.",
-        "Summarized LLM behavior into reproducible reports and visual materials."
+        "Built a fictional demo workflow for prompt construction, response parsing, and evaluation.",
+        "Compared model outputs with simple rubric-based checks.",
+        "Summarized results in a local Markdown report."
       ]
     },
     {
-      "title": "NLP Project: Joint Entity and Relation Extraction",
-      "dates": "2023",
+      "title": "Sample Data Automation Project",
+      "dates": "2024",
       "keywords": [
-        "NLP",
-        "Information Extraction",
-        "Transformers",
-        "CasRel",
-        "TDEER",
-        "TPLinker",
-        "UniRel",
-        "Relation Extraction"
+        "Automation",
+        "Excel",
+        "SQL",
+        "Data Preparation",
+        "Documentation"
       ],
       "bullets": [
-        "Implemented and compared CasRel, TDEER, TPLinker, and UniRel for extracting structured triples from unstructured text.",
-        "Evaluated model suitability for overlapping entities and complex relation patterns.",
-        "Created case-study comparisons to explain trade-offs between model architectures."
-      ]
-    },
-    {
-      "title": "Mask-Aware VAE Imputation for Large-Scale Assessments",
-      "dates": "2025 - 2026",
-      "keywords": [
-        "VAE",
-        "Item Response Theory",
-        "IRT",
-        "Missing Data",
-        "MCAR",
-        "MAR",
-        "MNAR",
-        "Evaluation",
-        "Simulation"
-      ],
-      "bullets": [
-        "Developed mask-aware VAE workflows for missing-value imputation in large response matrices.",
-        "Compared results with Item Response Theory baselines.",
-        "Evaluated missing-cell prediction accuracy and reporting stability."
+        "Cleaned a synthetic spreadsheet dataset and documented assumptions.",
+        "Used SQL queries to create small summary tables.",
+        "Kept the project scope limited to demo data and public-safe examples."
       ]
     }
   ],
   "languages": [
-    "English: professional working proficiency",
-    "Mandarin Chinese: native"
+    "English: demo working proficiency"
   ],
   "notes": [
-    "This sample profile is anonymized for GitHub. Keep real names, phone numbers, emails, dates of birth, student IDs, transcripts, certificates, visa notes, and commute details in ignored local files only."
+    "This profile is fully fictional. Do not put real names, schools, languages, locations, work authorization, commute details, certificates, transcripts, or application history in tracked sample files.",
+    "Create a private profile such as profiles/me.local.json for real use."
   ]
 }
