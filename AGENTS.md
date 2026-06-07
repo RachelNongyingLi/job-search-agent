@@ -32,7 +32,13 @@ This repo is a local-first precision job-search agent. The goal is not to make a
 
 - `web/index.html` is a static local console. It may generate commands, Codex prompts, and artifact previews; it must not claim to execute the Python workflow by itself.
 - Do not add analytics, remote fonts, remote scripts, cloud upload, API key storage, or localStorage persistence for private job-search data.
+- Keep the frontend organized around a fixed local workspace: JD inputs, private baseline CV, private profile, memory, and per-application outputs.
+- Expose three top-level user views in this order: Application Round, First Use, Settings. Application Round owns JD evidence, fit artifacts, and CV planning; First Use owns workspace creation, `memory.local.json`, initial setup, and CV baseline; Settings owns paths/API flags.
+- The frontend should first try to scan the user-selected workspace folder for expected files, then fall back to manual import. Missing expected files should be visibly marked.
+- Require an initial CV baseline before real CV tailoring. Treat it as private evidence for understanding existing claims, not as permission to publish or rewrite those claims.
+- Generated workflow artifacts should be viewable in the interface when the user imports them: `decision.json`, `report.md`, `next_actions.md`, `cv_plan.md`, and `llm_verification.json`.
 - Website/PDF/TXT JD input must converge to a local `.txt` or `.md` JD path before workflow analysis.
+- Do not imply that static HTML auto-scrapes job URLs or parses PDFs. Treat URL/PDF as source references until Codex or a localhost server extracts reviewed JD text.
 - A future local server must bind to localhost, use allowlisted private directories, call `run_workflow`, and keep CV/public-output confirmation at the UI boundary.
 - The frontend must preserve the same gate semantics as the CLI: red-line blocks prevent CV planning and LLM drafting.
 

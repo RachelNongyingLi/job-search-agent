@@ -35,13 +35,31 @@ Use `--yes` only when you want to approve non-blocking prompts for demos or scri
 
 ## Local Web Console
 
-You can also open the bilingual local console:
+You can also open the multilingual local console:
 
 ```text
 web/index.html
 ```
 
-It helps you prepare JD input, generate workflow commands, configure optional LLM flags, import `decision.json` / `report.md`, and copy a Codex prompt. It is static HTML: it does not upload data, store API keys, or directly run the Python CLI.
+It has three views:
+
+- **Application round**: add job evidence, inspect fit results, and review the CV plan.
+- **First use**: create the local working setup, create `memory.local.json`, load the initial CV baseline, and copy the Codex prompt.
+- **Settings**: set the workspace paths and optional LLM API flags.
+
+It is static HTML: it does not upload data, store API keys, or directly run the Python CLI.
+
+The console uses a fixed local workspace model:
+
+- one workspace root
+- one initial CV baseline, such as `private_resumes/base_cv.pdf`
+- one private profile, such as `profiles/me.local.json`
+- one memory file, such as `memory.local.json`
+- one output folder per application under `outputs/private/`
+
+Provide an initial CV before the first real CV-tailoring task. The initial CV is private evidence for understanding the current resume; it is not public output and is not automatically rewritten.
+
+The console can scan a selected local workspace folder first. It checks expected paths and marks files as found, missing, or manually imported. If scanning is unavailable or a file is missing, use the manual import controls.
 
 ## Two Ways To Use It
 

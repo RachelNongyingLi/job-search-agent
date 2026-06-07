@@ -40,18 +40,47 @@ job-agent workflow run \
 
 ### Local Web Console
 
-The repo includes a static bilingual console at `web/index.html`.
+The repo includes a static multilingual console at `web/index.html`.
+
+It is organized into three user-facing views:
+
+- **Application round**: JD evidence, fit-analysis artifacts, and CV-planning boundary
+- **First use**: workspace setup, `memory.local.json` creation, initial CV baseline, and Codex operator tutorial
+- **Settings**: fixed workspace paths, private file locations, and optional LLM API flags
 
 Use it to:
 
-- choose a JD source type: website, PDF, TXT, or Markdown
+- set a fixed local workspace root
+- require an initial CV baseline before real CV tailoring
+- scan the selected local workspace for expected files before asking for manual imports
+- choose a JD source type: website URL, PDF reference, TXT/Markdown, or direct JD text
 - prepare local paths for JD, profile, output, and memory
 - generate `job-agent workflow run` commands
 - configure optional LLM flags without storing API keys
-- import `decision.json`, `report.md`, `cv_plan.md`, and `llm_verification.json`
+- import `decision.json`, `report.md`, `next_actions.md`, `cv_plan.md`, and `llm_verification.json`
 - copy a Codex operator prompt
 
-Current boundary: static HTML cannot run the Python CLI, parse PDFs reliably, scrape websites, or build a final PDF CV. Website and PDF inputs should be reviewed by the user, converted to local text, and then passed to the CLI as `.txt` or `.md`.
+Current boundary: static HTML cannot run the Python CLI, parse PDFs reliably, scrape websites, or build a final PDF CV. Website URLs and PDFs are source references until Codex or a localhost server extracts reviewed JD text. The CLI still runs from a local `.txt` or `.md` JD path.
+
+The fixed workspace model is:
+
+```text
+inputs/jobs/<application>.txt      # reviewed JD text
+private_resumes/base_cv.pdf        # initial private CV baseline
+profiles/me.local.json             # private structured profile
+memory.local.json                  # private cross-application memory
+outputs/private/<application>/     # workflow artifacts
+```
+
+The initial CV baseline is required for real CV work because it lets Codex or a future local server understand existing evidence before changing role-specific wording. It is private evidence, not public output, and it does not bypass claim-evidence checks.
+
+The frontend should follow this lookup order:
+
+1. User chooses the workspace folder in the browser.
+2. The UI checks the expected fixed paths.
+3. Found artifacts are rendered directly in the interface.
+4. Missing artifacts are marked red.
+5. Manual import controls remain available as fallback.
 
 Future boundary: a local server may wrap `run_workflow` behind localhost APIs, but it must keep allowlisted private directories, no remote upload by default, and explicit CV/public-output confirmation.
 

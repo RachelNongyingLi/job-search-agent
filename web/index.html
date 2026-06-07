@@ -6,23 +6,24 @@
   <title>Apply Less, Fit More - Local Console</title>
   <style>
     :root {
-      --bg: #f6f7f3;
-      --panel: #ffffff;
-      --ink: #17211f;
-      --muted: #5e6866;
-      --line: #d8ded8;
-      --line-strong: #bcc8c3;
-      --teal: #0f766e;
-      --teal-soft: #e4f3ef;
-      --blue: #275fba;
-      --blue-soft: #e6eefb;
-      --amber: #a85d00;
-      --amber-soft: #fff0d8;
+      --bg: #eef2f1;
+      --panel: #fcfefd;
+      --panel-soft: #f7faf9;
+      --ink: #101828;
+      --muted: #667085;
+      --line: #d0d5dd;
+      --line-strong: #98a2b3;
+      --teal: #0e9384;
+      --teal-soft: #e6f4f1;
+      --blue: #2563eb;
+      --blue-soft: #e8efff;
+      --amber: #b54708;
+      --amber-soft: #fff4df;
       --red: #b42318;
-      --red-soft: #fde5e2;
-      --green: #1f7a4d;
-      --green-soft: #e5f4eb;
-      --shadow: 0 18px 42px rgba(26, 40, 36, 0.08);
+      --red-soft: #fee8e5;
+      --green: #067647;
+      --green-soft: #e7f6ec;
+      --shadow: 0 18px 45px rgba(16, 24, 40, 0.08);
       color-scheme: light;
     }
 
@@ -62,7 +63,7 @@
       gap: 20px;
       padding: 14px 28px;
       border-bottom: 1px solid var(--line);
-      background: rgba(246, 247, 243, 0.94);
+      background: rgba(238, 242, 241, 0.95);
       backdrop-filter: blur(14px);
     }
 
@@ -83,6 +84,7 @@
       background: var(--panel);
       color: var(--teal);
       font-weight: 800;
+      box-shadow: inset 0 0 0 2px rgba(14, 147, 132, 0.08);
     }
 
     .brand h1 {
@@ -109,7 +111,7 @@
       display: none;
     }
 
-    .nav a,
+    .nav button,
     .lang-toggle button,
     .segmented button {
       border: 1px solid transparent;
@@ -120,17 +122,24 @@
       white-space: nowrap;
     }
 
-    .nav a {
+    .nav button {
       padding: 8px 10px;
       font-size: 13px;
     }
 
-    .nav a:hover,
-    .nav a:focus-visible {
+    .nav button:hover,
+    .nav button:focus-visible {
       border-color: var(--line);
       color: var(--ink);
       background: var(--panel);
       outline: none;
+    }
+
+    .nav button.active {
+      border-color: #b8dcd5;
+      background: var(--teal-soft);
+      color: var(--teal);
+      font-weight: 800;
     }
 
     .lang-toggle,
@@ -183,6 +192,244 @@
 
     .surface {
       padding: 20px;
+    }
+
+    .subsection {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .subsection:first-of-type {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .subsection-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .subsection-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .workflow-rail {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .workflow-rail.three-step {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .step {
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .path-summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .path-item {
+      min-height: 66px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
+      overflow: hidden;
+    }
+
+    .path-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .path-item code {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .path-item.found,
+    .artifact-tile.found {
+      border-color: #b9dcc7;
+      background: var(--green-soft);
+    }
+
+    .path-item.missing,
+    .artifact-tile.missing {
+      border-color: #f2b9b4;
+      background: var(--red-soft);
+    }
+
+    .path-item.manual,
+    .artifact-tile.manual {
+      border-color: #f0d3a5;
+      background: var(--amber-soft);
+    }
+
+    .path-item.error,
+    .artifact-tile.error {
+      border-color: #f2b9b4;
+      background: var(--red-soft);
+    }
+
+    .file-state {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 24px;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .file-state.found {
+      border-color: #b9dcc7;
+      background: #fff;
+      color: var(--green);
+    }
+
+    .file-state.missing,
+    .file-state.error {
+      border-color: #f2b9b4;
+      background: #fff;
+      color: var(--red);
+    }
+
+    .file-state.manual {
+      border-color: #f0d3a5;
+      background: #fff;
+      color: var(--amber);
+    }
+
+    .scan-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .workspace-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .workspace-section .subsection-title {
+      display: grid;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+
+    .workspace-section .subsection-title > div:first-child {
+      max-width: 660px;
+    }
+
+    .workspace-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-start;
+      min-width: 0;
+    }
+
+    .workspace-actions .btn {
+      min-height: 34px;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .workspace-actions .btn.primary {
+      padding-inline: 12px;
+    }
+
+    .workspace-fields {
+      gap: 10px 12px;
+    }
+
+    .workspace-fields label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .workspace-fields input,
+    .workspace-fields select {
+      height: 34px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .workspace-status {
+      margin-top: 0;
+    }
+
+    .workspace-status .path-item {
+      min-height: 52px;
+      padding: 8px 10px;
+    }
+
+    .workspace-status .path-item code {
+      font-size: 11px;
+    }
+
+    .workspace-status .file-state {
+      min-height: 20px;
+      margin-top: 5px;
+      padding: 2px 7px;
+      font-size: 10px;
+    }
+
+    .workspace-hints {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .workspace-hints .notice {
+      margin-top: 0;
+      padding: 9px 11px;
+      font-size: 12px;
     }
 
     .side {
@@ -258,6 +505,10 @@
       min-width: 0;
     }
 
+    [data-source-panel] {
+      grid-column: 1 / -1;
+    }
+
     label {
       font-size: 13px;
       font-weight: 700;
@@ -301,6 +552,35 @@
       border-radius: 8px;
       background: var(--blue-soft);
       color: #183d76;
+    }
+
+    .notice {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
+      color: var(--muted);
+    }
+
+    .upload-status {
+      min-height: 18px;
+      margin: 6px 0 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .upload-status.success {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .upload-status.error {
+      color: var(--red);
+      font-weight: 700;
     }
 
     .toolbar {
@@ -433,6 +713,57 @@
       grid-template-columns: 190px minmax(0, 1fr);
       gap: 14px;
       align-items: stretch;
+    }
+
+    .artifact-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .artifact-tile {
+      display: grid;
+      gap: 8px;
+      min-height: 108px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
+    }
+
+    .artifact-tile input {
+      height: auto;
+      min-height: 40px;
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .preview-panel {
+      min-height: 220px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #101b18;
+      color: #e9f4ef;
+      overflow: hidden;
+    }
+
+    .preview-panel h3 {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .preview-panel pre {
+      max-height: 360px;
+      overflow: auto;
     }
 
     .score {
@@ -570,6 +901,25 @@
         grid-template-columns: 1fr;
       }
 
+      .workflow-rail,
+      .workflow-rail.three-step,
+      .artifact-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .workspace-section .subsection-title {
+        display: grid;
+      }
+
+      .workspace-actions {
+        justify-content: flex-start;
+        min-width: 0;
+      }
+
+      .path-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
       .side {
         position: static;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -587,9 +937,15 @@
 
       .grid-2,
       .grid-3,
+      .workflow-rail,
+      .workflow-rail.three-step,
+      .path-summary,
+      .artifact-grid,
       .results-grid,
+      .preview-grid,
       .list-grid,
-      .side {
+      .side,
+      .workspace-hints {
         grid-template-columns: 1fr;
       }
 
@@ -608,15 +964,15 @@
         <p data-i18n="appSubtitle">Local job-search workflow console</p>
       </div>
     </div>
-    <nav class="nav" aria-label="Page sections">
-      <a href="#workflow" data-i18n="navWorkflow">Workflow</a>
-      <a href="#results" data-i18n="navResults">Fit analysis</a>
-      <a href="#cv" data-i18n="navCv">CV plan</a>
-      <a href="#guides" data-i18n="navGuides">Guides</a>
+    <nav class="nav" aria-label="Page views">
+      <button type="button" class="active" data-page-target="application" aria-selected="true" data-i18n="navApplication">Application round</button>
+      <button type="button" data-page-target="first-use" aria-selected="false" data-i18n="navFirstUse">First use</button>
+      <button type="button" data-page-target="settings" aria-selected="false" data-i18n="navSettings">Settings</button>
     </nav>
     <div class="lang-toggle" aria-label="Language">
       <button type="button" class="active" data-lang="en">EN</button>
       <button type="button" data-lang="zh">中文</button>
+      <button type="button" data-lang="de">DE</button>
     </div>
   </header>
 
@@ -626,97 +982,332 @@
         <section class="surface" id="workflow">
           <div class="section-head">
             <div>
-              <p class="eyebrow" data-i18n="workflowEyebrow">Local workflow</p>
-              <h2 data-i18n="workflowTitle">Turn a job post into a safe workflow command</h2>
-              <p data-i18n="workflowDesc">Static HTML cannot run Python. It prepares local files, CLI commands, and Codex prompts without uploading your data.</p>
+              <p class="eyebrow" id="pageEyebrow" data-i18n="applicationPageEyebrow">Application round</p>
+              <h2 id="pageTitle" data-i18n="applicationPageTitle">Analyze the job, inspect fit, then plan CV edits</h2>
+              <p id="pageDesc" data-i18n="applicationPageDesc">Review JD evidence, generate the workflow command, render decision/report artifacts, and only then enter CV planning.</p>
             </div>
             <span class="pill good" data-i18n="privateLocal">Local only</span>
           </div>
 
-          <div class="tabs" role="tablist" aria-label="Job input type">
-            <button type="button" class="tab-button active" data-source="website" data-i18n="sourceWebsite">Website</button>
-            <button type="button" class="tab-button" data-source="pdf" data-i18n="sourcePdf">PDF</button>
-            <button type="button" class="tab-button" data-source="txt" data-i18n="sourceText">TXT / MD</button>
-          </div>
-
-          <div class="mode-help" id="sourceHelp" data-i18n="websiteHelp">
-            Paste the job URL for reference, copy the JD text from the website, and save it as a local .txt file before running the workflow.
-          </div>
-
-          <div class="grid-2">
-            <div class="field" data-source-panel="website">
-              <label for="jobUrl" data-i18n="jobUrlLabel">Job URL</label>
-              <input id="jobUrl" type="url" placeholder="https://company.example/jobs/role">
+          <div class="workflow-rail three-step" data-page-block="application">
+            <div class="step">
+              <strong data-i18n="applicationStepJobTitle">1. Upload job information</strong>
+              <span data-i18n="applicationStepJobBody">Add a job URL, PDF, TXT/MD, or reviewed JD text as the local job evidence.</span>
             </div>
-            <div class="field" data-source-panel="pdf">
-              <label for="pdfFile" data-i18n="pdfLabel">PDF JD</label>
-              <input id="pdfFile" type="file" accept="application/pdf,.pdf">
-              <p data-i18n="pdfNote">PDF text extraction needs a future local server. For now, paste extracted text below.</p>
+            <div class="step">
+              <strong data-i18n="applicationStepFitTitle">2. Get fit analysis</strong>
+              <span data-i18n="applicationStepFitBody">Let Codex or a local server run the workflow, then inspect the fit gate and artifacts here.</span>
             </div>
-            <div class="field" data-source-panel="txt">
-              <label for="txtFile" data-i18n="txtLabel">TXT / MD JD</label>
-              <input id="txtFile" type="file" accept=".txt,.md,text/plain,text/markdown">
-            </div>
-            <div class="field">
-              <label for="jobPath" data-i18n="jobPathLabel">Local JD path</label>
-              <input id="jobPath" type="text" value="inputs/jobs/company_role_YYYY-MM-DD.txt">
+            <div class="step">
+              <strong data-i18n="applicationStepCvTitle">3. Get the revised CV</strong>
+              <span data-i18n="applicationStepCvBody">After the gate allows it, review the CV plan and one-page LaTeX output boundary.</span>
             </div>
           </div>
 
-          <div class="field" style="margin-top: 12px;">
-            <label for="jdText" data-i18n="jdTextLabel">Paste JD text</label>
-            <textarea id="jdText" data-i18n-placeholder="jdTextPlaceholder" placeholder="Paste website text, PDF text, or TXT/MD content here."></textarea>
-          </div>
-
-          <div class="toolbar">
-            <button type="button" class="btn" id="downloadText"><span aria-hidden="true">↓</span><span data-i18n="downloadTxt">Download JD text</span></button>
-            <span class="muted" id="fileStatus" data-i18n="fileStatusEmpty">No local file loaded.</span>
-          </div>
-
-          <hr style="border: 0; border-top: 1px solid var(--line); margin: 18px 0;">
-
-          <div class="grid-3">
-            <div class="field">
-              <label for="profilePath" data-i18n="profilePathLabel">Profile path</label>
-              <input id="profilePath" type="text" value="profiles/me.local.json">
+          <div class="workflow-rail" data-page-block="first-use">
+            <div class="step">
+              <strong data-i18n="stepWorkspaceTitle">1. Fixed workspace</strong>
+              <span data-i18n="stepWorkspaceBody">Choose one local root and keep every application under predictable private paths.</span>
             </div>
-            <div class="field">
-              <label for="outDir" data-i18n="outDirLabel">Output directory</label>
-              <input id="outDir" type="text" value="outputs/private/company_role">
+            <div class="step">
+              <strong data-i18n="stepCvTitle">2. Baseline CV</strong>
+              <span data-i18n="stepCvBody">The first CV teaches the agent your existing evidence before role-specific tailoring.</span>
             </div>
-            <div class="field">
-              <label for="memoryPath" data-i18n="memoryPathLabel">Memory path</label>
-              <input id="memoryPath" type="text" value="memory.local.json">
+            <div class="step">
+              <strong data-i18n="stepJobTitle">3. Job evidence</strong>
+              <span data-i18n="stepJobBody">Website, PDF, and TXT inputs all become a reviewed local JD text file.</span>
             </div>
-            <div class="field">
-              <label for="companyName" data-i18n="companyLabel">Company override</label>
-              <input id="companyName" type="text" placeholder="Example Company">
-            </div>
-            <div class="field">
-              <label for="roleTitle" data-i18n="titleLabel">Role title override</label>
-              <input id="roleTitle" type="text" placeholder="AI Automation Intern">
-            </div>
-            <div class="field">
-              <label for="commandStyle" data-i18n="commandStyleLabel">Command style</label>
-              <select id="commandStyle">
-                <option value="module">PYTHONPATH module</option>
-                <option value="installed">job-agent</option>
-              </select>
+            <div class="step">
+              <strong data-i18n="stepResultsTitle">4. Results in UI</strong>
+              <span data-i18n="stepResultsBody">Import workflow artifacts and inspect the gate before touching CV wording.</span>
             </div>
           </div>
 
-          <div class="check-row">
-            <input id="approvePlan" type="checkbox">
-            <label for="approvePlan" data-i18n="approvePlanLabel">I confirm non-blocking CV planning prompts can be approved (--yes)</label>
+          <div class="subsection workspace-section" data-page-block="settings first-use">
+            <div class="subsection-title">
+              <div>
+                <h3 data-i18n="workspaceTitle">Workspace paths</h3>
+                <p data-i18n="workspaceDesc">Set one stable working root. The interface derives private job, CV, memory, and output paths from it.</p>
+              </div>
+              <div class="workspace-actions">
+                <button type="button" class="btn primary" id="createWorkspace" data-page-block="first-use"><span aria-hidden="true">＋</span><span data-i18n="createWorkspace">Create workspace</span></button>
+                <button type="button" class="btn" id="openWorkspace"><span aria-hidden="true">↗</span><span data-i18n="openWorkspace">Open folder</span></button>
+                <button type="button" class="btn" id="standardPaths"><span aria-hidden="true">↻</span><span data-i18n="standardPaths">Standard paths</span></button>
+              </div>
+            </div>
+            <div class="grid-3 workspace-fields">
+              <div class="field">
+                <label for="workspaceRoot" data-i18n="workspaceRootLabel">Workspace root</label>
+                <input id="workspaceRoot" type="text" value=".">
+              </div>
+              <div class="field">
+                <label for="applicationSlug" data-i18n="slugLabel">Application slug</label>
+                <input id="applicationSlug" type="text" value="company_role_YYYY-MM-DD">
+              </div>
+              <div class="field">
+                <label for="commandStyle" data-i18n="commandStyleLabel">Command style</label>
+                <select id="commandStyle">
+                  <option value="module">PYTHONPATH module</option>
+                  <option value="installed">job-agent</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="jobPath" data-i18n="jobPathLabel">Local JD path</label>
+                <input id="jobPath" type="text" value="inputs/jobs/company_role_YYYY-MM-DD.txt">
+              </div>
+              <div class="field">
+                <label for="profilePath" data-i18n="profilePathLabel">Profile path</label>
+                <input id="profilePath" type="text" value="profiles/me.local.json">
+              </div>
+              <div class="field">
+                <label for="baseCvPath" data-i18n="baseCvPathLabel">Initial CV path</label>
+                <input id="baseCvPath" type="text" value="private_resumes/base_cv.pdf">
+              </div>
+              <div class="field">
+                <label for="outDir" data-i18n="outDirLabel">Output directory</label>
+                <input id="outDir" type="text" value="outputs/private/company_role_YYYY-MM-DD">
+              </div>
+              <div class="field">
+                <label for="memoryPath" data-i18n="memoryPathLabel">Memory path</label>
+                <input id="memoryPath" type="text" value="memory.local.json">
+              </div>
+            </div>
+
+            <div class="path-summary workspace-status" aria-label="Derived paths">
+              <div class="path-item" data-scan-card="job"><span>JD</span><code id="summaryJob">inputs/jobs/company_role_YYYY-MM-DD.txt</code><b class="file-state" data-scan-state="job">Not scanned</b></div>
+              <div class="path-item" data-scan-card="baseCv"><span>CV</span><code id="summaryCv">private_resumes/base_cv.pdf</code><b class="file-state" data-scan-state="baseCv">Not scanned</b></div>
+              <div class="path-item" data-scan-card="profile"><span>Profile</span><code id="summaryProfile">profiles/me.local.json</code><b class="file-state" data-scan-state="profile">Not scanned</b></div>
+              <div class="path-item" data-scan-card="memory"><span>Memory</span><code id="summaryMemory">memory.local.json</code><b class="file-state" data-scan-state="memory">Not scanned</b></div>
+              <div class="path-item" data-scan-card="outDir"><span>Output</span><code id="summaryOut">outputs/private/company_role_YYYY-MM-DD</code><b class="file-state" data-scan-state="outDir">Not scanned</b></div>
+            </div>
+            <div class="workspace-hints">
+              <div class="notice" id="workspaceScanNote" data-i18n="workspaceScanNote">
+                Open the repo or workspace folder once. Missing files stay marked until created or imported.
+              </div>
+              <div class="notice hidden" id="workspaceCreateNote" data-page-block="first-use" data-i18n="workspaceCreateNote">
+                One click creates private folders, memory, a profile draft, and the output directory.
+              </div>
+            </div>
           </div>
 
-          <div class="command-box">
-            <button type="button" class="btn copy-floating" data-copy="workflowCommand"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
-            <pre id="workflowCommand"></pre>
+          <div class="subsection" data-page-block="first-use">
+            <div class="subsection-title">
+              <div>
+                <h3 data-i18n="baselineCvTitle">Initial CV baseline</h3>
+                <p data-i18n="baselineCvDesc">Require one original CV before the first real application so Codex or a future local server can understand existing evidence.</p>
+              </div>
+              <span class="pill warn" data-i18n="requiredBeforeCv">Required before CV work</span>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="baseCvFile" data-i18n="baseCvFileLabel">Initial CV file</label>
+                <input id="baseCvFile" type="file" accept=".pdf,.docx,.tex,.md,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown">
+                <p id="baseCvStatus" class="upload-status" data-i18n="baseCvEmpty">No baseline CV loaded yet.</p>
+              </div>
+              <div class="notice">
+                <strong data-i18n="baseCvNoteTitle">Why this matters</strong>
+                <p data-i18n="baseCvNote">The initial CV is evidence memory, not public output. Role-specific CV edits should compare against this baseline and keep the final LaTeX PDF to one page.</p>
+              </div>
+            </div>
+            <div id="baseCvPreview" class="code-box hidden">
+              <pre id="baseCvText"></pre>
+            </div>
+          </div>
+
+          <div class="subsection" data-page-block="application">
+            <div class="subsection-title">
+              <div>
+                <h3 data-i18n="jobEvidenceTitle">1. Upload job information</h3>
+                <p data-i18n="jobEvidenceDesc">Choose one source. Website, PDF, TXT/MD, and pasted text should become reviewed local JD evidence before analysis.</p>
+              </div>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="Job input type">
+              <button type="button" class="tab-button active" data-source="website" data-i18n="sourceWebsite">Website</button>
+              <button type="button" class="tab-button" data-source="pdf" data-i18n="sourcePdf">PDF</button>
+              <button type="button" class="tab-button" data-source="txt" data-i18n="sourceText">TXT / MD</button>
+              <button type="button" class="tab-button" data-source="text" data-i18n="sourceDirectText">JD text</button>
+            </div>
+
+            <div class="mode-help" id="sourceHelp" data-i18n="websiteHelp">
+              Save the URL as the source reference. The current static page does not auto-scrape websites; Codex or a future local server should turn it into reviewed JD text.
+            </div>
+
+            <div class="grid-2">
+              <div class="field" data-source-panel="website">
+                <label for="jobUrl" data-i18n="jobUrlLabel">Job URL</label>
+                <input id="jobUrl" type="url" placeholder="https://company.example/jobs/role">
+              </div>
+              <div class="field" data-source-panel="pdf">
+                <label for="pdfFile" data-i18n="pdfLabel">PDF JD</label>
+                <input id="pdfFile" type="file" accept="application/pdf,.pdf">
+                <p data-i18n="pdfNote">PDF extraction is not implemented in this static page. Use Codex/local server extraction, or switch to JD text after extracting it.</p>
+              </div>
+              <div class="field" data-source-panel="txt">
+                <label for="txtFile" data-i18n="txtLabel">TXT / MD JD</label>
+                <input id="txtFile" type="file" accept=".txt,.md,text/plain,text/markdown">
+              </div>
+            </div>
+
+            <div class="field hidden" data-source-panel="text" style="margin-top: 12px;">
+              <label for="jdText" data-i18n="jdTextLabel">Paste JD text</label>
+              <textarea id="jdText" data-i18n-placeholder="jdTextPlaceholder" placeholder="Paste reviewed JD text here."></textarea>
+            </div>
+
+            <div class="toolbar">
+              <button type="button" class="btn" id="downloadText" data-source-action="txt text"><span aria-hidden="true">↓</span><span data-i18n="downloadTxt">Download JD text</span></button>
+              <span class="upload-status" id="fileStatus" data-i18n="fileStatusEmpty">No local file loaded.</span>
+            </div>
+          </div>
+
+          <div class="subsection" data-page-block="application">
+            <div class="subsection-title">
+              <div>
+                <h3 data-i18n="runConfigTitle">2. Get fit analysis</h3>
+                <p data-i18n="runConfigDesc">Codex or a future local server reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.</p>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="companyName" data-i18n="companyLabel">Company</label>
+                <input id="companyName" type="text" placeholder="Example Company">
+              </div>
+              <div class="field">
+                <label for="roleTitle" data-i18n="titleLabel">Role title</label>
+                <input id="roleTitle" type="text" placeholder="AI Automation Intern">
+              </div>
+            </div>
+
+            <div class="mode-help" style="margin-top: 14px;">
+              <strong data-i18n="aiReadsTitle">AI reads these local files</strong>
+              <div class="path-summary" aria-label="AI input and output files">
+                <div class="path-item"><span>JD</span><code id="aiReadJob">inputs/jobs/company_role_YYYY-MM-DD.txt</code></div>
+                <div class="path-item"><span>CV</span><code id="aiReadCv">private_resumes/base_cv.pdf</code></div>
+                <div class="path-item"><span>Profile</span><code id="aiReadProfile">profiles/me.local.json</code></div>
+                <div class="path-item"><span>Memory</span><code id="aiReadMemory">memory.local.json</code></div>
+                <div class="path-item"><span>Output</span><code id="aiReadOut">outputs/private/company_role_YYYY-MM-DD</code></div>
+              </div>
+              <p data-i18n="aiReadsNote">Expected outputs: decision.json, report.md, next_actions.md, cv_plan.md, and llm_verification.json when a model draft is enabled.</p>
+            </div>
+
+            <div class="command-box" style="margin-top: 14px;">
+              <button type="button" class="btn copy-floating" data-copy="applicationCodexPrompt"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
+              <pre id="applicationCodexPrompt"></pre>
+            </div>
+
+            <div class="mode-help" style="margin-top: 14px;">
+              <strong data-i18n="advancedCliTitle">Advanced CLI fallback</strong>
+              <p data-i18n="advancedCliDesc">Use this only when you want to run the deterministic workflow yourself. Codex/operator should read the baseline CV around this command.</p>
+            </div>
+
+            <div class="check-row">
+              <input id="approvePlan" type="checkbox">
+              <label for="approvePlan" data-i18n="approvePlanLabel">Allow non-blocking CV-plan generation after the gate passes</label>
+            </div>
+
+            <div class="command-box">
+              <button type="button" class="btn copy-floating" data-copy="workflowCommand"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
+              <pre id="workflowCommand"></pre>
+            </div>
+
+            <div class="mode-help" style="margin-top: 14px;">
+              <strong data-i18n="resultsTitle">Fit artifacts</strong>
+              <p data-i18n="resultsDesc">Scan the selected workspace first. If files are missing, the red tiles can be filled with manual import.</p>
+            </div>
+
+            <div class="artifact-grid" style="margin-top: 12px;">
+              <div class="artifact-tile" data-scan-card="decision">
+                <label for="decisionFile" data-i18n="decisionLabel">decision.json</label>
+                <b class="file-state" data-scan-state="decision">Not scanned</b>
+                <input id="decisionFile" type="file" accept="application/json,.json">
+                <p class="upload-status" id="decisionStatus"></p>
+              </div>
+              <div class="artifact-tile" data-scan-card="report">
+                <label for="reportFile" data-i18n="reportLabel">report.md</label>
+                <b class="file-state" data-scan-state="report">Not scanned</b>
+                <input id="reportFile" type="file" accept=".md,text/markdown,text/plain">
+                <p class="upload-status" id="reportStatus"></p>
+              </div>
+              <div class="artifact-tile" data-scan-card="nextActions">
+                <label for="nextActionsFile" data-i18n="nextActionsLabel">next_actions.md</label>
+                <b class="file-state" data-scan-state="nextActions">Not scanned</b>
+                <input id="nextActionsFile" type="file" accept=".md,text/markdown,text/plain">
+                <p class="upload-status" id="nextActionsStatus"></p>
+              </div>
+              <div class="artifact-tile" data-scan-card="cvPlan">
+                <label for="resultCvPlanFile" data-i18n="cvPlanLabel">cv_plan.md</label>
+                <b class="file-state" data-scan-state="cvPlan">Not scanned</b>
+                <input id="resultCvPlanFile" type="file" accept=".md,text/markdown,text/plain">
+                <p class="upload-status" id="resultCvPlanStatus"></p>
+              </div>
+              <div class="artifact-tile" data-scan-card="verification">
+                <label for="resultVerificationFile" data-i18n="verificationLabel">llm_verification.json</label>
+                <b class="file-state" data-scan-state="verification">Not scanned</b>
+                <input id="resultVerificationFile" type="file" accept="application/json,.json">
+                <p class="upload-status" id="resultVerificationStatus"></p>
+              </div>
+            </div>
+
+            <div id="decisionEmpty" class="empty" style="margin-top: 14px;" data-i18n="decisionEmpty">
+              Import decision.json to see score, status, risks, red lines, strengths, and do-not-claim items.
+            </div>
+
+            <div id="decisionView" class="hidden" style="margin-top: 14px;">
+              <div class="results-grid">
+                <div class="score" id="scoreDial">
+                  <div class="score-inner">
+                    <span class="score-value" id="scoreValue">0</span>
+                    <span class="muted">/100</span>
+                  </div>
+                </div>
+                <div class="result-box">
+                  <div class="pill-row" id="statusPills"></div>
+                  <h3 style="margin-top: 12px;" id="decisionText"></h3>
+                  <p class="muted" id="roleText"></p>
+                </div>
+              </div>
+              <div class="list-grid">
+                <div class="list">
+                  <h3 data-i18n="negativeSignalsTitle">Negative signals</h3>
+                  <ul id="negativeList"></ul>
+                </div>
+                <div class="list">
+                  <h3 data-i18n="marketRisksTitle">Market risks</h3>
+                  <ul id="riskList"></ul>
+                </div>
+                <div class="list">
+                  <h3 data-i18n="strengthsTitle">Root strengths</h3>
+                  <ul id="strengthList"></ul>
+                </div>
+                <div class="list">
+                  <h3 data-i18n="doNotClaimTitle">Do not claim</h3>
+                  <ul id="claimList"></ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-grid">
+              <div id="reportPreview" class="preview-panel hidden">
+                <h3 data-i18n="reportPreviewTitle">Report preview</h3>
+                <pre id="reportText"></pre>
+              </div>
+              <div id="nextActionsPreview" class="preview-panel hidden">
+                <h3 data-i18n="nextActionsPreviewTitle">Next actions preview</h3>
+                <pre id="nextActionsText"></pre>
+              </div>
+              <div id="cvPlanPreview" class="preview-panel hidden">
+                <h3 data-i18n="cvPlanPreviewTitle">CV plan preview</h3>
+                <pre id="cvPlanText"></pre>
+              </div>
+              <div id="verificationPreview" class="preview-panel hidden">
+                <h3 data-i18n="verificationPreviewTitle">LLM verification</h3>
+                <pre id="verificationText"></pre>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section class="surface" id="llm">
+        <section class="surface" id="llm" data-page-section="settings">
           <div class="section-head">
             <div>
               <p class="eyebrow" data-i18n="llmEyebrow">Optional model layer</p>
@@ -750,74 +1341,12 @@
           </div>
         </section>
 
-        <section class="surface" id="results">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow" data-i18n="resultsEyebrow">Artifact viewer</p>
-              <h2 data-i18n="resultsTitle">Import workflow results</h2>
-              <p data-i18n="resultsDesc">Load decision.json and report.md from outputs/private to inspect the fit gate locally.</p>
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="field">
-              <label for="decisionFile" data-i18n="decisionLabel">decision.json</label>
-              <input id="decisionFile" type="file" accept="application/json,.json">
-            </div>
-            <div class="field">
-              <label for="reportFile" data-i18n="reportLabel">report.md</label>
-              <input id="reportFile" type="file" accept=".md,text/markdown,text/plain">
-            </div>
-          </div>
-
-          <div id="decisionEmpty" class="empty" style="margin-top: 14px;" data-i18n="decisionEmpty">
-            Import decision.json to see score, status, risks, red lines, strengths, and do-not-claim items.
-          </div>
-
-          <div id="decisionView" class="hidden" style="margin-top: 14px;">
-            <div class="results-grid">
-              <div class="score" id="scoreDial">
-                <div class="score-inner">
-                  <span class="score-value" id="scoreValue">0</span>
-                  <span class="muted">/100</span>
-                </div>
-              </div>
-              <div class="result-box">
-                <div class="pill-row" id="statusPills"></div>
-                <h3 style="margin-top: 12px;" id="decisionText"></h3>
-                <p class="muted" id="roleText"></p>
-              </div>
-            </div>
-            <div class="list-grid">
-              <div class="list">
-                <h3 data-i18n="negativeSignalsTitle">Negative signals</h3>
-                <ul id="negativeList"></ul>
-              </div>
-              <div class="list">
-                <h3 data-i18n="marketRisksTitle">Market risks</h3>
-                <ul id="riskList"></ul>
-              </div>
-              <div class="list">
-                <h3 data-i18n="strengthsTitle">Root strengths</h3>
-                <ul id="strengthList"></ul>
-              </div>
-              <div class="list">
-                <h3 data-i18n="doNotClaimTitle">Do not claim</h3>
-                <ul id="claimList"></ul>
-              </div>
-            </div>
-          </div>
-
-          <div id="reportPreview" class="code-box hidden">
-            <pre id="reportText"></pre>
-          </div>
-        </section>
-
-        <section class="surface" id="cv">
+        <section class="surface" id="cv" data-page-section="application">
           <div class="section-head">
             <div>
               <p class="eyebrow" data-i18n="cvEyebrow">CV boundary</p>
-              <h2 data-i18n="cvTitle">CV plan and future LaTeX build</h2>
-              <p data-i18n="cvDesc">Today the workflow creates cv_plan.md. Final PDF generation is a future local-server feature with one-page QA.</p>
+              <h2 data-i18n="cvTitle">3. Get the revised CV</h2>
+              <p data-i18n="cvDesc">Use cv_plan.md as the boundary for CV edits. Final LaTeX PDF generation remains a future local-server feature with one-page QA.</p>
             </div>
             <span class="pill warn" data-i18n="humanGate">Human gate</span>
           </div>
@@ -825,10 +1354,12 @@
             <div class="field">
               <label for="cvPlanFile" data-i18n="cvPlanLabel">cv_plan.md</label>
               <input id="cvPlanFile" type="file" accept=".md,text/markdown,text/plain">
+              <p class="upload-status" id="cvPlanStatus"></p>
             </div>
             <div class="field">
               <label for="verificationFile" data-i18n="verificationLabel">llm_verification.json</label>
               <input id="verificationFile" type="file" accept="application/json,.json">
+              <p class="upload-status" id="verificationStatus"></p>
             </div>
           </div>
           <div class="mode-help" style="margin-top: 14px;" data-i18n="cvBoundary">
@@ -840,7 +1371,7 @@
           </div>
         </section>
 
-        <section class="surface" id="guides">
+        <section class="surface" id="guides" data-page-section="first-use">
           <div class="section-head">
             <div>
               <p class="eyebrow" data-i18n="guidesEyebrow">Operator guide</p>
@@ -899,37 +1430,88 @@
       en: {
         appTitle: "Apply Less, Fit More",
         appSubtitle: "Local job-search workflow console",
-        navWorkflow: "Workflow",
-        navResults: "Fit analysis",
-        navCv: "CV plan",
-        navGuides: "Guides",
+        navSettings: "Settings",
+        navFirstUse: "First use",
+        navApplication: "Application round",
+        settingsPageEyebrow: "Settings",
+        settingsPageTitle: "Set paths, privacy, and model options",
+        settingsPageDesc: "Choose stable workspace paths and optional LLM flags. API keys stay outside the page.",
+        firstUsePageEyebrow: "First use",
+        firstUsePageTitle: "Create the workspace and baseline CV",
+        firstUsePageDesc: "Start here when the application page shows missing setup: create the workspace, load the initial CV, then copy the Codex operator prompt.",
+        applicationPageEyebrow: "Application round",
+        applicationPageTitle: "Analyze the job, inspect fit, then plan CV edits",
+        applicationPageDesc: "Follow one local round: upload job information, get fit analysis, then generate a safe CV revision plan.",
+        applicationStepJobTitle: "1. Upload job information",
+        applicationStepJobBody: "Add a job URL, PDF, TXT/MD, or reviewed JD text as the local job evidence.",
+        applicationStepFitTitle: "2. Get fit analysis",
+        applicationStepFitBody: "Let Codex or a local server run the workflow, then inspect the fit gate and artifacts here.",
+        applicationStepCvTitle: "3. Get the revised CV",
+        applicationStepCvBody: "After the gate allows it, review the CV plan and one-page LaTeX output boundary.",
+        stepWorkspaceTitle: "1. Fixed workspace",
+        stepWorkspaceBody: "Choose one local root and keep every application under predictable private paths.",
+        stepCvTitle: "2. Baseline CV",
+        stepCvBody: "The first CV teaches the agent your existing evidence before role-specific tailoring.",
+        stepJobTitle: "3. Job evidence",
+        stepJobBody: "Website, PDF, and TXT inputs all become a reviewed local JD text file.",
+        stepResultsTitle: "4. Results in UI",
+        stepResultsBody: "Import workflow artifacts and inspect the gate before touching CV wording.",
         workflowEyebrow: "Local workflow",
         workflowTitle: "Turn a job post into a safe workflow command",
         workflowDesc: "Static HTML cannot run Python. It prepares local files, CLI commands, and Codex prompts without uploading your data.",
         privateLocal: "Local only",
+        workspaceTitle: "Workspace paths",
+        workspaceDesc: "Set one stable working root. The interface derives private job, CV, memory, and output paths from it.",
+        createWorkspace: "Create workspace",
+        openWorkspace: "Open folder",
+        standardPaths: "Standard paths",
+        workspaceScanNote: "Open the repo or workspace folder once. Missing files stay marked until created or imported.",
+        workspaceCreateNote: "One click creates private folders, memory, a profile draft, and the output directory.",
+        workspaceRootLabel: "Workspace root",
+        slugLabel: "Application slug",
+        baseCvPathLabel: "Initial CV path",
+        baselineCvTitle: "Initial CV baseline",
+        baselineCvDesc: "Require one original CV before the first real application so Codex or a future local server can understand existing evidence.",
+        requiredBeforeCv: "Required before CV work",
+        baseCvFileLabel: "Initial CV file",
+        baseCvEmpty: "No baseline CV loaded yet.",
+        baseCvNoteTitle: "Why this matters",
+        baseCvNote: "The initial CV is evidence memory, not public output. Role-specific CV edits should compare against this baseline and keep the final LaTeX PDF to one page.",
+        jobEvidenceTitle: "1. Upload job information",
+        jobEvidenceDesc: "Choose one source. Website, PDF, TXT/MD, and pasted text should become reviewed local JD evidence before analysis.",
+        runConfigTitle: "2. Get fit analysis",
+        runConfigDesc: "Codex or a future local server reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.",
         sourceWebsite: "Website",
         sourcePdf: "PDF",
         sourceText: "TXT / MD",
-        websiteHelp: "Paste the job URL for reference, copy the JD text from the website, and save it as a local .txt file before running the workflow.",
-        pdfHelp: "Choose a PDF for reference. This page does not parse PDFs yet; paste extracted text below or use a future local server.",
-        txtHelp: "Load a .txt or .md JD, or paste the text directly. The CLI currently works from a local .txt/.md path.",
+        sourceDirectText: "JD text",
+        websiteHelp: "Save the URL as the source reference. The current static page does not auto-scrape websites; Codex or a future local server should turn it into reviewed JD text.",
+        pdfHelp: "Choose a PDF as the source reference. PDF extraction is not implemented in this static page; Codex or a future local server should extract and review it.",
+        txtHelp: "Load a .txt or .md JD. This page reads it locally and uses the text as the reviewed JD source.",
+        textHelp: "Paste reviewed JD text directly when you already copied or extracted it from a website or PDF.",
         jobUrlLabel: "Job URL",
         pdfLabel: "PDF JD",
-        pdfNote: "PDF text extraction needs a future local server. For now, paste extracted text below.",
+        pdfNote: "PDF extraction is not implemented in this static page. Use Codex/local server extraction, or switch to JD text after extracting it.",
         txtLabel: "TXT / MD JD",
         jobPathLabel: "Local JD path",
         jdTextLabel: "Paste JD text",
-        jdTextPlaceholder: "Paste website text, PDF text, or TXT/MD content here.",
+        jdTextPlaceholder: "Paste reviewed JD text here.",
         downloadTxt: "Download JD text",
         fileStatusEmpty: "No local file loaded.",
         loadedFile: "Loaded",
+        importedFile: "Imported",
+        fileLoadFailed: "Could not load file",
         profilePathLabel: "Profile path",
         outDirLabel: "Output directory",
         memoryPathLabel: "Memory path",
-        companyLabel: "Company override",
-        titleLabel: "Role title override",
+        companyLabel: "Company",
+        titleLabel: "Role title",
         commandStyleLabel: "Command style",
-        approvePlanLabel: "I confirm non-blocking CV planning prompts can be approved (--yes)",
+        aiReadsTitle: "AI reads these local files",
+        aiReadsNote: "Expected outputs: decision.json, report.md, next_actions.md, cv_plan.md, and llm_verification.json when a model draft is enabled.",
+        advancedCliTitle: "Advanced CLI fallback",
+        advancedCliDesc: "Use this only when you want to run the deterministic workflow yourself. Codex/operator should read the baseline CV around this command.",
+        approvePlanLabel: "Allow non-blocking CV-plan generation after the gate passes",
         copy: "Copy",
         copied: "Copied.",
         llmEyebrow: "Optional model layer",
@@ -941,27 +1523,32 @@
         modelLabel: "Model",
         keyEnvLabel: "API key env var",
         keyEnvNote: "Do not paste API keys into this page; use an environment variable name.",
-        resultsEyebrow: "Artifact viewer",
-        resultsTitle: "Import workflow results",
-        resultsDesc: "Load decision.json and report.md from outputs/private to inspect the fit gate locally.",
+        resultsEyebrow: "Fit artifacts",
+        resultsTitle: "Fit artifacts",
+        resultsDesc: "Scan the selected workspace first. If files are missing, the red tiles can be filled with manual import.",
         decisionLabel: "decision.json",
         reportLabel: "report.md",
+        nextActionsLabel: "next_actions.md",
         decisionEmpty: "Import decision.json to see score, status, risks, red lines, strengths, and do-not-claim items.",
+        reportPreviewTitle: "Report preview",
+        nextActionsPreviewTitle: "Next actions preview",
+        cvPlanPreviewTitle: "CV plan preview",
+        verificationPreviewTitle: "LLM verification",
         negativeSignalsTitle: "Negative signals",
         marketRisksTitle: "Market risks",
         strengthsTitle: "Root strengths",
         doNotClaimTitle: "Do not claim",
         noneDetected: "None detected.",
         cvEyebrow: "CV boundary",
-        cvTitle: "CV plan and future LaTeX build",
-        cvDesc: "Today the workflow creates cv_plan.md. Final PDF generation is a future local-server feature with one-page QA.",
+        cvTitle: "3. Get the revised CV",
+        cvDesc: "Use cv_plan.md as the boundary for CV edits. Final LaTeX PDF generation remains a future local-server feature with one-page QA.",
         humanGate: "Human gate",
         cvPlanLabel: "cv_plan.md",
         verificationLabel: "llm_verification.json",
         cvBoundary: "Memory can remember facts. Human confirmation is still required before editing CV bullets, turning private facts into public wording, sending materials, or accepting the final one-page PDF.",
-        guidesEyebrow: "Operator guide",
+        guidesEyebrow: "First-use tutorial",
         guidesTitle: "Codex prompt and local API notes",
-        guidesDesc: "Use Codex as the operator around the CLI. A future local server can wrap run_workflow behind localhost APIs.",
+        guidesDesc: "Use this after choosing a workspace and baseline CV. Codex operates the CLI now; a future local server can wrap run_workflow behind localhost APIs.",
         codexPromptTitle: "Prompt for Codex",
         apiNotesTitle: "Future localhost API shape",
         privacyTitle: "Privacy defaults",
@@ -972,12 +1559,29 @@
         memoryVsBody: "Memory learns recurring filters and fact status. Human confirmation is for CV edits, public wording, sending messages, and final PDF acceptance.",
         gateTitle: "Gate logic",
         gateBody: "A blocked workflow means no substitute CV bullets, cover letter, or recruiter message.",
-        futureCv: "Future command only: job-agent cv build is not implemented yet.\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
+        futureCv: "Future command only: job-agent cv build is not implemented yet.\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
         apiNotes: "Future local server contract, bound to 127.0.0.1 only:\n\nPOST /api/jobs/text\n  Save reviewed JD text into inputs/jobs/.\n\nPOST /api/workflows\n  Calls run_workflow with explicit UI confirmations.\n\nGET /api/workflows/{id}/decision\nGET /api/workflows/{id}/report\nGET /api/workflows/{id}/next-actions\n\nPOST /api/cv/build\n  Future only. Requires cv_plan.md, one-page PDF QA, verifier pass, and human confirmation.",
-        codexPrompt: "Please read README.md and AGENTS.md.\nUse the local workflow for this JD.\nDo not tailor my CV until the gate allows it.\nRun:\n\n{command}\n\nAfter running, read report.md, decision.json, and next_actions.md from the output folder.\nIf cv_plan.md is missing, treat it as an intentional gate result unless the command failed.\nDo not bypass red lines, do-not-claim items, memory privacy, or the one-page CV contract.",
+        codexPrompt: "Please read README.md and AGENTS.md.\nAct as the local operator for this application round.\nRead the reviewed JD at {jobPath}, my profile at {profilePath}, memory at {memoryPath}, and my initial CV baseline at {cvPath}.\nUse the baseline CV only as private evidence for understanding my current CV. Do not tailor my CV until the gate allows it.\nRun the deterministic workflow:\n\n{command}\n\nThen read the output folder {outDir}: decision.json, report.md, next_actions.md, cv_plan.md if it exists, and llm_verification.json if present.\nSummarize the fit gate, red lines, do-not-claim items, and next actions back to me. If cv_plan.md is missing, treat it as an intentional gate result unless the command failed.\nDo not bypass red lines, memory privacy, or the one-page CV contract.",
         invalidJson: "Could not parse JSON.",
         reportLoaded: "Report loaded locally.",
+        nextActionsLoaded: "Next actions loaded locally.",
         cvPlanLoaded: "CV plan loaded locally.",
+        baseCvLoaded: "Baseline CV loaded locally.",
+        baseCvPreviewUnavailable: "Preview is available for .txt, .md, and .tex files. PDF/DOCX support belongs in a future local server.",
+        pathsUpdated: "Standard private paths applied.",
+        workspaceUnsupported: "Folder scanning is not supported in this browser. Use manual import.",
+        workspaceOpened: "Workspace folder opened.",
+        workspaceCreateUnsupported: "Workspace creation needs a browser with local folder write access.",
+        workspaceCreated: "Workspace created locally.",
+        workspaceCreateFailed: "Could not create the workspace files.",
+        scanComplete: "Workspace scan complete.",
+        scanFailed: "Could not scan the selected folder.",
+        baseCvSaved: "Baseline CV saved into the workspace.",
+        state_unscanned: "Not scanned",
+        state_found: "Found",
+        state_missing: "Missing",
+        state_manual: "Manual import",
+        state_error: "Error",
         verificationPassed: "LLM verification passed.",
         verificationFailed: "LLM verification did not pass.",
         downloadEmpty: "Paste JD text before downloading.",
@@ -991,37 +1595,88 @@
       zh: {
         appTitle: "少投一点，投准一点",
         appSubtitle: "本地求职工作流控制台",
-        navWorkflow: "工作流",
-        navResults: "适配度分析",
-        navCv: "CV 计划",
-        navGuides: "指南",
+        navSettings: "设置",
+        navFirstUse: "第一次使用",
+        navApplication: "一轮投递",
+        settingsPageEyebrow: "设置",
+        settingsPageTitle: "设置路径、隐私和模型选项",
+        settingsPageDesc: "先固定本地工作路径和可选 LLM 参数。API key 不进入页面，只放在环境变量里。",
+        firstUsePageEyebrow: "第一次使用",
+        firstUsePageTitle: "建立工作路径和初始 CV",
+        firstUsePageDesc: "当一轮投递页显示 setup 缺失时来这里：创建 workspace、加载初始 CV，再复制 Codex operator 提示词。",
+        applicationPageEyebrow: "一轮投递",
+        applicationPageTitle: "分析岗位、查看适配度，再计划 CV 修改",
+        applicationPageDesc: "一轮投递按三步走：上传职位信息，获取匹配分析，再生成安全的 CV 修改计划。",
+        applicationStepJobTitle: "1. 上传职位信息",
+        applicationStepJobBody: "添加岗位 URL、PDF、TXT/MD，或粘贴确认过的 JD 文本作为本地岗位证据。",
+        applicationStepFitTitle: "2. 获取匹配信息",
+        applicationStepFitBody: "让 Codex 或本地 server 运行 workflow，然后在这里查看 fit gate 和产物。",
+        applicationStepCvTitle: "3. 获得修改后的 CV",
+        applicationStepCvBody: "Gate 允许后，再查看 CV plan 和一页 LaTeX 输出边界。",
+        stepWorkspaceTitle: "1. 固定工作路径",
+        stepWorkspaceBody: "选择一个本地 root，让每次投递都落到可预测的 private 路径。",
+        stepCvTitle: "2. 初始 CV",
+        stepCvBody: "第一份 CV 让 agent 先理解已有证据，再做岗位定制。",
+        stepJobTitle: "3. 岗位证据",
+        stepJobBody: "网站、PDF、TXT 最终都收敛为用户确认过的本地 JD 文本。",
+        stepResultsTitle: "4. 界面看结果",
+        stepResultsBody: "导入 workflow 产物，在改 CV 前先看 gate 和红线。",
         workflowEyebrow: "本地工作流",
         workflowTitle: "把岗位信息转成本地安全 workflow 命令",
         workflowDesc: "静态 HTML 不能直接运行 Python。它负责准备本地文件路径、CLI 命令和 Codex 提示词，不上传你的数据。",
         privateLocal: "仅本地",
+        workspaceTitle: "工作路径",
+        workspaceDesc: "设置一个稳定的本地工作 root。界面会从它派生 JD、CV、memory 和输出路径。",
+        createWorkspace: "创建 workspace",
+        openWorkspace: "打开文件夹",
+        standardPaths: "标准路径",
+        workspaceScanNote: "打开 repo 或 workspace 文件夹一次。缺失文件会保持标记，直到创建或导入。",
+        workspaceCreateNote: "一键创建 private 文件夹、memory、profile 草稿和输出目录。",
+        workspaceRootLabel: "Workspace root",
+        slugLabel: "投递 slug",
+        baseCvPathLabel: "初始 CV 路径",
+        baselineCvTitle: "初始 CV baseline",
+        baselineCvDesc: "第一次真实投递前必须提供一份原始 CV，让 Codex 或未来本地 server 理解已有证据。",
+        requiredBeforeCv: "改 CV 前必需",
+        baseCvFileLabel: "初始 CV 文件",
+        baseCvEmpty: "尚未加载初始 CV。",
+        baseCvNoteTitle: "为什么需要它",
+        baseCvNote: "初始 CV 是证据记忆，不是公开输出。岗位定制应和这份 baseline 对比，并保持最终 LaTeX PDF 正好一页。",
+        jobEvidenceTitle: "1. 上传职位信息",
+        jobEvidenceDesc: "选择一种来源。网站、PDF、TXT/MD 和粘贴文本都应先变成确认过的本地 JD 证据，再进入分析。",
+        runConfigTitle: "2. 获取匹配信息",
+        runConfigDesc: "由 Codex 或未来本地 server 读取 JD、profile、memory 和初始 CV，运行 workflow，然后在下方展示产物。",
         sourceWebsite: "网站",
         sourcePdf: "PDF",
         sourceText: "TXT / MD",
-        websiteHelp: "粘贴岗位 URL 作为参考，从网页复制 JD 正文，保存成本地 .txt 后再运行 workflow。",
-        pdfHelp: "可以选择 PDF 作为参考。这个页面暂不解析 PDF；请先粘贴提取出的文本，或未来使用本地 server。",
-        txtHelp: "加载 .txt/.md JD，或直接粘贴文本。当前 CLI 使用本地 .txt/.md 路径。",
+        sourceDirectText: "JD 文本",
+        websiteHelp: "把岗位 URL 作为来源引用保存。当前静态页面不会自动抓取网页；应由 Codex 或未来本地 server 把它转成用户确认过的 JD 文本。",
+        pdfHelp: "选择 PDF 作为来源引用。当前静态页面还没有 PDF 解析；应由 Codex 或未来本地 server 提取并让用户确认。",
+        txtHelp: "加载 .txt 或 .md JD。页面会在本地读取它，并把该文本作为已确认的 JD 来源。",
+        textHelp: "当你已经从网页或 PDF 复制/提取出 JD 时，在这里直接粘贴确认过的文本。",
         jobUrlLabel: "岗位 URL",
         pdfLabel: "PDF 岗位文件",
-        pdfNote: "PDF 文本提取需要未来本地 server。现在请先把提取出的文本粘贴到下方。",
+        pdfNote: "当前静态页面还没有 PDF 解析。请用 Codex/本地 server 提取，或提取后切到 JD 文本。",
         txtLabel: "TXT / MD 岗位文件",
         jobPathLabel: "本地 JD 路径",
         jdTextLabel: "粘贴 JD 文本",
-        jdTextPlaceholder: "把网页、PDF 提取文本，或 TXT/MD 内容粘贴在这里。",
+        jdTextPlaceholder: "把确认过的 JD 文本粘贴在这里。",
         downloadTxt: "下载 JD 文本",
         fileStatusEmpty: "尚未加载本地文件。",
         loadedFile: "已加载",
+        importedFile: "已导入",
+        fileLoadFailed: "无法加载文件",
         profilePathLabel: "Profile 路径",
         outDirLabel: "输出目录",
         memoryPathLabel: "Memory 路径",
-        companyLabel: "公司名覆盖",
-        titleLabel: "岗位名覆盖",
+        companyLabel: "公司名",
+        titleLabel: "岗位名",
         commandStyleLabel: "命令格式",
-        approvePlanLabel: "我确认可以批准非阻断 CV planning 提示（--yes）",
+        aiReadsTitle: "AI 会读取这些本地文件",
+        aiReadsNote: "预期输出：decision.json、report.md、next_actions.md、cv_plan.md；开启模型草稿时还有 llm_verification.json。",
+        advancedCliTitle: "高级 CLI 兜底",
+        advancedCliDesc: "只有你想自己运行 deterministic workflow 时才用这里。Codex/operator 应围绕这个命令同时读取 baseline CV。",
+        approvePlanLabel: "Gate 通过后允许生成非阻断 CV plan",
         copy: "复制",
         copied: "已复制。",
         llmEyebrow: "可选模型层",
@@ -1033,27 +1688,32 @@
         modelLabel: "模型",
         keyEnvLabel: "API key 环境变量",
         keyEnvNote: "不要把 API key 粘贴进页面；这里只填写环境变量名。",
-        resultsEyebrow: "产物查看器",
-        resultsTitle: "导入 workflow 结果",
-        resultsDesc: "从 outputs/private 加载 decision.json 和 report.md，本地查看适配度 gate。",
+        resultsEyebrow: "匹配产物",
+        resultsTitle: "匹配分析产物",
+        resultsDesc: "先扫描选中的工作文件夹。缺失文件会标红，也可以用手动导入补上。",
         decisionLabel: "decision.json",
         reportLabel: "report.md",
+        nextActionsLabel: "next_actions.md",
         decisionEmpty: "导入 decision.json 后可以查看分数、状态、风险、红线、根优势和 do-not-claim。",
+        reportPreviewTitle: "Report 预览",
+        nextActionsPreviewTitle: "Next actions 预览",
+        cvPlanPreviewTitle: "CV plan 预览",
+        verificationPreviewTitle: "LLM verification",
         negativeSignalsTitle: "负面信号 / 红线",
         marketRisksTitle: "市场硬过滤",
         strengthsTitle: "根优势",
         doNotClaimTitle: "不能声称",
         noneDetected: "未检测到。",
         cvEyebrow: "CV 边界",
-        cvTitle: "CV 计划与未来 LaTeX 生成",
-        cvDesc: "当前 workflow 生成 cv_plan.md。最终 PDF 生成是未来本地 server 功能，需要一页 QA。",
+        cvTitle: "3. 获得修改后的 CV",
+        cvDesc: "用 cv_plan.md 作为修改边界。最终 LaTeX PDF 生成仍是未来本地 server 功能，需要一页 QA。",
         humanGate: "人工确认",
         cvPlanLabel: "cv_plan.md",
         verificationLabel: "llm_verification.json",
         cvBoundary: "Memory 可以记住事实。改 CV bullet、把私密事实写成公开表达、发送材料、接受最终一页 PDF 之前仍需要人工确认。",
-        guidesEyebrow: "Operator 指南",
+        guidesEyebrow: "第一次使用教程",
         guidesTitle: "Codex 提示词与本地 API 说明",
-        guidesDesc: "Codex 是 CLI 外面的 operator。未来本地 server 可以把 run_workflow 包成本机 API。",
+        guidesDesc: "设置工作路径和初始 CV 后使用这里。现在由 Codex 操作 CLI；未来本地 server 可以把 run_workflow 包成本机 API。",
         codexPromptTitle: "复制给 Codex 的提示词",
         apiNotesTitle: "未来 localhost API 形状",
         privacyTitle: "隐私默认规则",
@@ -1064,12 +1724,29 @@
         memoryVsBody: "Memory 学习反复出现的过滤项和事实状态。人工确认只用于改 CV、公开表述、发送消息和最终 PDF。",
         gateTitle: "Gate 逻辑",
         gateBody: "被红线阻断时，不补写 CV bullet、cover letter 或 recruiter message。",
-        futureCv: "仅未来命令：job-agent cv build 还没有实现。\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
+        futureCv: "仅未来命令：job-agent cv build 还没有实现。\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
         apiNotes: "未来本地 server 契约，只绑定 127.0.0.1：\n\nPOST /api/jobs/text\n  把用户确认过的 JD 文本保存到 inputs/jobs/。\n\nPOST /api/workflows\n  在明确 UI 确认下调用 run_workflow。\n\nGET /api/workflows/{id}/decision\nGET /api/workflows/{id}/report\nGET /api/workflows/{id}/next-actions\n\nPOST /api/cv/build\n  仅未来功能。需要 cv_plan.md、一页 PDF QA、verifier 通过和人工确认。",
-        codexPrompt: "请阅读 README.md 和 AGENTS.md。\n针对这个 JD 使用本地 workflow。\n不要在 gate 允许前修改我的 CV。\n运行：\n\n{command}\n\n运行后读取输出目录里的 report.md、decision.json、next_actions.md。\n如果 cv_plan.md 缺失，先判断是否是 gate 有意拦截，不要自行补写 CV bullet。\n不要绕过红线、do-not-claim、memory 隐私或一页 CV 规则。",
+        codexPrompt: "请阅读 README.md 和 AGENTS.md。\n你作为这一轮投递的本地 operator 工作。\n读取已确认 JD：{jobPath}，profile：{profilePath}，memory：{memoryPath}，以及初始 CV baseline：{cvPath}。\n初始 CV 只能作为私有证据来理解我当前 CV；不要在 gate 允许前修改 CV。\n运行 deterministic workflow：\n\n{command}\n\n然后读取输出目录 {outDir} 里的 decision.json、report.md、next_actions.md、如果存在的 cv_plan.md，以及如果存在的 llm_verification.json。\n把 fit gate、红线、do-not-claim 和下一步动作总结给我。如果 cv_plan.md 缺失，先判断是否是 gate 有意拦截，不要自行补写 CV bullet。\n不要绕过红线、memory 隐私或一页 CV 规则。",
         invalidJson: "无法解析 JSON。",
         reportLoaded: "Report 已在本地加载。",
+        nextActionsLoaded: "Next actions 已在本地加载。",
         cvPlanLoaded: "CV plan 已在本地加载。",
+        baseCvLoaded: "初始 CV 已在本地加载。",
+        baseCvPreviewUnavailable: "仅 .txt、.md、.tex 支持页面预览。PDF/DOCX 解析属于未来本地 server 功能。",
+        pathsUpdated: "已应用标准 private 路径。",
+        workspaceUnsupported: "当前浏览器不支持文件夹扫描，请使用手动导入。",
+        workspaceOpened: "已打开工作文件夹。",
+        workspaceCreateUnsupported: "创建 workspace 需要浏览器支持本地文件夹写入权限。",
+        workspaceCreated: "Workspace 已在本地创建。",
+        workspaceCreateFailed: "无法创建 workspace 文件。",
+        scanComplete: "工作文件夹扫描完成。",
+        scanFailed: "无法扫描所选文件夹。",
+        baseCvSaved: "初始 CV 已保存到 workspace。",
+        state_unscanned: "未扫描",
+        state_found: "已找到",
+        state_missing: "缺失",
+        state_manual: "手动导入",
+        state_error: "错误",
         verificationPassed: "LLM verification 已通过。",
         verificationFailed: "LLM verification 未通过。",
         downloadEmpty: "请先粘贴 JD 文本再下载。",
@@ -1079,12 +1756,195 @@
         ready: "可进入 CV plan",
         selective: "谨慎 CV plan",
         lowFit: "低匹配"
+      },
+      de: {
+        appTitle: "Weniger bewerben, gezielter bewerben",
+        appSubtitle: "Lokale Job-Suchworkflow-Konsole",
+        navSettings: "Einstellungen",
+        navFirstUse: "Erstnutzung",
+        navApplication: "Bewerbungsrunde",
+        settingsPageEyebrow: "Einstellungen",
+        settingsPageTitle: "Pfade, Datenschutz und Modelloptionen festlegen",
+        settingsPageDesc: "Lege stabile Workspace-Pfade und optionale LLM-Flags fest. API-Schlüssel bleiben außerhalb dieser Seite.",
+        firstUsePageEyebrow: "Erstnutzung",
+        firstUsePageTitle: "Workspace und Basis-CV anlegen",
+        firstUsePageDesc: "Starte hier, wenn die Bewerbungsseite fehlendes Setup zeigt: Workspace erstellen, Basis-CV laden und den Codex-Operator-Prompt kopieren.",
+        applicationPageEyebrow: "Bewerbungsrunde",
+        applicationPageTitle: "Job analysieren, Fit prüfen, dann CV-Änderungen planen",
+        applicationPageDesc: "Eine lokale Runde in drei Schritten: Jobinformationen hochladen, Fit-Analyse erhalten, dann eine sichere CV-Revision planen.",
+        applicationStepJobTitle: "1. Jobinformationen hochladen",
+        applicationStepJobBody: "Füge Job-URL, PDF, TXT/MD oder geprüften JD-Text als lokale Job-Evidenz hinzu.",
+        applicationStepFitTitle: "2. Fit-Analyse erhalten",
+        applicationStepFitBody: "Lass Codex oder einen lokalen Server den Workflow ausführen und prüfe Gate sowie Artefakte hier.",
+        applicationStepCvTitle: "3. Überarbeiteten CV erhalten",
+        applicationStepCvBody: "Nach Gate-Freigabe prüfst du CV-Plan und Ein-Seiten-LaTeX-Grenze.",
+        stepWorkspaceTitle: "1. Fester Workspace",
+        stepWorkspaceBody: "Wähle einen lokalen Root-Ordner und halte jede Bewerbung in vorhersagbaren privaten Pfaden.",
+        stepCvTitle: "2. Basis-CV",
+        stepCvBody: "Der erste CV hilft dem Agenten, vorhandene Belege vor rollenspezifischer Anpassung zu verstehen.",
+        stepJobTitle: "3. Job-Nachweise",
+        stepJobBody: "Website-, PDF- und TXT-Eingaben werden alle zu einer geprüften lokalen Stellen-Textdatei.",
+        stepResultsTitle: "4. Ergebnisse in der UI",
+        stepResultsBody: "Importiere Workflow-Artefakte und prüfe das Gate, bevor CV-Formulierungen geändert werden.",
+        workflowEyebrow: "Lokaler Workflow",
+        workflowTitle: "Eine Stellenanzeige in einen sicheren Workflow-Befehl verwandeln",
+        workflowDesc: "Statisches HTML kann Python nicht ausführen. Es bereitet lokale Dateien, CLI-Befehle und Codex-Prompts vor, ohne Daten hochzuladen.",
+        privateLocal: "Nur lokal",
+        workspaceTitle: "Workspace-Pfade",
+        workspaceDesc: "Lege einen stabilen lokalen Arbeitsroot fest. Die Oberfläche leitet daraus private Job-, CV-, Memory- und Ausgabe-Pfade ab.",
+        createWorkspace: "Workspace erstellen",
+        openWorkspace: "Ordner öffnen",
+        standardPaths: "Standardpfade",
+        workspaceScanNote: "Öffne Repo oder Workspace einmal. Fehlende Dateien bleiben markiert, bis sie erstellt oder importiert sind.",
+        workspaceCreateNote: "Erstellt private Ordner, Memory, Profilentwurf und Ausgabeverzeichnis.",
+        workspaceRootLabel: "Workspace-Root",
+        slugLabel: "Bewerbungs-Slug",
+        baseCvPathLabel: "Pfad zum Basis-CV",
+        baselineCvTitle: "Initialer Basis-CV",
+        baselineCvDesc: "Vor der ersten echten Bewerbung ist ein Original-CV erforderlich, damit Codex oder ein zukünftiger lokaler Server vorhandene Belege verstehen kann.",
+        requiredBeforeCv: "Vor CV-Arbeit erforderlich",
+        baseCvFileLabel: "Basis-CV-Datei",
+        baseCvEmpty: "Noch kein Basis-CV geladen.",
+        baseCvNoteTitle: "Warum das wichtig ist",
+        baseCvNote: "Der Basis-CV ist private Evidenz, kein öffentlicher Output. Rollenspezifische CV-Änderungen sollen ihn als Vergleich nutzen und die finale LaTeX-PDF genau auf einer Seite halten.",
+        jobEvidenceTitle: "1. Jobinformationen hochladen",
+        jobEvidenceDesc: "Wähle eine Quelle. Website, PDF, TXT/MD und eingefügter Text sollen vor der Analyse zu geprüfter lokaler JD-Evidenz werden.",
+        runConfigTitle: "2. Fit-Analyse erhalten",
+        runConfigDesc: "Codex oder ein zukünftiger lokaler Server liest JD, Profil, Memory und Basis-CV, führt den Workflow aus und zeigt die Artefakte unten.",
+        sourceWebsite: "Website",
+        sourcePdf: "PDF",
+        sourceText: "TXT / MD",
+        sourceDirectText: "JD-Text",
+        websiteHelp: "Speichere die URL als Quellenreferenz. Diese statische Seite scrapt Websites nicht automatisch; Codex oder ein zukünftiger lokaler Server soll daraus geprüften JD-Text machen.",
+        pdfHelp: "Wähle ein PDF als Quellenreferenz. PDF-Extraktion ist in dieser statischen Seite nicht implementiert; Codex oder ein zukünftiger lokaler Server soll den Text extrahieren und prüfen.",
+        txtHelp: "Lade eine .txt- oder .md-Stellenanzeige. Diese Seite liest sie lokal und nutzt den Text als geprüfte JD-Quelle.",
+        textHelp: "Füge geprüften JD-Text direkt ein, wenn du ihn bereits von einer Website oder aus einem PDF kopiert oder extrahiert hast.",
+        jobUrlLabel: "Job-URL",
+        pdfLabel: "PDF-Stellenanzeige",
+        pdfNote: "PDF-Extraktion ist in dieser statischen Seite nicht implementiert. Nutze Codex/lokale Server-Extraktion oder wechsle nach der Extraktion zu JD-Text.",
+        txtLabel: "TXT / MD-Stellenanzeige",
+        jobPathLabel: "Lokaler JD-Pfad",
+        jdTextLabel: "Stellentext einfügen",
+        jdTextPlaceholder: "Füge geprüften JD-Text hier ein.",
+        downloadTxt: "JD-Text herunterladen",
+        fileStatusEmpty: "Keine lokale Datei geladen.",
+        loadedFile: "Geladen",
+        importedFile: "Importiert",
+        fileLoadFailed: "Datei konnte nicht geladen werden",
+        profilePathLabel: "Profilpfad",
+        outDirLabel: "Ausgabeverzeichnis",
+        memoryPathLabel: "Memory-Pfad",
+        companyLabel: "Firma",
+        titleLabel: "Rolle",
+        commandStyleLabel: "Befehlsformat",
+        aiReadsTitle: "KI liest diese lokalen Dateien",
+        aiReadsNote: "Erwartete Outputs: decision.json, report.md, next_actions.md, cv_plan.md und llm_verification.json, wenn ein Modellentwurf aktiviert ist.",
+        advancedCliTitle: "Erweiterter CLI-Fallback",
+        advancedCliDesc: "Nutze dies nur, wenn du den deterministischen Workflow selbst ausführen willst. Codex/operator soll den Basis-CV rund um diesen Befehl lesen.",
+        approvePlanLabel: "Nicht blockierende CV-Plan-Erzeugung nach bestandenem Gate erlauben",
+        copy: "Kopieren",
+        copied: "Kopiert.",
+        llmEyebrow: "Optionale Modellschicht",
+        llmTitle: "LLM-API-Einstellungen",
+        llmDesc: "Standardmäßig wird kein Modell genutzt. Wenn aktiviert, darf das Modell erst nach Freigabe durch das deterministische Gate Formulierungen entwerfen.",
+        draftOnly: "Nur Entwurf",
+        providerLabel: "Provider",
+        baseUrlLabel: "Base URL",
+        modelLabel: "Modell",
+        keyEnvLabel: "API-Key-Umgebungsvariable",
+        keyEnvNote: "Füge keine API-Schlüssel in diese Seite ein; nutze nur den Namen einer Umgebungsvariable.",
+        resultsEyebrow: "Fit-Artefakte",
+        resultsTitle: "Fit-Artefakte",
+        resultsDesc: "Scanne zuerst den gewählten Workspace. Wenn Dateien fehlen, können die roten Kacheln manuell befüllt werden.",
+        decisionLabel: "decision.json",
+        reportLabel: "report.md",
+        nextActionsLabel: "next_actions.md",
+        decisionEmpty: "Importiere decision.json, um Score, Status, Risiken, rote Linien, Stärken und Do-not-claim-Punkte zu sehen.",
+        reportPreviewTitle: "Report-Vorschau",
+        nextActionsPreviewTitle: "Next-actions-Vorschau",
+        cvPlanPreviewTitle: "CV-plan-Vorschau",
+        verificationPreviewTitle: "LLM-Verifikation",
+        negativeSignalsTitle: "Negative Signale",
+        marketRisksTitle: "Marktrisiken",
+        strengthsTitle: "Kernstärken",
+        doNotClaimTitle: "Nicht behaupten",
+        noneDetected: "Keine erkannt.",
+        cvEyebrow: "CV-Grenze",
+        cvTitle: "3. Überarbeiteten CV erhalten",
+        cvDesc: "Nutze cv_plan.md als Grenze für CV-Änderungen. Die finale LaTeX-PDF bleibt ein zukünftiges lokales Server-Feature mit Ein-Seiten-QA.",
+        humanGate: "Menschliches Gate",
+        cvPlanLabel: "cv_plan.md",
+        verificationLabel: "llm_verification.json",
+        cvBoundary: "Memory kann Fakten merken. Menschliche Bestätigung bleibt erforderlich, bevor CV-Bullets bearbeitet, private Fakten öffentlich formuliert, Materialien gesendet oder die finale Ein-Seiten-PDF akzeptiert wird.",
+        guidesEyebrow: "Erstnutzungs-Tutorial",
+        guidesTitle: "Codex-Prompt und lokale API-Notizen",
+        guidesDesc: "Nutze dies nach Workspace- und Basis-CV-Setup. Codex bedient aktuell die CLI; ein zukünftiger lokaler Server kann run_workflow über localhost-APIs kapseln.",
+        codexPromptTitle: "Prompt für Codex",
+        apiNotesTitle: "Zukünftige localhost-API-Form",
+        privacyTitle: "Datenschutz-Defaults",
+        privacyOne: "Halte echte Profile, CVs, Reports, Memory, PDFs und Bewerbungshistorie in ignorierten privaten Pfaden.",
+        privacyTwo: "Diese statische Seite lädt keine Daten hoch und speichert keine Secrets.",
+        privacyThree: "Füge hier niemals API-Schlüssel ein; nutze den Namen einer Umgebungsvariable.",
+        memoryVsTitle: "Memory vs. Checkpoint",
+        memoryVsBody: "Memory lernt wiederkehrende Filter und Faktenstatus. Menschliche Bestätigung gilt für CV-Änderungen, öffentliche Formulierungen, Nachrichtenversand und finale PDF-Abnahme.",
+        gateTitle: "Gate-Logik",
+        gateBody: "Ein blockierter Workflow bedeutet: keine Ersatz-CV-Bullets, kein Cover Letter und keine Recruiter-Nachricht.",
+        futureCv: "Nur zukünftiger Befehl: job-agent cv build ist noch nicht implementiert.\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
+        apiNotes: "Zukünftiger lokaler Server-Vertrag, nur an 127.0.0.1 gebunden:\n\nPOST /api/jobs/text\n  Speichert geprüften Stellentext in inputs/jobs/.\n\nPOST /api/workflows\n  Ruft run_workflow mit expliziten UI-Bestätigungen auf.\n\nGET /api/workflows/{id}/decision\nGET /api/workflows/{id}/report\nGET /api/workflows/{id}/next-actions\n\nPOST /api/cv/build\n  Nur zukünftig. Erfordert cv_plan.md, Ein-Seiten-PDF-QA, bestandene Verifikation und menschliche Bestätigung.",
+        codexPrompt: "Bitte lies README.md und AGENTS.md.\nHandle als lokaler Operator für diese Bewerbungsrunde.\nLies die geprüfte Stellenanzeige unter {jobPath}, mein Profil unter {profilePath}, Memory unter {memoryPath} und meinen Basis-CV unter {cvPath}.\nNutze den Basis-CV nur als private Evidenz, um meinen aktuellen CV zu verstehen. Passe meinen CV nicht an, bevor das Gate es erlaubt.\nFühre den deterministischen Workflow aus:\n\n{command}\n\nLies danach den Ausgabeordner {outDir}: decision.json, report.md, next_actions.md, cv_plan.md falls vorhanden und llm_verification.json falls vorhanden.\nFasse Fit-Gate, rote Linien, Do-not-claim-Punkte und nächste Schritte für mich zusammen. Wenn cv_plan.md fehlt, behandle das zuerst als beabsichtigtes Gate-Ergebnis, außer der Befehl ist fehlgeschlagen.\nUmgehe keine roten Linien, Memory-Privatsphäre oder den Ein-Seiten-CV-Vertrag.",
+        invalidJson: "JSON konnte nicht geparst werden.",
+        reportLoaded: "Report lokal geladen.",
+        nextActionsLoaded: "Next actions lokal geladen.",
+        cvPlanLoaded: "CV plan lokal geladen.",
+        baseCvLoaded: "Basis-CV lokal geladen.",
+        baseCvPreviewUnavailable: "Vorschau ist für .txt, .md und .tex verfügbar. PDF/DOCX-Unterstützung gehört in einen zukünftigen lokalen Server.",
+        pathsUpdated: "Private Standardpfade angewendet.",
+        workspaceUnsupported: "Ordnerscan wird in diesem Browser nicht unterstützt. Nutze manuellen Import.",
+        workspaceOpened: "Workspace-Ordner geöffnet.",
+        workspaceCreateUnsupported: "Workspace-Erstellung benötigt einen Browser mit Schreibzugriff auf lokale Ordner.",
+        workspaceCreated: "Workspace lokal erstellt.",
+        workspaceCreateFailed: "Workspace-Dateien konnten nicht erstellt werden.",
+        scanComplete: "Workspace-Scan abgeschlossen.",
+        scanFailed: "Der gewählte Ordner konnte nicht gescannt werden.",
+        baseCvSaved: "Basis-CV im Workspace gespeichert.",
+        state_unscanned: "Nicht gescannt",
+        state_found: "Gefunden",
+        state_missing: "Fehlt",
+        state_manual: "Manueller Import",
+        state_error: "Fehler",
+        verificationPassed: "LLM-Verifikation bestanden.",
+        verificationFailed: "LLM-Verifikation nicht bestanden.",
+        downloadEmpty: "Füge vor dem Download Stellentext ein.",
+        txtDownloaded: "JD-Text heruntergeladen.",
+        redLine: "Rote-Linie-Block",
+        verifyFirst: "Zuerst prüfen",
+        ready: "Bereit für CV-Plan",
+        selective: "Selektiver CV-Plan",
+        lowFit: "Niedriger Fit"
       }
     };
 
     let lang = "en";
     let source = "website";
+    let activePage = "application";
     let currentDecision = null;
+    let workspaceHandle = null;
+    let workspaceWritable = false;
+    let selectedBaseCvFile = null;
+    const scanStates = {};
+    const pages = ["settings", "first-use", "application"];
+    const pageAliases = {
+      workflow: "application",
+      llm: "settings",
+      guides: "first-use",
+      results: "application",
+      cv: "application"
+    };
+    const pageCopy = {
+      settings: ["settingsPageEyebrow", "settingsPageTitle", "settingsPageDesc"],
+      "first-use": ["firstUsePageEyebrow", "firstUsePageTitle", "firstUsePageDesc"],
+      application: ["applicationPageEyebrow", "applicationPageTitle", "applicationPageDesc"]
+    };
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -1093,13 +1953,79 @@
       return I18N[lang][key] || I18N.en[key] || key;
     }
 
+    function normalizePage(value) {
+      const cleaned = String(value || "").replace(/^#/, "");
+      if (pages.includes(cleaned)) return cleaned;
+      return pageAliases[cleaned] || "application";
+    }
+
+    function hasPage(datasetValue, page) {
+      return String(datasetValue || "")
+        .split(/\s+/)
+        .filter(Boolean)
+        .includes(page);
+    }
+
+    function setPage(nextPage, updateHash = true) {
+      const page = normalizePage(nextPage);
+      activePage = page;
+      document.body.dataset.page = page;
+      $$("[data-page-target]").forEach((button) => {
+        const active = button.dataset.pageTarget === page;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      $$("[data-page-section]").forEach((section) => {
+        section.classList.toggle("hidden", !hasPage(section.dataset.pageSection, page));
+      });
+      $$("[data-page-block]").forEach((block) => {
+        block.classList.toggle("hidden", !hasPage(block.dataset.pageBlock, page));
+      });
+      const [eyebrowKey, titleKey, descKey] = pageCopy[page];
+      [
+        ["pageEyebrow", eyebrowKey],
+        ["pageTitle", titleKey],
+        ["pageDesc", descKey]
+      ].forEach(([id, key]) => {
+        const node = $("#" + id);
+        node.dataset.i18n = key;
+        node.textContent = text(key);
+      });
+      if (updateHash) {
+        history.replaceState(null, "", "#" + page);
+      }
+    }
+
     function quoteShell(value) {
       const trimmed = String(value || "").trim();
       if (!trimmed) return "";
       return "'" + trimmed.replace(/'/g, "'\"'\"'") + "'";
     }
 
+    function cleanSlug(value) {
+      return String(value || "company_role_YYYY-MM-DD")
+        .trim()
+        .replace(/[^a-zA-Z0-9._-]+/g, "_")
+        .replace(/^_+|_+$/g, "") || "company_role_YYYY-MM-DD";
+    }
+
+    function relativePath(value) {
+      return String(value || "").trim().replace(/^\.\/+/, "");
+    }
+
+    function parentPath(path) {
+      const parts = relativePath(path).split("/").filter(Boolean);
+      parts.pop();
+      return parts.join("/");
+    }
+
+    function fileName(path) {
+      const parts = relativePath(path).split("/").filter(Boolean);
+      return parts[parts.length - 1] || "";
+    }
+
     function workflowCommand() {
+      const workspace = $("#workspaceRoot").value.trim();
       const root = $("#commandStyle").value === "module"
         ? "PYTHONPATH=src python3 -m job_agent.cli"
         : "job-agent";
@@ -1127,7 +2053,12 @@
         const keyEnv = $("#llmKeyEnv").value.trim();
         if (keyEnv) parts.push("--llm-api-key-env " + quoteShell(keyEnv));
       }
-      return parts.join(" \\\n  ");
+      const command = parts.join(" \\\n  ");
+      const lines = [];
+      if (workspace) lines.push("cd " + quoteShell(workspace));
+      lines.push("# Baseline CV for private CV understanding: " + quoteShell($("#baseCvPath").value));
+      lines.push(command);
+      return lines.join("\n");
     }
 
     function renderCommand() {
@@ -1135,14 +2066,76 @@
       $("#workflowCommand").textContent = command;
       $("#futureCvCommand").textContent = text("futureCv")
         .replace("{jobPath}", quoteShell($("#jobPath").value))
-        .replace("{profilePath}", quoteShell($("#profilePath").value));
-      $("#codexPrompt").textContent = text("codexPrompt").replace("{command}", command);
+        .replace("{profilePath}", quoteShell($("#profilePath").value))
+        .replace("{cvPath}", quoteShell($("#baseCvPath").value));
+      const prompt = text("codexPrompt")
+        .replace("{command}", command)
+        .replace("{jobPath}", quoteShell($("#jobPath").value))
+        .replace("{profilePath}", quoteShell($("#profilePath").value))
+        .replace("{memoryPath}", quoteShell($("#memoryPath").value))
+        .replace("{cvPath}", quoteShell($("#baseCvPath").value))
+        .replace("{outDir}", quoteShell($("#outDir").value));
+      $("#codexPrompt").textContent = prompt;
+      $("#applicationCodexPrompt").textContent = prompt;
       $("#apiNotes").textContent = text("apiNotes");
+      renderPathSummary();
+    }
+
+    function renderPathSummary() {
+      $("#summaryJob").textContent = relativePath($("#jobPath").value);
+      $("#summaryCv").textContent = relativePath($("#baseCvPath").value);
+      $("#summaryProfile").textContent = relativePath($("#profilePath").value);
+      $("#summaryMemory").textContent = relativePath($("#memoryPath").value);
+      $("#summaryOut").textContent = relativePath($("#outDir").value);
+      $("#aiReadJob").textContent = relativePath($("#jobPath").value);
+      $("#aiReadCv").textContent = relativePath($("#baseCvPath").value);
+      $("#aiReadProfile").textContent = relativePath($("#profilePath").value);
+      $("#aiReadMemory").textContent = relativePath($("#memoryPath").value);
+      $("#aiReadOut").textContent = relativePath($("#outDir").value);
+    }
+
+    function updateScanLabels() {
+      $$("[data-scan-state]").forEach((node) => {
+        const key = node.dataset.scanState;
+        const state = scanStates[key] || "unscanned";
+        node.textContent = text("state_" + state);
+        node.className = "file-state " + state;
+        const card = document.querySelector(`[data-scan-card="${key}"]`);
+        if (card) {
+          card.classList.remove("found", "missing", "error", "manual");
+          if (state !== "unscanned") card.classList.add(state);
+        }
+      });
+    }
+
+    function setScanState(key, state) {
+      scanStates[key] = state;
+      updateScanLabels();
+    }
+
+    function resetScanStates() {
+      Object.keys(scanPlan()).forEach((key) => {
+        scanStates[key] = "unscanned";
+      });
+      updateScanLabels();
+    }
+
+    function applyStandardPaths() {
+      const slug = cleanSlug($("#applicationSlug").value);
+      $("#applicationSlug").value = slug;
+      $("#jobPath").value = `inputs/jobs/${slug}.txt`;
+      $("#profilePath").value = "profiles/me.local.json";
+      $("#baseCvPath").value = "private_resumes/base_cv.pdf";
+      $("#outDir").value = `outputs/private/${slug}`;
+      $("#memoryPath").value = "memory.local.json";
+      resetScanStates();
+      renderCommand();
+      showToast(text("pathsUpdated"));
     }
 
     function setLanguage(nextLang) {
       lang = nextLang;
-      document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+      document.documentElement.lang = lang === "zh" ? "zh-CN" : lang === "de" ? "de-DE" : "en";
       $$("[data-i18n]").forEach((node) => {
         node.textContent = text(node.dataset.i18n);
       });
@@ -1153,8 +2146,10 @@
         button.classList.toggle("active", button.dataset.lang === lang);
       });
       updateSource(source);
+      updateScanLabels();
       renderCommand();
       if (currentDecision) renderDecision(currentDecision);
+      setPage(activePage, false);
     }
 
     function updateSource(nextSource) {
@@ -1165,7 +2160,16 @@
       $$("[data-source-panel]").forEach((panel) => {
         panel.classList.toggle("hidden", panel.dataset.sourcePanel !== source);
       });
-      const key = source === "website" ? "websiteHelp" : source === "pdf" ? "pdfHelp" : "txtHelp";
+      $$("[data-source-action]").forEach((action) => {
+        action.classList.toggle("hidden", !hasPage(action.dataset.sourceAction, source));
+      });
+      const helpBySource = {
+        website: "websiteHelp",
+        pdf: "pdfHelp",
+        txt: "txtHelp",
+        text: "textHelp"
+      };
+      const key = helpBySource[source] || "websiteHelp";
       $("#sourceHelp").textContent = text(key);
     }
 
@@ -1175,6 +2179,19 @@
       toast.classList.add("show");
       window.clearTimeout(showToast.timer);
       showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1900);
+    }
+
+    function setUploadStatus(id, key, file, type = "success", notify = true) {
+      const node = $("#" + id);
+      const fileName = file && file.name ? file.name : "";
+      const message = [text(key), fileName].filter(Boolean).join(": ");
+      if (node) {
+        node.textContent = message;
+        node.classList.remove("success", "error");
+        node.classList.add(type);
+      }
+      if (notify) showToast(message);
+      return message;
     }
 
     async function copyNode(id) {
@@ -1193,10 +2210,262 @@
       }
     }
 
-    function readTextFile(file, callback) {
+    function readTextFile(file, callback, onError) {
       const reader = new FileReader();
       reader.onload = () => callback(String(reader.result || ""));
+      reader.onerror = () => {
+        if (onError) onError(reader.error);
+      };
       reader.readAsText(file);
+    }
+
+    async function getHandleByPath(rootHandle, path, kind = "file") {
+      const parts = relativePath(path).split("/").filter(Boolean);
+      if (!parts.length) return null;
+      let handle = rootHandle;
+      for (let index = 0; index < parts.length; index += 1) {
+        const part = parts[index];
+        const isLast = index === parts.length - 1;
+        try {
+          if (isLast && kind === "file") {
+            return await handle.getFileHandle(part);
+          }
+          handle = await handle.getDirectoryHandle(part);
+        } catch {
+          return null;
+        }
+      }
+      return handle;
+    }
+
+    async function readFileHandleText(fileHandle) {
+      const file = await fileHandle.getFile();
+      return file.text();
+    }
+
+    async function ensureDirectoryPath(rootHandle, path) {
+      const parts = relativePath(path).split("/").filter(Boolean);
+      let handle = rootHandle;
+      for (const part of parts) {
+        handle = await handle.getDirectoryHandle(part, { create: true });
+      }
+      return handle;
+    }
+
+    async function writeTextIfMissing(rootHandle, path, content) {
+      const normalized = relativePath(path);
+      if (!normalized) return false;
+      const existing = await getHandleByPath(rootHandle, normalized, "file");
+      if (existing) return false;
+      const directory = await ensureDirectoryPath(rootHandle, parentPath(normalized));
+      const handle = await directory.getFileHandle(fileName(normalized), { create: true });
+      const writable = await handle.createWritable();
+      await writable.write(content);
+      await writable.close();
+      return true;
+    }
+
+    async function writeFileToPath(rootHandle, path, file) {
+      const normalized = relativePath(path);
+      if (!normalized || !file) return false;
+      const directory = await ensureDirectoryPath(rootHandle, parentPath(normalized));
+      const handle = await directory.getFileHandle(fileName(normalized), { create: true });
+      const writable = await handle.createWritable();
+      await writable.write(file);
+      await writable.close();
+      return true;
+    }
+
+    async function openWorkspaceForWrite() {
+      if (!("showDirectoryPicker" in window)) {
+        showToast(text("workspaceCreateUnsupported"));
+        return null;
+      }
+      if (workspaceHandle && workspaceHandle.requestPermission) {
+        const permission = await workspaceHandle.requestPermission({ mode: "readwrite" });
+        if (permission === "granted") {
+          workspaceWritable = true;
+          return workspaceHandle;
+        }
+      }
+      try {
+        workspaceHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+        workspaceWritable = true;
+        $("#workspaceRoot").value = workspaceHandle.name || $("#workspaceRoot").value;
+        showToast(text("workspaceOpened"));
+        return workspaceHandle;
+      } catch (error) {
+        if (error && error.name === "AbortError") return null;
+        showToast(text("workspaceCreateFailed"));
+        return null;
+      }
+    }
+
+    function starterProfileJson() {
+      return JSON.stringify(
+        {
+          name: "EDIT_ME_PRIVATE",
+          headline: "Private local profile draft. Replace before running real workflows.",
+          target_roles: [],
+          locations: [],
+          market_facts: {
+            location_preference: [],
+            languages_claimed: [],
+            languages_not_claimed: [],
+            work_authorization: "ask locally before claiming",
+            commute_or_relocation: "ask locally before claiming",
+            mandatory_internship_proof: "ask locally before claiming"
+          },
+          ability_model: {
+            root_strengths: [],
+            interview_upskill: [],
+            irrelevant_or_low_signal: [],
+            negative_ability_red_lines: [
+              "Do not claim mandatory internship eligibility without private proof.",
+              "Do not treat an unverified commute as solved.",
+              "Do not rewrite projects into unrelated domains without direct evidence."
+            ]
+          },
+          education: [],
+          skills: {},
+          experiences: [],
+          projects: [],
+          languages: [],
+          notes: [
+            "Private local draft created by web/index.html.",
+            "Replace placeholders with evidence-backed facts before using the workflow."
+          ]
+        },
+        null,
+        2
+      ) + "\n";
+    }
+
+    function emptyMemoryJson() {
+      return JSON.stringify(
+        {
+          version: 1,
+          applications: [],
+          learned_filters: [],
+          recurring_red_lines: [],
+          do_not_claim: [],
+          notes: []
+        },
+        null,
+        2
+      ) + "\n";
+    }
+
+    async function createWorkspaceScaffold() {
+      const rootHandle = await openWorkspaceForWrite();
+      if (!rootHandle) return;
+      try {
+        await ensureDirectoryPath(rootHandle, parentPath($("#jobPath").value));
+        await ensureDirectoryPath(rootHandle, parentPath($("#profilePath").value));
+        await ensureDirectoryPath(rootHandle, parentPath($("#baseCvPath").value));
+        await ensureDirectoryPath(rootHandle, relativePath($("#outDir").value));
+        await ensureDirectoryPath(rootHandle, parentPath($("#memoryPath").value));
+        await writeTextIfMissing(rootHandle, $("#memoryPath").value, emptyMemoryJson());
+        await writeTextIfMissing(rootHandle, $("#profilePath").value, starterProfileJson());
+        if (selectedBaseCvFile) {
+          await writeFileToPath(rootHandle, $("#baseCvPath").value, selectedBaseCvFile);
+          setScanState("baseCv", "found");
+        }
+        await scanWorkspace();
+        showToast(selectedBaseCvFile ? text("baseCvSaved") : text("workspaceCreated"));
+      } catch {
+        showToast(text("workspaceCreateFailed"));
+      }
+    }
+
+    async function openWorkspaceAndScan() {
+      if (!("showDirectoryPicker" in window)) {
+        showToast(text("workspaceUnsupported"));
+        Object.keys(scanPlan()).forEach((key) => setScanState(key, "manual"));
+        return;
+      }
+      try {
+        workspaceHandle = await window.showDirectoryPicker({ mode: "read" });
+        workspaceWritable = false;
+        $("#workspaceRoot").value = workspaceHandle.name || $("#workspaceRoot").value;
+        showToast(text("workspaceOpened"));
+        await scanWorkspace();
+      } catch (error) {
+        if (error && error.name === "AbortError") return;
+        showToast(text("scanFailed"));
+      }
+    }
+
+    function scanPlan() {
+      const out = relativePath($("#outDir").value);
+      return {
+        job: { path: relativePath($("#jobPath").value), kind: "file", reader: "jd" },
+        baseCv: { path: relativePath($("#baseCvPath").value), kind: "file", reader: "baseline" },
+        profile: { path: relativePath($("#profilePath").value), kind: "file" },
+        memory: { path: relativePath($("#memoryPath").value), kind: "file" },
+        outDir: { path: out, kind: "directory" },
+        decision: { path: `${out}/decision.json`, kind: "file", reader: "decision" },
+        report: { path: `${out}/report.md`, kind: "file", reader: "report" },
+        nextActions: { path: `${out}/next_actions.md`, kind: "file", reader: "nextActions" },
+        cvPlan: { path: `${out}/cv_plan.md`, kind: "file", reader: "cvPlan" },
+        verification: { path: `${out}/llm_verification.json`, kind: "file", reader: "verification" },
+      };
+    }
+
+    async function scanWorkspace() {
+      if (!workspaceHandle) {
+        await openWorkspaceAndScan();
+        return;
+      }
+      const plan = scanPlan();
+      for (const [key, item] of Object.entries(plan)) {
+        const handle = await getHandleByPath(workspaceHandle, item.path, item.kind);
+        if (!handle) {
+          setScanState(key, "missing");
+          continue;
+        }
+        setScanState(key, "found");
+        if (item.reader) {
+          await loadScannedArtifact(item.reader, handle);
+        }
+      }
+      showToast(text("scanComplete"));
+    }
+
+    async function loadScannedArtifact(reader, fileHandle) {
+      try {
+        if (reader === "baseline") {
+          const file = await fileHandle.getFile();
+          handleBaselineCv(file, false);
+          return;
+        }
+        const content = await readFileHandleText(fileHandle);
+        if (reader === "jd") {
+          $("#jdText").value = content;
+          setUploadStatus("fileStatus", "loadedFile", { name: relativePath($("#jobPath").value) }, "success", false);
+        } else if (reader === "decision") {
+          renderDecision(JSON.parse(content));
+        } else if (reader === "report") {
+          showTextPreview("reportPreview", "reportText", content, "reportLoaded", false);
+        } else if (reader === "nextActions") {
+          showTextPreview("nextActionsPreview", "nextActionsText", content, "nextActionsLoaded", false);
+        } else if (reader === "cvPlan") {
+          showTextPreview("cvPlanPreview", "cvPlanText", content, "cvPlanLoaded", false);
+        } else if (reader === "verification") {
+          renderVerification(content, false);
+        }
+      } catch {
+        const keyByReader = {
+          jd: "job",
+          baseline: "baseCv",
+          decision: "decision",
+          report: "report",
+          nextActions: "nextActions",
+          cvPlan: "cvPlan",
+          verification: "verification",
+        };
+        setScanState(keyByReader[reader], "error");
+      }
     }
 
     function setList(id, items, mapItem) {
@@ -1284,6 +2553,61 @@
       showToast(text("txtDownloaded"));
     }
 
+    function showTextPreview(panelId, textId, content, toastKey, notify = true) {
+      $("#" + textId).textContent = content.slice(0, 12000);
+      $("#" + panelId).classList.remove("hidden");
+      if (notify) showToast(text(toastKey));
+    }
+
+    function syncBaseCvPathToFile(file) {
+      const match = file && file.name ? file.name.match(/\.[^.]+$/) : null;
+      if (!match) return;
+      const extension = match[0].toLowerCase();
+      const current = relativePath($("#baseCvPath").value);
+      if (!current || current === "private_resumes/base_cv.pdf" || current.startsWith("private_resumes/base_cv.")) {
+        $("#baseCvPath").value = "private_resumes/base_cv" + extension;
+      }
+    }
+
+    function handleBaselineCv(file, notify = true) {
+      if (!file) return;
+      selectedBaseCvFile = file;
+      syncBaseCvPathToFile(file);
+      setUploadStatus("baseCvStatus", "baseCvLoaded", file, "success", notify);
+      const lower = file.name.toLowerCase();
+      if (lower.endsWith(".txt") || lower.endsWith(".md") || lower.endsWith(".tex")) {
+        readTextFile(file, (content) => {
+          $("#baseCvText").textContent = content.slice(0, 9000);
+          $("#baseCvPreview").classList.remove("hidden");
+        }, () => {
+          setUploadStatus("baseCvStatus", "fileLoadFailed", file, "error", true);
+        });
+      } else {
+        $("#baseCvText").textContent = text("baseCvPreviewUnavailable");
+        $("#baseCvPreview").classList.remove("hidden");
+      }
+      renderCommand();
+    }
+
+    function renderVerification(content, notify = true) {
+      try {
+        const data = JSON.parse(content);
+        $("#verificationText").textContent = JSON.stringify(data, null, 2);
+        $("#verificationPreview").classList.remove("hidden");
+        if (notify) showToast(data.passed ? text("verificationPassed") : text("verificationFailed"));
+      } catch {
+        if (notify) showToast(text("invalidJson"));
+        throw new Error("invalid verification json");
+      }
+    }
+
+    $$("[data-page-target]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setPage(button.dataset.pageTarget);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+
     $$(".lang-toggle button").forEach((button) => {
       button.addEventListener("click", () => setLanguage(button.dataset.lang));
     });
@@ -1292,9 +2616,24 @@
       button.addEventListener("click", () => updateSource(button.dataset.source));
     });
 
+    $("#standardPaths").addEventListener("click", applyStandardPaths);
+    $("#createWorkspace").addEventListener("click", createWorkspaceScaffold);
+    $("#openWorkspace").addEventListener("click", async () => {
+      if (workspaceHandle) {
+        await scanWorkspace();
+      } else {
+        await openWorkspaceAndScan();
+      }
+    });
+
     $$("input, select, textarea").forEach((node) => {
       node.addEventListener("input", renderCommand);
       node.addEventListener("change", renderCommand);
+    });
+
+    ["workspaceRoot", "applicationSlug", "jobPath", "profilePath", "baseCvPath", "outDir", "memoryPath"].forEach((id) => {
+      $("#" + id).addEventListener("input", resetScanStates);
+      $("#" + id).addEventListener("change", resetScanStates);
     });
 
     $$("[data-copy]").forEach((button) => {
@@ -1303,19 +2642,30 @@
 
     $("#downloadText").addEventListener("click", downloadText);
 
+    $("#baseCvFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      handleBaselineCv(file);
+      if (file) setScanState("baseCv", "manual");
+    });
+
     $("#txtFile").addEventListener("change", (event) => {
       const file = event.target.files[0];
       if (!file) return;
       readTextFile(file, (content) => {
         $("#jdText").value = content;
-        $("#fileStatus").textContent = text("loadedFile") + ": " + file.name;
+        setUploadStatus("fileStatus", "loadedFile", file);
+        setScanState("job", "manual");
+      }, () => {
+        setUploadStatus("fileStatus", "fileLoadFailed", file, "error");
       });
     });
 
     $("#pdfFile").addEventListener("change", (event) => {
       const file = event.target.files[0];
       if (!file) return;
-      $("#fileStatus").textContent = text("loadedFile") + ": " + file.name + " · " + text("pdfNote");
+      const message = setUploadStatus("fileStatus", "loadedFile", file);
+      $("#fileStatus").textContent = message + " · " + text("pdfNote");
+      setScanState("job", "manual");
     });
 
     $("#decisionFile").addEventListener("change", (event) => {
@@ -1324,9 +2674,14 @@
       readTextFile(file, (content) => {
         try {
           renderDecision(JSON.parse(content));
+          setScanState("decision", "manual");
+          setUploadStatus("decisionStatus", "importedFile", file);
         } catch {
+          setUploadStatus("decisionStatus", "fileLoadFailed", file, "error", false);
           showToast(text("invalidJson"));
         }
+      }, () => {
+        setUploadStatus("decisionStatus", "fileLoadFailed", file, "error");
       });
     });
 
@@ -1334,32 +2689,78 @@
       const file = event.target.files[0];
       if (!file) return;
       readTextFile(file, (content) => {
-        $("#reportText").textContent = content.slice(0, 9000);
-        $("#reportPreview").classList.remove("hidden");
-        showToast(text("reportLoaded"));
+        showTextPreview("reportPreview", "reportText", content, "reportLoaded");
+        setScanState("report", "manual");
+        setUploadStatus("reportStatus", "importedFile", file, "success", false);
+      }, () => {
+        setUploadStatus("reportStatus", "fileLoadFailed", file, "error");
+      });
+    });
+
+    $("#nextActionsFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      readTextFile(file, (content) => {
+        showTextPreview("nextActionsPreview", "nextActionsText", content, "nextActionsLoaded");
+        setScanState("nextActions", "manual");
+        setUploadStatus("nextActionsStatus", "importedFile", file, "success", false);
+      }, () => {
+        setUploadStatus("nextActionsStatus", "fileLoadFailed", file, "error");
       });
     });
 
     $("#cvPlanFile").addEventListener("change", (event) => {
       const file = event.target.files[0];
-      if (file) showToast(text("cvPlanLoaded"));
-    });
-
-    $("#verificationFile").addEventListener("change", (event) => {
-      const file = event.target.files[0];
       if (!file) return;
       readTextFile(file, (content) => {
-        try {
-          const data = JSON.parse(content);
-          showToast(data.passed ? text("verificationPassed") : text("verificationFailed"));
-        } catch {
-          showToast(text("invalidJson"));
-        }
+        showTextPreview("cvPlanPreview", "cvPlanText", content, "cvPlanLoaded");
+        setScanState("cvPlan", "manual");
+        setUploadStatus("cvPlanStatus", "importedFile", file, "success", false);
+        setUploadStatus("resultCvPlanStatus", "importedFile", file, "success", false);
+      }, () => {
+        setUploadStatus("cvPlanStatus", "fileLoadFailed", file, "error");
       });
     });
 
-    updateSource(source);
+    $("#resultCvPlanFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      readTextFile(file, (content) => {
+        showTextPreview("cvPlanPreview", "cvPlanText", content, "cvPlanLoaded");
+        setScanState("cvPlan", "manual");
+        setUploadStatus("resultCvPlanStatus", "importedFile", file, "success", false);
+        setUploadStatus("cvPlanStatus", "importedFile", file, "success", false);
+      }, () => {
+        setUploadStatus("resultCvPlanStatus", "fileLoadFailed", file, "error");
+      });
+    });
+
+    function handleVerificationFile(file, statusId) {
+      if (!file) return;
+      readTextFile(file, (content) => {
+        try {
+          renderVerification(content);
+          setScanState("verification", "manual");
+          setUploadStatus(statusId, "importedFile", file, "success", false);
+          setUploadStatus(statusId === "verificationStatus" ? "resultVerificationStatus" : "verificationStatus", "importedFile", file, "success", false);
+        } catch {
+          setUploadStatus(statusId, "fileLoadFailed", file, "error", false);
+        }
+      }, () => {
+        setUploadStatus(statusId, "fileLoadFailed", file, "error");
+      });
+    }
+
+    $("#verificationFile").addEventListener("change", (event) => {
+      handleVerificationFile(event.target.files[0], "verificationStatus");
+    });
+
+    $("#resultVerificationFile").addEventListener("change", (event) => {
+      handleVerificationFile(event.target.files[0], "resultVerificationStatus");
+    });
+
     setLanguage("en");
+    setPage(normalizePage(window.location.hash), false);
   </script>
 </body>
 </html>
