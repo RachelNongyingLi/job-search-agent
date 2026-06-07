@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Demo fit analysis output</title>
+  <desc id="desc">A public-safe preview of the local job-search app after a job analysis run.</desc>
+  <defs>
+    <style>
+      .bg { fill: #eef2f1; }
+      .panel { fill: #fcfefd; stroke: #d0d5dd; stroke-width: 1.2; }
+      .soft { fill: #f7faf9; stroke: #d0d5dd; stroke-width: 1; }
+      .teal { fill: #0e9384; }
+      .teal-soft { fill: #e6f4f1; stroke: #b8dcd5; stroke-width: 1; }
+      .blue-soft { fill: #e8efff; stroke: #b7c8ff; stroke-width: 1; }
+      .amber-soft { fill: #fff4df; stroke: #f0c36a; stroke-width: 1; }
+      .red-soft { fill: #fee8e5; stroke: #f0a29a; stroke-width: 1; }
+      .ink { fill: #101828; }
+      .muted { fill: #667085; }
+      .white { fill: #ffffff; }
+      .label { font: 700 13px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .small { font: 12px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .body { font: 14px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .h1 { font: 800 26px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .h2 { font: 800 18px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .mono { font: 13px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="960" height="540" rx="0"/>
+  <rect class="panel" x="32" y="28" width="896" height="484" rx="14"/>
+
+  <text class="small muted" x="60" y="66">DEMO OUTPUT</text>
+  <text class="h1 ink" x="60" y="98">Know the fit before you rewrite the CV</text>
+  <text class="body muted" x="60" y="124">AI Automation Intern at Example Company · public-safe preview</text>
+  <rect class="teal-soft" x="770" y="58" width="116" height="32" rx="8"/>
+  <text class="label" x="790" y="79" fill="#067647">Local only</text>
+
+  <rect class="soft" x="60" y="154" width="244" height="138" rx="10"/>
+  <text class="small muted" x="82" y="184">FIT SCORE</text>
+  <text class="h1 ink" x="82" y="226">74/100</text>
+  <rect class="teal-soft" x="82" y="244" width="164" height="28" rx="7"/>
+  <text class="label" x="96" y="263" fill="#067647">ready_for_cv_plan</text>
+
+  <rect class="soft" x="326" y="154" width="244" height="138" rx="10"/>
+  <text class="small muted" x="348" y="184">GATE</text>
+  <text class="h2 ink" x="348" y="216">No hard red line</text>
+  <text class="body muted" x="348" y="244">CV planning is allowed</text>
+  <text class="body muted" x="348" y="266">only within evidence.</text>
+
+  <rect class="soft" x="592" y="154" width="276" height="138" rx="10"/>
+  <text class="small muted" x="614" y="184">DECISION</text>
+  <text class="h2 ink" x="614" y="216">Worth careful tailoring</text>
+  <text class="body muted" x="614" y="244">Good technical overlap,</text>
+  <text class="body muted" x="614" y="266">market facts still private.</text>
+
+  <rect class="blue-soft" x="60" y="318" width="258" height="132" rx="10"/>
+  <text class="label ink" x="82" y="350">Evidence matches</text>
+  <text class="body muted" x="82" y="380">· Python workflow automation</text>
+  <text class="body muted" x="82" y="406">· LLM evaluation workflow</text>
+  <text class="body muted" x="82" y="432">· Documentation and reporting</text>
+
+  <rect class="amber-soft" x="350" y="318" width="258" height="132" rx="10"/>
+  <text class="label ink" x="372" y="350">Verify first</text>
+  <text class="body muted" x="372" y="380">· Commute or relocation</text>
+  <text class="body muted" x="372" y="406">· Work authorization</text>
+  <text class="body muted" x="372" y="432">· Internship proof if required</text>
+
+  <rect class="red-soft" x="640" y="318" width="228" height="132" rx="10"/>
+  <text class="label ink" x="662" y="350">Do not claim</text>
+  <text class="body muted" x="662" y="380">· Production ownership</text>
+  <text class="body muted" x="662" y="406">· Fake deployment metrics</text>
+  <text class="body muted" x="662" y="432">· Unverified eligibility</text>
+
+  <rect class="teal" x="60" y="468" width="808" height="26" rx="8"/>
+  <text class="small white" x="82" y="486">Next action: generate a cautious CV plan, then human-approve the exact one-page LaTeX PDF.</text>
+</svg>

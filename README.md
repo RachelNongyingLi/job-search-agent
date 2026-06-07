@@ -22,6 +22,14 @@ It does not auto-apply. It does not invent experience. It keeps the workflow loc
 
 Use it when you are tired of rewriting resumes for roles that may be blocked by location, proof, authorization, missing evidence, or a mismatch between the JD and your real experience.
 
+## What It Looks Like
+
+This public-safe demo shows the ideal output shape after a job has been analyzed:
+
+![Demo fit analysis preview](docs/demo_fit_analysis.svg)
+
+See the companion walkthrough: [docs/demo_fit_analysis.md](docs/demo_fit_analysis.md).
+
 ## Start Here
 
 Install the project:
@@ -153,6 +161,16 @@ job-agent workflow run \
   --out-dir outputs/private/company_role_YYYY-MM-DD \
   --memory memory.local.json
 ```
+
+## Build A Release Zip
+
+Before publishing a release, build a curated zip instead of uploading the whole working folder:
+
+```bash
+python3 scripts/build_release.py
+```
+
+The script only packages public-safe paths and fails if private paths or secret-like values are detected. It writes the zip and a `.sha256` file under `dist/releases/`.
 
 Run tests:
 
