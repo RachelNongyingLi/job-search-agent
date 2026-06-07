@@ -209,26 +209,4 @@ job-agent workflow run \
   --memory memory.local.json
 ```
 
-## Build A Release Zip
-
-Before publishing a release, build a curated zip instead of uploading the whole working folder:
-
-```bash
-python3 scripts/build_release.py
-```
-
-The script only packages public-safe paths and fails if private paths or secret-like values are detected. It writes the zip and a `.sha256` file under `dist/releases/`.
-
-Run tests:
-
-```bash
-PYTHONPATH=src python3 -m unittest discover -s tests
-```
-
-If `job-agent-web` is not found, rerun `pip install -e .` or use:
-
-```bash
-PYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .
-```
-
 More detailed Codex/Claude, local LLM, API, and one-page LaTeX CV notes are in [docs/agent_workflow.md](docs/agent_workflow.md).
