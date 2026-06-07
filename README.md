@@ -1,10 +1,30 @@
 # Apply Less, Fit More
 
-A local-first job-search assistant for deciding whether a role is worth tailoring.
+**Know whether a role deserves your CV before you spend hours tailoring it.**
 
-It does not auto-apply. It does not invent experience. It helps you find hard blockers, evidence-backed strengths, interview-upskill items, and things that must not be claimed on the CV.
+Most job-search tools start by generating more text. This one starts with judgment: fit, blockers, unsupported claims, and a safe boundary for CV edits.
 
-## Quick Start
+It helps answer:
+
+- Should I apply to this role at all?
+- What can I honestly claim from my profile and current CV?
+- What needs verification before it becomes public wording?
+- What should stay private or off the CV?
+
+It does not auto-apply. It does not invent experience. It keeps the workflow local-first and evidence-first.
+
+## Why It Is Different
+
+- **Gate before generation**: red-line blockers can stop CV planning before wording starts.
+- **Evidence over vibes**: every CV idea should trace back to profile, project, current CV, JD, or report evidence.
+- **Private by default**: real CVs, memory, job history, and outputs stay in ignored local paths.
+- **One-page CV discipline**: LaTeX CV work is bounded by a final exactly-one-page contract.
+
+Use it when you are tired of rewriting resumes for roles that may be blocked by location, proof, authorization, missing evidence, or a mismatch between the JD and your real experience.
+
+## Start Here
+
+Install the project:
 
 ```bash
 cd job-search-agent
@@ -13,166 +33,137 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-Run the main workflow:
+Start the local backend:
 
 ```bash
-job-agent workflow run \
-  --job examples/ai_automation_jd.txt \
-  --out-dir outputs/private/example_ai_automation \
-  --memory memory.local.json
+job-agent-web --host 127.0.0.1 --port 8765 --workspace .
 ```
 
-It writes:
-
-```text
-report.md            # human-readable fit report
-decision.json        # machine-readable gate result
-next_actions.md      # what to do next
-cv_plan.md           # only when the gate allows CV planning
-```
-
-Use `--yes` only when you want to approve non-blocking prompts for demos or scripting.
-
-## Local Web Console
-
-You can run the multilingual local console with the Python backend:
-
-```bash
-PYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .
-```
-
-Then open:
+Open the interface:
 
 ```text
 http://127.0.0.1:8765/web/index.html
 ```
 
-If that port is already serving a static page, use another port and open the matching URL.
+If that page says it is serving static files instead of the backend, another server is already using the port. Start the backend on a different port, for example `8766`, and open the matching URL.
 
-This lets the HTML call local APIs to save reviewed JD text, run `run_workflow`, and load `decision.json`, `report.md`, `next_actions.md`, `cv_plan.md`, and `llm_verification.json`.
-
-You can still open the static file directly:
-
-```text
-web/index.html
+```bash
+job-agent-web --host 127.0.0.1 --port 8766 --workspace .
 ```
 
-In static-only mode, the page can prepare commands and import artifacts, but it cannot execute Python by itself.
+```text
+http://127.0.0.1:8766/web/index.html
+```
 
-It has three views:
+## Use The Interface
 
-- **Application round**: add job evidence, inspect fit results, and review the CV plan.
-- **First use**: create the local working setup, create `memory.local.json`, load the initial CV baseline, and copy the Codex prompt.
-- **Settings**: set the workspace paths and optional LLM API flags.
+The app has three pages:
 
-The local server binds to `127.0.0.1`; it does not upload data, store API keys, or auto-apply.
+- **Application round**: add job evidence, run fit analysis, and inspect results.
+- **First use**: create the local workspace, upload the initial CV, and copy the Codex prompt if needed.
+- **Settings**: set paths, backend URL, and optional local LLM flags.
 
-The console uses a fixed local workspace model:
+Recommended first-time flow:
 
-- one workspace root
-- one initial CV baseline, such as `private_resumes/base_cv.pdf`
-- one private profile, such as `profiles/me.local.json`
-- one memory file, such as `memory.local.json`
-- one output folder per application under `outputs/private/`
+1. Open **First use**.
+2. Create the workspace.
+3. Upload your initial CV baseline.
+4. Open **Application round**.
+5. Add a job URL, PDF reference, TXT/MD file, or pasted JD text.
+6. Make sure the final JD text is reviewed locally.
+7. Click **Run fit analysis**.
+8. Read the gate, red lines, report, next actions, and CV plan if one is allowed.
 
-Provide an initial CV before the first real CV-tailoring task. The initial CV is private evidence for understanding the current resume; it is not public output and is not automatically rewritten.
+Website URLs and PDFs are source references. The current backend does not automatically scrape websites or parse PDFs into final JD text yet. Before running analysis, paste or load reviewed JD text.
 
-The console can scan a selected local workspace folder first. It checks expected paths and marks files as found, missing, or manually imported. If scanning is unavailable or a file is missing, use the manual import controls.
+## What It Creates
 
-## Two Ways To Use It
+The interface uses a fixed local workspace model:
 
-### 1. Codex Or Claude As Operator
+```text
+inputs/jobs/<application>.txt       # reviewed JD text
+private_resumes/base_cv.pdf         # private initial CV baseline
+profiles/me.local.json              # private profile
+memory.local.json                   # private cross-application memory
+outputs/private/<application>/      # decision, report, next actions, CV plan
+```
 
-This is the recommended mode right now.
+Expected outputs:
 
-Open the repo in Codex or Claude Code and ask it to run the workflow. Codex reads `AGENTS.md`; Claude reads `CLAUDE.md`, which points back to the same rules.
+```text
+decision.json       # score, status, red lines, do-not-claim items
+report.md           # human-readable fit report
+next_actions.md     # what to do next
+cv_plan.md          # only when the gate allows CV planning
+llm_verification.json   # only when optional model drafting is enabled
+```
+
+If `cv_plan.md` is missing, treat that as a possible gate result, not automatically as a bug.
+
+## CV Rules
+
+The initial CV is private evidence. It helps the agent understand your current resume; it is not permission to publish or rewrite claims.
+
+Human confirmation is required before:
+
+- editing CV bullets or LaTeX
+- turning private facts into public wording
+- sending a CV, cover letter, or recruiter message
+- accepting the final PDF as a clean, exactly one-page LaTeX CV
+
+Red-line blocks mean no CV bullets, cover letter, recruiter message, or model draft yet.
+
+## Privacy
+
+Keep real job-search material out of git:
+
+- real CVs, PDFs, DOCX files, transcripts, certificates
+- `memory.local.json`
+- `profiles/*.local.json`
+- `outputs/private/`
+- application history, recruiter messages, visa/work authorization, address, commute, relocation, or proof documents
+
+The local backend binds to `127.0.0.1`. It does not upload data, store API keys, or auto-apply.
+
+## Using Codex Or Claude
+
+The interface is the main path. Codex or Claude can still help as a local operator when you want reasoning around the files.
 
 Good prompt:
 
 ```text
 Read AGENTS.md and README.md.
-Run job-agent workflow for this JD.
-Do not tailor my CV until the gate says it is allowed.
-Use the report and decision.json for judgment.
+Use the local job-search workflow for this application.
+Do not tailor my CV until the gate allows it.
+Do not bypass red lines, private evidence rules, or the one-page CV contract.
 ```
 
-Codex or Claude may reason over the CLI output, compare roles, and help plan CV edits. It must not bypass red lines, private evidence checks, or one-page CV rules.
+Codex reads `AGENTS.md`. Claude Code reads `CLAUDE.md`, which points back to the same rules.
 
-### 2. Local LLM Drafting
+## Terminal Fallback
 
-By default, the CLI uses no language model. To add a local or self-hosted model, use an OpenAI-compatible endpoint after the deterministic gate:
+The interface includes a folded **Terminal fallback** command. Use it only when the backend is unavailable or you want to debug the CLI directly.
 
-```bash
-job-agent workflow run \
-  --job examples/ai_automation_jd.txt \
-  --out-dir outputs/private/example_ai_automation \
-  --llm-provider openai-compatible \
-  --llm-base-url http://localhost:11434/v1 \
-  --llm-model your-local-model \
-  --yes
-```
-
-If accepted, the optional model draft is written to:
-
-```text
-cv_plan.llm.md
-llm_verification.json
-```
-
-The model draft is wording help only. It cannot override red-line blocks, missing proof, unsupported claims, or verifier failures.
-
-## Memory And Checkpoints
-
-Across applications, memory should learn recurring signals:
-
-- hard filters such as mandatory internship proof, commute, relocation, location, language, and work authorization
-- repeated red lines, blocked roles, verify-first facts, and do-not-claim patterns
-- evidence-backed strengths and recurring interview-upskill gaps
-
-Human confirmation is needed when the workflow is about to change or send application material:
-
-- editing CV bullets or LaTeX
-- turning a private fact into public wording
-- sending a CV, cover letter, or recruiter message
-- accepting the final PDF as a clean, exactly one-page LaTeX CV
-
-## Your Own Profile
-
-The public profile is only a demo:
-
-```text
-profiles/sample_candidate.json
-```
-
-For real use:
-
-```bash
-cp profiles/sample_candidate.json profiles/me.local.json
-```
-
-Then run:
+Example:
 
 ```bash
 job-agent workflow run \
   --job inputs/jobs/company_role_YYYY-MM-DD.txt \
   --profile profiles/me.local.json \
-  --out-dir outputs/private/company_role \
+  --out-dir outputs/private/company_role_YYYY-MM-DD \
   --memory memory.local.json
 ```
 
-## Privacy
-
-Do not commit private job-search material: real CVs, cover letters, `memory.local.json`, `applications.csv`, `*.local.json`, PDFs, DOCX files, transcripts, certificates, visa details, address, commute, or work authorization.
-
-Keep real job descriptions in `inputs/jobs/` and real outputs in `outputs/private/`.
-
-## Useful Commands
+Run tests:
 
 ```bash
-job-agent analyze --job examples/ai_automation_jd.txt
-job-agent track add --company "Example Company" --role "AI Automation Intern" --status "saved"
-job-agent track list
 PYTHONPATH=src python3 -m unittest discover -s tests
 ```
 
-More detailed Codex/Claude, local LLM, and one-page LaTeX CV notes are in [docs/agent_workflow.md](docs/agent_workflow.md).
+If `job-agent-web` is not found, rerun `pip install -e .` or use:
+
+```bash
+PYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .
+```
+
+More detailed Codex/Claude, local LLM, API, and one-page LaTeX CV notes are in [docs/agent_workflow.md](docs/agent_workflow.md).

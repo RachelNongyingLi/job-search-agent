@@ -231,6 +231,32 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .promise-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .promise-item {
+      min-height: 62px;
+      padding: 12px;
+      border: 1px solid #b8dcd5;
+      border-radius: 8px;
+      background: var(--teal-soft);
+    }
+
+    .promise-item strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    .promise-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .step {
       min-height: 86px;
       padding: 12px;
@@ -591,6 +617,28 @@
       margin-top: 14px;
     }
 
+    .backend-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid #b8dcd5;
+      border-radius: 8px;
+      background: var(--teal-soft);
+    }
+
+    .backend-strip strong {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .backend-strip .upload-status {
+      margin: 0;
+      white-space: normal;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -639,6 +687,45 @@
     .check-row input {
       width: 18px;
       height: 18px;
+    }
+
+    .fallback-panel {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
+    }
+
+    .fallback-panel summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .fallback-panel summary::after {
+      content: "+";
+      color: var(--teal);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .fallback-panel[open] summary::after {
+      content: "-";
+    }
+
+    .fallback-body {
+      padding: 0 14px 14px;
+    }
+
+    .fallback-body p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .command-box,
@@ -939,6 +1026,7 @@
       .grid-3,
       .workflow-rail,
       .workflow-rail.three-step,
+      .promise-strip,
       .path-summary,
       .artifact-grid,
       .results-grid,
@@ -961,7 +1049,7 @@
       <div class="brand-mark" aria-hidden="true">AF</div>
       <div>
         <h1 data-i18n="appTitle">Apply Less, Fit More</h1>
-        <p data-i18n="appSubtitle">Local job-search workflow console</p>
+        <p data-i18n="appSubtitle">Evidence-first CV decisions</p>
       </div>
     </div>
     <nav class="nav" aria-label="Page views">
@@ -983,10 +1071,25 @@
           <div class="section-head">
             <div>
               <p class="eyebrow" id="pageEyebrow" data-i18n="applicationPageEyebrow">Application round</p>
-              <h2 id="pageTitle" data-i18n="applicationPageTitle">Analyze the job, inspect fit, then plan CV edits</h2>
-              <p id="pageDesc" data-i18n="applicationPageDesc">Review JD evidence, generate the workflow command, render decision/report artifacts, and only then enter CV planning.</p>
+              <h2 id="pageTitle" data-i18n="applicationPageTitle">Know the fit before you rewrite the CV</h2>
+              <p id="pageDesc" data-i18n="applicationPageDesc">Run one local evidence check, see the red lines, then decide whether tailoring is worth it.</p>
             </div>
             <span class="pill good" data-i18n="privateLocal">Local only</span>
+          </div>
+
+          <div class="promise-strip" data-page-block="application first-use">
+            <div class="promise-item">
+              <strong data-i18n="promiseGateTitle">Gate before generation</strong>
+              <span data-i18n="promiseGateBody">Decide whether the role is worth CV work before drafting.</span>
+            </div>
+            <div class="promise-item">
+              <strong data-i18n="promiseEvidenceTitle">Evidence-backed claims</strong>
+              <span data-i18n="promiseEvidenceBody">Keep unsupported strengths and private facts out of public wording.</span>
+            </div>
+            <div class="promise-item">
+              <strong data-i18n="promiseLocalTitle">Local by default</strong>
+              <span data-i18n="promiseLocalBody">Profiles, memory, CVs, and outputs stay in local private paths.</span>
+            </div>
           </div>
 
           <div class="workflow-rail three-step" data-page-block="application">
@@ -996,12 +1099,20 @@
             </div>
             <div class="step">
               <strong data-i18n="applicationStepFitTitle">2. Get fit analysis</strong>
-              <span data-i18n="applicationStepFitBody">Let Codex or a local server run the workflow, then inspect the fit gate and artifacts here.</span>
+              <span data-i18n="applicationStepFitBody">Run the local backend workflow, then inspect the fit gate and artifacts here.</span>
             </div>
             <div class="step">
               <strong data-i18n="applicationStepCvTitle">3. Get the revised CV</strong>
               <span data-i18n="applicationStepCvBody">After the gate allows it, review the CV plan and one-page LaTeX output boundary.</span>
             </div>
+          </div>
+
+          <div class="backend-strip" data-page-block="application">
+            <div>
+              <strong data-i18n="backendTitle">Backend connection</strong>
+              <p class="upload-status" id="backendInlineStatus" data-i18n="backendChecking">Checking local backend...</p>
+            </div>
+            <button type="button" class="btn" data-backend-check><span aria-hidden="true">●</span><span data-i18n="checkBackend">Check backend</span></button>
           </div>
 
           <div class="workflow-rail" data-page-block="first-use">
@@ -1130,7 +1241,7 @@
             </div>
 
             <div class="mode-help" id="sourceHelp" data-i18n="websiteHelp">
-              Save the URL as the source reference. The current static page does not auto-scrape websites; Codex or a future local server should turn it into reviewed JD text.
+              Save the URL as the source reference. Backend mode still needs reviewed JD text, so paste the extracted text or load a TXT/MD file before running.
             </div>
 
             <div class="grid-2">
@@ -1141,7 +1252,7 @@
               <div class="field" data-source-panel="pdf">
                 <label for="pdfFile" data-i18n="pdfLabel">PDF JD</label>
                 <input id="pdfFile" type="file" accept="application/pdf,.pdf">
-                <p data-i18n="pdfNote">PDF extraction is not implemented in this static page. Use Codex/local server extraction, or switch to JD text after extracting it.</p>
+                <p data-i18n="pdfNote">PDF extraction is not implemented here yet. Extract and review the text first, or switch to JD text after extracting it.</p>
               </div>
               <div class="field" data-source-panel="txt">
                 <label for="txtFile" data-i18n="txtLabel">TXT / MD JD</label>
@@ -1164,7 +1275,7 @@
             <div class="subsection-title">
               <div>
                 <h3 data-i18n="runConfigTitle">2. Get fit analysis</h3>
-                <p data-i18n="runConfigDesc">Codex or a future local server reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.</p>
+                <p data-i18n="runConfigDesc">The local backend reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.</p>
               </div>
             </div>
             <div class="grid-2">
@@ -1179,7 +1290,7 @@
             </div>
 
             <div class="mode-help" style="margin-top: 14px;">
-              <strong data-i18n="aiReadsTitle">AI reads these local files</strong>
+              <strong data-i18n="aiReadsTitle">Backend reads these local files</strong>
               <div class="path-summary" aria-label="AI input and output files">
                 <div class="path-item"><span>JD</span><code id="aiReadJob">inputs/jobs/company_role_YYYY-MM-DD.txt</code></div>
                 <div class="path-item"><span>CV</span><code id="aiReadCv">private_resumes/base_cv.pdf</code></div>
@@ -1191,19 +1302,7 @@
             </div>
 
             <div class="toolbar">
-              <button type="button" class="btn primary" id="runBackend"><span aria-hidden="true">▶</span><span data-i18n="runWithBackend">Run with local backend</span></button>
-              <button type="button" class="btn" data-backend-check><span aria-hidden="true">●</span><span data-i18n="checkBackend">Check backend</span></button>
-              <span class="upload-status" id="backendInlineStatus"></span>
-            </div>
-
-            <div class="command-box" style="margin-top: 14px;">
-              <button type="button" class="btn copy-floating" data-copy="applicationCodexPrompt"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
-              <pre id="applicationCodexPrompt"></pre>
-            </div>
-
-            <div class="mode-help" style="margin-top: 14px;">
-              <strong data-i18n="advancedCliTitle">Advanced CLI fallback</strong>
-              <p data-i18n="advancedCliDesc">Use this only when you want to run the deterministic workflow yourself. Codex/operator should read the baseline CV around this command.</p>
+              <button type="button" class="btn primary" id="runBackend"><span aria-hidden="true">▶</span><span data-i18n="runWithBackend">Run fit analysis</span></button>
             </div>
 
             <div class="check-row">
@@ -1211,17 +1310,23 @@
               <label for="approvePlan" data-i18n="approvePlanLabel">Allow cautious CV-plan generation when there is no hard block</label>
             </div>
 
-            <div class="command-box">
-              <button type="button" class="btn copy-floating" data-copy="workflowCommand"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
-              <pre id="workflowCommand"></pre>
-            </div>
+            <details class="fallback-panel">
+              <summary data-i18n="advancedCliTitle">Terminal fallback</summary>
+              <div class="fallback-body">
+                <p data-i18n="advancedCliDesc">Open this only if the local backend is unavailable or you want to run the CLI manually. Backend mode does not require copying this command.</p>
+                <div class="command-box">
+                  <button type="button" class="btn copy-floating" data-copy="workflowCommand"><span aria-hidden="true">⧉</span><span data-i18n="copy">Copy</span></button>
+                  <pre id="workflowCommand"></pre>
+                </div>
+              </div>
+            </details>
 
             <div class="mode-help" style="margin-top: 14px;">
               <strong data-i18n="resultsTitle">Fit artifacts</strong>
-              <p data-i18n="resultsDesc">Scan the selected workspace first. If files are missing, the red tiles can be filled with manual import.</p>
+              <p data-i18n="resultsDesc">After a backend run, results load here automatically. Use reload or manual import only for existing output folders.</p>
             </div>
             <div class="toolbar">
-              <button type="button" class="btn" id="loadBackendArtifacts"><span aria-hidden="true">↧</span><span data-i18n="loadBackendArtifacts">Load from backend</span></button>
+              <button type="button" class="btn" id="loadBackendArtifacts"><span aria-hidden="true">↧</span><span data-i18n="loadBackendArtifacts">Reload results</span></button>
             </div>
 
             <div class="artifact-grid" style="margin-top: 12px;">
@@ -1464,7 +1569,7 @@
     const I18N = {
       en: {
         appTitle: "Apply Less, Fit More",
-        appSubtitle: "Local job-search workflow console",
+        appSubtitle: "Evidence-first CV decisions",
         navSettings: "Settings",
         navFirstUse: "First use",
         navApplication: "Application round",
@@ -1475,12 +1580,18 @@
         firstUsePageTitle: "Create the workspace and baseline CV",
         firstUsePageDesc: "Start here when the application page shows missing setup: create the workspace, load the initial CV, then copy the Codex operator prompt.",
         applicationPageEyebrow: "Application round",
-        applicationPageTitle: "Analyze the job, inspect fit, then plan CV edits",
-        applicationPageDesc: "Follow one local round: upload job information, get fit analysis, then generate a safe CV revision plan.",
+        applicationPageTitle: "Know the fit before you rewrite the CV",
+        applicationPageDesc: "Run one local evidence check, see the red lines, then decide whether tailoring is worth it.",
+        promiseGateTitle: "Gate before generation",
+        promiseGateBody: "Decide whether the role is worth CV work before drafting.",
+        promiseEvidenceTitle: "Evidence-backed claims",
+        promiseEvidenceBody: "Keep unsupported strengths and private facts out of public wording.",
+        promiseLocalTitle: "Local by default",
+        promiseLocalBody: "Profiles, memory, CVs, and outputs stay in local private paths.",
         applicationStepJobTitle: "1. Upload job information",
         applicationStepJobBody: "Add a job URL, PDF, TXT/MD, or reviewed JD text as the local job evidence.",
         applicationStepFitTitle: "2. Get fit analysis",
-        applicationStepFitBody: "Let Codex or a local server run the workflow, then inspect the fit gate and artifacts here.",
+        applicationStepFitBody: "Run the local backend workflow, then inspect the fit gate and artifacts here.",
         applicationStepCvTitle: "3. Get the revised CV",
         applicationStepCvBody: "After the gate allows it, review the CV plan and one-page LaTeX output boundary.",
         stepWorkspaceTitle: "1. Fixed workspace",
@@ -1515,18 +1626,18 @@
         jobEvidenceTitle: "1. Upload job information",
         jobEvidenceDesc: "Choose one source. Website, PDF, TXT/MD, and pasted text should become reviewed local JD evidence before analysis.",
         runConfigTitle: "2. Get fit analysis",
-        runConfigDesc: "Codex or a future local server reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.",
+        runConfigDesc: "The local backend reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.",
         sourceWebsite: "Website",
         sourcePdf: "PDF",
         sourceText: "TXT / MD",
         sourceDirectText: "JD text",
-        websiteHelp: "Save the URL as the source reference. The current static page does not auto-scrape websites; Codex or a future local server should turn it into reviewed JD text.",
-        pdfHelp: "Choose a PDF as the source reference. PDF extraction is not implemented in this static page; Codex or a future local server should extract and review it.",
+        websiteHelp: "Save the URL as the source reference. Backend mode still needs reviewed JD text, so paste the extracted text or load a TXT/MD file before running.",
+        pdfHelp: "Choose a PDF as the source reference. PDF extraction is not implemented here yet; extract the text first, review it, then paste or load it before running.",
         txtHelp: "Load a .txt or .md JD. This page reads it locally and uses the text as the reviewed JD source.",
         textHelp: "Paste reviewed JD text directly when you already copied or extracted it from a website or PDF.",
         jobUrlLabel: "Job URL",
         pdfLabel: "PDF JD",
-        pdfNote: "PDF extraction is not implemented in this static page. Use Codex/local server extraction, or switch to JD text after extracting it.",
+        pdfNote: "PDF extraction is not implemented here yet. Extract and review the text first, or switch to JD text after extracting it.",
         txtLabel: "TXT / MD JD",
         jobPathLabel: "Local JD path",
         jdTextLabel: "Paste JD text",
@@ -1542,30 +1653,31 @@
         companyLabel: "Company",
         titleLabel: "Role title",
         commandStyleLabel: "Command style",
-        aiReadsTitle: "AI reads these local files",
+        aiReadsTitle: "Backend reads these local files",
         aiReadsNote: "Expected outputs: decision.json, report.md, next_actions.md, cv_plan.md, and llm_verification.json when a model draft is enabled.",
-        advancedCliTitle: "Advanced CLI fallback",
-        advancedCliDesc: "Use this only when you want to run the deterministic workflow yourself. Codex/operator should read the baseline CV around this command.",
+        advancedCliTitle: "Terminal fallback",
+        advancedCliDesc: "Open this only if the local backend is unavailable or you want to run the CLI manually. Backend mode does not require copying this command.",
         approvePlanLabel: "Allow cautious CV-plan generation when there is no hard block",
-        runWithBackend: "Run with local backend",
+        runWithBackend: "Run fit analysis",
         checkBackend: "Check backend",
+        backendChecking: "Checking local backend...",
         backendEyebrow: "Local server",
         backendTitle: "Backend connection",
         backendDesc: "Run the local Python server to let this HTML create files, run workflow, and load artifacts without copying terminal commands.",
         backendUrlLabel: "Backend URL",
         backendActionLabel: "Connection",
         backendOnline: "Backend connected",
-        backendOffline: "Backend unavailable. Start the local server first.",
+        backendOffline: "Backend unavailable. Start the local server or update the backend URL in Settings.",
         backendRunComplete: "Workflow finished. Results loaded.",
         backendRunFailed: "Backend workflow failed",
         backendJdSaved: "JD saved through backend",
         backendWorkspaceCreated: "Workspace created through backend",
         backendArtifactsLoaded: "Artifacts loaded from backend",
-        backendWrongServer: "This URL is serving static files, not the job-agent backend.",
+        backendWrongServer: "This URL is serving static files, not the job-agent backend. Open the backend server URL.",
         reviewedJdRequired: "Load or paste reviewed JD text before running. URL/PDF alone are source references.",
         cvPlanWithheld: "No CV plan returned; the gate may have withheld it.",
         verificationMissing: "No LLM verification returned.",
-        loadBackendArtifacts: "Load from backend",
+        loadBackendArtifacts: "Reload results",
         serverCommand: "Start the local backend from the repo root:\n\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\nThen open:\nhttp://127.0.0.1:8765/web/index.html",
         copy: "Copy",
         copied: "Copied.",
@@ -1580,7 +1692,7 @@
         keyEnvNote: "Do not paste API keys into this page; use an environment variable name.",
         resultsEyebrow: "Fit artifacts",
         resultsTitle: "Fit artifacts",
-        resultsDesc: "Scan the selected workspace first. If files are missing, the red tiles can be filled with manual import.",
+        resultsDesc: "After a backend run, results load here automatically. Use reload or manual import only for existing output folders.",
         decisionLabel: "decision.json",
         reportLabel: "report.md",
         nextActionsLabel: "next_actions.md",
@@ -1649,7 +1761,7 @@
       },
       zh: {
         appTitle: "少投一点，投准一点",
-        appSubtitle: "本地求职工作流控制台",
+        appSubtitle: "先证据，后改 CV",
         navSettings: "设置",
         navFirstUse: "第一次使用",
         navApplication: "一轮投递",
@@ -1660,12 +1772,18 @@
         firstUsePageTitle: "建立工作路径和初始 CV",
         firstUsePageDesc: "当一轮投递页显示 setup 缺失时来这里：创建 workspace、加载初始 CV，再复制 Codex operator 提示词。",
         applicationPageEyebrow: "一轮投递",
-        applicationPageTitle: "分析岗位、查看适配度，再计划 CV 修改",
-        applicationPageDesc: "一轮投递按三步走：上传职位信息，获取匹配分析，再生成安全的 CV 修改计划。",
+        applicationPageTitle: "先判断值不值得改 CV",
+        applicationPageDesc: "先做一次本地证据检查，看清红线，再决定是否值得为这个岗位定制。",
+        promiseGateTitle: "先 gate，再生成",
+        promiseGateBody: "先判断岗位是否值得改 CV，再进入措辞草稿。",
+        promiseEvidenceTitle: "只写有证据的 claim",
+        promiseEvidenceBody: "把不支持的优势和私密事实挡在公开表达之外。",
+        promiseLocalTitle: "默认本地私密",
+        promiseLocalBody: "Profile、memory、CV 和输出都留在本地 private 路径。",
         applicationStepJobTitle: "1. 上传职位信息",
         applicationStepJobBody: "添加岗位 URL、PDF、TXT/MD，或粘贴确认过的 JD 文本作为本地岗位证据。",
         applicationStepFitTitle: "2. 获取匹配信息",
-        applicationStepFitBody: "让 Codex 或本地 server 运行 workflow，然后在这里查看 fit gate 和产物。",
+        applicationStepFitBody: "用本地后端运行 workflow，然后在这里查看 fit gate 和产物。",
         applicationStepCvTitle: "3. 获得修改后的 CV",
         applicationStepCvBody: "Gate 允许后，再查看 CV plan 和一页 LaTeX 输出边界。",
         stepWorkspaceTitle: "1. 固定工作路径",
@@ -1700,18 +1818,18 @@
         jobEvidenceTitle: "1. 上传职位信息",
         jobEvidenceDesc: "选择一种来源。网站、PDF、TXT/MD 和粘贴文本都应先变成确认过的本地 JD 证据，再进入分析。",
         runConfigTitle: "2. 获取匹配信息",
-        runConfigDesc: "由 Codex 或未来本地 server 读取 JD、profile、memory 和初始 CV，运行 workflow，然后在下方展示产物。",
+        runConfigDesc: "本地后端读取 JD、profile、memory 和初始 CV，运行 workflow，然后在下方展示产物。",
         sourceWebsite: "网站",
         sourcePdf: "PDF",
         sourceText: "TXT / MD",
         sourceDirectText: "JD 文本",
-        websiteHelp: "把岗位 URL 作为来源引用保存。当前静态页面不会自动抓取网页；应由 Codex 或未来本地 server 把它转成用户确认过的 JD 文本。",
-        pdfHelp: "选择 PDF 作为来源引用。当前静态页面还没有 PDF 解析；应由 Codex 或未来本地 server 提取并让用户确认。",
+        websiteHelp: "把岗位 URL 作为来源引用保存。后端模式仍需要确认过的 JD 文本；运行前请粘贴提取后的文本，或加载 TXT/MD 文件。",
+        pdfHelp: "选择 PDF 作为来源引用。这里还没有 PDF 解析；请先提取并确认文本，再粘贴或加载后运行。",
         txtHelp: "加载 .txt 或 .md JD。页面会在本地读取它，并把该文本作为已确认的 JD 来源。",
         textHelp: "当你已经从网页或 PDF 复制/提取出 JD 时，在这里直接粘贴确认过的文本。",
         jobUrlLabel: "岗位 URL",
         pdfLabel: "PDF 岗位文件",
-        pdfNote: "当前静态页面还没有 PDF 解析。请用 Codex/本地 server 提取，或提取后切到 JD 文本。",
+        pdfNote: "这里还没有 PDF 解析。请先提取并确认文本，或提取后切到 JD 文本。",
         txtLabel: "TXT / MD 岗位文件",
         jobPathLabel: "本地 JD 路径",
         jdTextLabel: "粘贴 JD 文本",
@@ -1727,30 +1845,31 @@
         companyLabel: "公司名",
         titleLabel: "岗位名",
         commandStyleLabel: "命令格式",
-        aiReadsTitle: "AI 会读取这些本地文件",
+        aiReadsTitle: "后端会读取这些本地文件",
         aiReadsNote: "预期输出：decision.json、report.md、next_actions.md、cv_plan.md；开启模型草稿时还有 llm_verification.json。",
-        advancedCliTitle: "高级 CLI 兜底",
-        advancedCliDesc: "只有你想自己运行 deterministic workflow 时才用这里。Codex/operator 应围绕这个命令同时读取 baseline CV。",
+        advancedCliTitle: "终端兜底",
+        advancedCliDesc: "只有本地后端不可用，或者你想手动运行 CLI 时才打开这里。后端模式不需要复制这段命令。",
         approvePlanLabel: "没有硬阻断时，允许生成谨慎 CV plan",
-        runWithBackend: "用本地后端运行",
+        runWithBackend: "运行匹配分析",
         checkBackend: "检测后端",
+        backendChecking: "正在检测本地后端...",
         backendEyebrow: "本地 server",
         backendTitle: "后端连接",
         backendDesc: "启动本地 Python server 后，HTML 可以创建文件、运行 workflow、加载产物，不再需要复制终端命令。",
         backendUrlLabel: "后端 URL",
         backendActionLabel: "连接",
         backendOnline: "后端已连接",
-        backendOffline: "后端不可用，请先启动本地 server。",
+        backendOffline: "后端不可用，请启动本地 server，或在设置里修改后端 URL。",
         backendRunComplete: "Workflow 已完成，结果已加载。",
         backendRunFailed: "后端 workflow 失败",
         backendJdSaved: "JD 已通过后端保存",
         backendWorkspaceCreated: "Workspace 已通过后端创建",
         backendArtifactsLoaded: "已从后端加载产物",
-        backendWrongServer: "这个 URL 现在是静态文件服务，不是 job-agent 后端。",
+        backendWrongServer: "这个 URL 现在是静态文件服务，不是 job-agent 后端。请打开后端 server URL。",
         reviewedJdRequired: "运行前请先加载或粘贴确认过的 JD 文本。URL/PDF 本身只是来源引用。",
         cvPlanWithheld: "没有返回 CV plan；可能是 gate 有意拦截。",
         verificationMissing: "没有返回 LLM verification。",
-        loadBackendArtifacts: "从后端加载",
+        loadBackendArtifacts: "重新加载结果",
         serverCommand: "在 repo root 启动本地后端：\n\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\n然后打开：\nhttp://127.0.0.1:8765/web/index.html",
         copy: "复制",
         copied: "已复制。",
@@ -1765,7 +1884,7 @@
         keyEnvNote: "不要把 API key 粘贴进页面；这里只填写环境变量名。",
         resultsEyebrow: "匹配产物",
         resultsTitle: "匹配分析产物",
-        resultsDesc: "先扫描选中的工作文件夹。缺失文件会标红，也可以用手动导入补上。",
+        resultsDesc: "后端运行完成后，结果会自动显示在这里。只有查看已有输出目录时，才需要重新加载或手动导入。",
         decisionLabel: "decision.json",
         reportLabel: "report.md",
         nextActionsLabel: "next_actions.md",
@@ -1834,7 +1953,7 @@
       },
       de: {
         appTitle: "Weniger bewerben, gezielter bewerben",
-        appSubtitle: "Lokale Job-Suchworkflow-Konsole",
+        appSubtitle: "Evidenz zuerst, CV danach",
         navSettings: "Einstellungen",
         navFirstUse: "Erstnutzung",
         navApplication: "Bewerbungsrunde",
@@ -1845,12 +1964,18 @@
         firstUsePageTitle: "Workspace und Basis-CV anlegen",
         firstUsePageDesc: "Starte hier, wenn die Bewerbungsseite fehlendes Setup zeigt: Workspace erstellen, Basis-CV laden und den Codex-Operator-Prompt kopieren.",
         applicationPageEyebrow: "Bewerbungsrunde",
-        applicationPageTitle: "Job analysieren, Fit prüfen, dann CV-Änderungen planen",
-        applicationPageDesc: "Eine lokale Runde in drei Schritten: Jobinformationen hochladen, Fit-Analyse erhalten, dann eine sichere CV-Revision planen.",
+        applicationPageTitle: "Fit prüfen, bevor du den CV umschreibst",
+        applicationPageDesc: "Führe einen lokalen Evidenzcheck aus, sieh die roten Linien und entscheide erst dann, ob Tailoring lohnt.",
+        promiseGateTitle: "Gate vor Generation",
+        promiseGateBody: "Entscheide vor dem Entwurf, ob die Rolle CV-Arbeit wert ist.",
+        promiseEvidenceTitle: "Belegte Claims",
+        promiseEvidenceBody: "Halte unbelegte Stärken und private Fakten aus öffentlicher Formulierung heraus.",
+        promiseLocalTitle: "Standardmäßig lokal",
+        promiseLocalBody: "Profile, Memory, CVs und Outputs bleiben in lokalen privaten Pfaden.",
         applicationStepJobTitle: "1. Jobinformationen hochladen",
         applicationStepJobBody: "Füge Job-URL, PDF, TXT/MD oder geprüften JD-Text als lokale Job-Evidenz hinzu.",
         applicationStepFitTitle: "2. Fit-Analyse erhalten",
-        applicationStepFitBody: "Lass Codex oder einen lokalen Server den Workflow ausführen und prüfe Gate sowie Artefakte hier.",
+        applicationStepFitBody: "Führe den Workflow über das lokale Backend aus und prüfe Gate sowie Artefakte hier.",
         applicationStepCvTitle: "3. Überarbeiteten CV erhalten",
         applicationStepCvBody: "Nach Gate-Freigabe prüfst du CV-Plan und Ein-Seiten-LaTeX-Grenze.",
         stepWorkspaceTitle: "1. Fester Workspace",
@@ -1885,18 +2010,18 @@
         jobEvidenceTitle: "1. Jobinformationen hochladen",
         jobEvidenceDesc: "Wähle eine Quelle. Website, PDF, TXT/MD und eingefügter Text sollen vor der Analyse zu geprüfter lokaler JD-Evidenz werden.",
         runConfigTitle: "2. Fit-Analyse erhalten",
-        runConfigDesc: "Codex oder ein zukünftiger lokaler Server liest JD, Profil, Memory und Basis-CV, führt den Workflow aus und zeigt die Artefakte unten.",
+        runConfigDesc: "Das lokale Backend liest JD, Profil, Memory und Basis-CV, führt den Workflow aus und zeigt die Artefakte unten.",
         sourceWebsite: "Website",
         sourcePdf: "PDF",
         sourceText: "TXT / MD",
         sourceDirectText: "JD-Text",
-        websiteHelp: "Speichere die URL als Quellenreferenz. Diese statische Seite scrapt Websites nicht automatisch; Codex oder ein zukünftiger lokaler Server soll daraus geprüften JD-Text machen.",
-        pdfHelp: "Wähle ein PDF als Quellenreferenz. PDF-Extraktion ist in dieser statischen Seite nicht implementiert; Codex oder ein zukünftiger lokaler Server soll den Text extrahieren und prüfen.",
+        websiteHelp: "Speichere die URL als Quellenreferenz. Der Backend-Modus braucht weiterhin geprüften JD-Text; füge vor dem Start extrahierten Text ein oder lade TXT/MD.",
+        pdfHelp: "Wähle ein PDF als Quellenreferenz. PDF-Extraktion ist hier noch nicht implementiert; extrahiere und prüfe den Text zuerst, dann füge ihn ein oder lade ihn.",
         txtHelp: "Lade eine .txt- oder .md-Stellenanzeige. Diese Seite liest sie lokal und nutzt den Text als geprüfte JD-Quelle.",
         textHelp: "Füge geprüften JD-Text direkt ein, wenn du ihn bereits von einer Website oder aus einem PDF kopiert oder extrahiert hast.",
         jobUrlLabel: "Job-URL",
         pdfLabel: "PDF-Stellenanzeige",
-        pdfNote: "PDF-Extraktion ist in dieser statischen Seite nicht implementiert. Nutze Codex/lokale Server-Extraktion oder wechsle nach der Extraktion zu JD-Text.",
+        pdfNote: "PDF-Extraktion ist hier noch nicht implementiert. Extrahiere und prüfe den Text zuerst oder wechsle danach zu JD-Text.",
         txtLabel: "TXT / MD-Stellenanzeige",
         jobPathLabel: "Lokaler JD-Pfad",
         jdTextLabel: "Stellentext einfügen",
@@ -1912,30 +2037,31 @@
         companyLabel: "Firma",
         titleLabel: "Rolle",
         commandStyleLabel: "Befehlsformat",
-        aiReadsTitle: "KI liest diese lokalen Dateien",
+        aiReadsTitle: "Backend liest diese lokalen Dateien",
         aiReadsNote: "Erwartete Outputs: decision.json, report.md, next_actions.md, cv_plan.md und llm_verification.json, wenn ein Modellentwurf aktiviert ist.",
-        advancedCliTitle: "Erweiterter CLI-Fallback",
-        advancedCliDesc: "Nutze dies nur, wenn du den deterministischen Workflow selbst ausführen willst. Codex/operator soll den Basis-CV rund um diesen Befehl lesen.",
+        advancedCliTitle: "Terminal-Fallback",
+        advancedCliDesc: "Öffne dies nur, wenn das lokale Backend nicht verfügbar ist oder du die CLI manuell ausführen willst. Im Backend-Modus musst du diesen Befehl nicht kopieren.",
         approvePlanLabel: "Vorsichtigen CV-Plan erlauben, wenn kein harter Block vorliegt",
-        runWithBackend: "Mit lokalem Backend ausführen",
+        runWithBackend: "Fit-Analyse starten",
         checkBackend: "Backend prüfen",
+        backendChecking: "Lokales Backend wird geprüft...",
         backendEyebrow: "Lokaler Server",
         backendTitle: "Backend-Verbindung",
         backendDesc: "Starte den lokalen Python-Server, damit dieses HTML Dateien erstellen, den Workflow ausführen und Artefakte laden kann.",
         backendUrlLabel: "Backend-URL",
         backendActionLabel: "Verbindung",
         backendOnline: "Backend verbunden",
-        backendOffline: "Backend nicht erreichbar. Starte zuerst den lokalen Server.",
+        backendOffline: "Backend nicht erreichbar. Starte den lokalen Server oder ändere die Backend-URL in den Einstellungen.",
         backendRunComplete: "Workflow abgeschlossen. Ergebnisse geladen.",
         backendRunFailed: "Backend-Workflow fehlgeschlagen",
         backendJdSaved: "JD über Backend gespeichert",
         backendWorkspaceCreated: "Workspace über Backend erstellt",
         backendArtifactsLoaded: "Artefakte vom Backend geladen",
-        backendWrongServer: "Diese URL liefert statische Dateien, nicht das job-agent-Backend.",
+        backendWrongServer: "Diese URL liefert statische Dateien, nicht das job-agent-Backend. Öffne die Backend-Server-URL.",
         reviewedJdRequired: "Lade oder füge geprüften JD-Text ein, bevor du startest. URL/PDF sind nur Quellenreferenzen.",
         cvPlanWithheld: "Kein CV-Plan zurückgegeben; das Gate hat ihn möglicherweise zurückgehalten.",
         verificationMissing: "Keine LLM-Verifikation zurückgegeben.",
-        loadBackendArtifacts: "Vom Backend laden",
+        loadBackendArtifacts: "Ergebnisse neu laden",
         serverCommand: "Lokales Backend im Repo-Root starten:\n\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\nDann öffnen:\nhttp://127.0.0.1:8765/web/index.html",
         copy: "Kopieren",
         copied: "Kopiert.",
@@ -1950,7 +2076,7 @@
         keyEnvNote: "Füge keine API-Schlüssel in diese Seite ein; nutze nur den Namen einer Umgebungsvariable.",
         resultsEyebrow: "Fit-Artefakte",
         resultsTitle: "Fit-Artefakte",
-        resultsDesc: "Scanne zuerst den gewählten Workspace. Wenn Dateien fehlen, können die roten Kacheln manuell befüllt werden.",
+        resultsDesc: "Nach einem Backend-Lauf erscheinen Ergebnisse hier automatisch. Nutze Neuladen oder manuellen Import nur für vorhandene Ausgabeordner.",
         decisionLabel: "decision.json",
         reportLabel: "report.md",
         nextActionsLabel: "next_actions.md",
@@ -2172,7 +2298,6 @@
         .replace("{cvPath}", quoteShell($("#baseCvPath").value))
         .replace("{outDir}", quoteShell($("#outDir").value));
       $("#codexPrompt").textContent = prompt;
-      $("#applicationCodexPrompt").textContent = prompt;
       $("#apiNotes").textContent = text("apiNotes");
       renderPathSummary();
     }
@@ -2747,28 +2872,33 @@
       return payload;
     }
 
-    function setBackendStatus(key, type = "success", notify = true) {
-      setUploadStatus("backendStatus", key, null, type, false);
-      setUploadStatus("backendInlineStatus", key, null, type, notify);
+    function setBackendMessage(message, type = "success", notify = true) {
+      ["backendStatus", "backendInlineStatus"].forEach((id) => {
+        const node = $("#" + id);
+        if (node) {
+          node.textContent = message;
+          node.classList.remove("success", "error");
+          node.classList.add(type);
+        }
+      });
+      if (notify) showToast(message);
     }
 
-    async function checkBackend() {
+    function setBackendStatus(key, type = "success", notify = true) {
+      setBackendMessage(text(key), type, notify);
+    }
+
+    async function checkBackend(notify = true) {
       try {
         const health = await backendRequest("/api/health");
         const suffix = health.workspace_root ? ": " + health.workspace_root : "";
         const message = text("backendOnline") + suffix;
-        ["backendStatus", "backendInlineStatus"].forEach((id) => {
-          const node = $("#" + id);
-          if (node) {
-            node.textContent = message;
-            node.classList.remove("error");
-            node.classList.add("success");
-          }
-        });
-        showToast(text("backendOnline"));
+        setBackendMessage(message, "success", false);
+        if (notify) showToast(text("backendOnline"));
         return true;
-      } catch {
-        setBackendStatus("backendOffline", "error");
+      } catch (error) {
+        const message = error && error.message ? error.message : text("backendOffline");
+        setBackendMessage(message, "error", notify);
         return false;
       }
     }
@@ -2967,7 +3097,7 @@
       }
     });
     $$("[data-backend-check]").forEach((button) => {
-      button.addEventListener("click", checkBackend);
+      button.addEventListener("click", () => checkBackend(true));
     });
     $("#runBackend").addEventListener("click", runWithBackend);
     $("#loadBackendArtifacts").addEventListener("click", loadArtifactsWithBackend);
@@ -3108,6 +3238,7 @@
     initializeBackendUrl();
     setLanguage("en");
     setPage(normalizePage(window.location.hash), false);
+    checkBackend(false);
   </script>
 </body>
 </html>
