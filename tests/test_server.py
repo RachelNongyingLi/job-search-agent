@@ -241,6 +241,46 @@ class ServerApiTests(unittest.TestCase):
             self.assertIsInstance(payload["artifacts"]["decision"], dict)
             self.assertIn("Job Match Report", payload["artifacts"]["report"])
 
+    def test_fastapi_workflow_checkpoint_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_demo_workspace(root)
+            client = TestClient(build_app(workspace_root=root, web_root=Path.cwd() / "web"))
+
+            first = client.post(
+                "/api/workflows/run",
+                json={
+                    "job_path": "inputs/jobs/demo.txt",
+                    "profile_path": "profiles/me.local.json",
+                    "out_dir": "outputs/private/demo",
+                    "auto_approve": False,
+                    "engine": "langgraph",
+                },
+            )
+
+            self.assertEqual(first.status_code, 200)
+            first_payload = first.json()
+            self.assertTrue(first_payload["pending"])
+            self.assertEqual(first_payload["pending_checkpoint"]["kind"], "cv_plan_approval")
+            self.assertTrue(first_payload["thread_id"])
+            self.assertFalse((root / "outputs/private/demo/cv_plan.md").exists())
+
+            resumed = client.post(
+                "/api/workflows/resume",
+                json={
+                    "thread_id": first_payload["thread_id"],
+                    "checkpoint_id": first_payload["pending_checkpoint"]["id"],
+                    "checkpoint_kind": "cv_plan_approval",
+                    "approved": True,
+                },
+            )
+
+            self.assertEqual(resumed.status_code, 200)
+            resumed_payload = resumed.json()
+            self.assertFalse(resumed_payload["pending"])
+            self.assertIn("CV Targeting Plan", resumed_payload["artifacts"]["cv_plan"])
+            self.assertTrue((root / "outputs/private/demo/next_actions.md").exists())
+
     def test_fastapi_workflow_rejects_string_auto_approve(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

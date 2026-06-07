@@ -182,6 +182,8 @@ The app now uses a modern local AI stack:
 - **LangGraph** is the default workflow engine.
 - **Pydantic** validates API payloads and core job/profile/match schemas.
 
+In backend mode, LangGraph can pause at a real human checkpoint before writing `cv_plan.md`. Approve or reject in the interface; the server resumes the same local workflow thread.
+
 Classic linear workflow remains available only as a debugging fallback. To run the default graph workflow from the terminal:
 
 ```bash

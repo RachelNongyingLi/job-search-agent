@@ -3,9 +3,9 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from .generator import build_report, write_report
 from .job_parser import parse_job_file
@@ -26,13 +26,26 @@ class WorkflowEngineError(RuntimeError):
     """Raised when a requested workflow orchestrator cannot run."""
 
 
+class WorkflowCheckpoint(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    kind: str
+    title: str
+    message: str
+    action: str
+    risk_level: str = "human_required"
+    requires: list[str] = Field(default_factory=list)
+    state_summary: dict[str, Any] = Field(default_factory=dict)
+    id: str | None = None
+
+
 class WorkflowArtifacts(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     out_dir: Path
-    report: Path
-    decision: Path
-    next_actions: Path
+    report: Path | None = None
+    decision: Path | None = None
+    next_actions: Path | None = None
     cv_plan: Path | None = None
     llm_cv_plan: Path | None = None
     llm_verification: Path | None = None
@@ -45,6 +58,8 @@ class WorkflowRun(BaseModel):
     status: str
     result: MatchResult
     artifacts: WorkflowArtifacts
+    pending_checkpoint: WorkflowCheckpoint | None = None
+    thread_id: str | None = None
 
 
 class IntakeAgent:
@@ -217,6 +232,9 @@ def run_workflow(
     llm_api_key_env: str = "OPENAI_API_KEY",
     llm_client: LLMClient | None = None,
     engine: str = DEFAULT_WORKFLOW_ENGINE,
+    thread_id: str | None = None,
+    checkpointer: Any = None,
+    resume: Any = None,
 ) -> WorkflowRun:
     workflow_engine = _normalize_engine(engine)
     if workflow_engine == "langgraph":
@@ -236,6 +254,9 @@ def run_workflow(
             llm_base_url=llm_base_url,
             llm_api_key_env=llm_api_key_env,
             llm_client=llm_client,
+            thread_id=thread_id,
+            checkpointer=checkpointer,
+            resume=resume,
         )
     return _run_classic_workflow(
         job_path=job_path,

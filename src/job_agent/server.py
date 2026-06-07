@@ -4,6 +4,7 @@ import argparse
 import base64
 import json
 import threading
+import uuid
 from pathlib import Path
 from typing import TypeVar
 from urllib.parse import urlparse
@@ -24,6 +25,7 @@ from .api_models import (
     PathResponse,
     WorkflowRunRequest,
     WorkflowRunResponse,
+    WorkflowResumeRequest,
     WorkspaceCreateRequest,
     WorkspaceCreateResponse,
 )
@@ -59,6 +61,7 @@ def build_app(workspace_root: str | Path = ".", web_root: str | Path = "web") ->
     )
     app.state.workspace_root = root
     app.state.web_root = web
+    app.state.workflow_checkpointer = _build_langgraph_checkpointer()
 
     app.add_middleware(
         CORSMiddleware,
@@ -111,7 +114,19 @@ def build_app(workspace_root: str | Path = ".", web_root: str | Path = "web") ->
 
     @app.post("/api/workflows/run", response_model=WorkflowRunResponse)
     async def workflows_run(request: Request, payload: WorkflowRunRequest):
-        return _run_workflow_api(request.app.state.workspace_root, payload)
+        return _run_workflow_api(
+            request.app.state.workspace_root,
+            payload,
+            checkpointer=request.app.state.workflow_checkpointer,
+        )
+
+    @app.post("/api/workflows/resume", response_model=WorkflowRunResponse)
+    async def workflows_resume(request: Request, payload: WorkflowResumeRequest):
+        return _resume_workflow_api(
+            request.app.state.workspace_root,
+            payload,
+            checkpointer=request.app.state.workflow_checkpointer,
+        )
 
     @app.options("/{_path:path}", include_in_schema=False)
     async def options_any(_path: str):
@@ -154,6 +169,24 @@ def _validation_message(exc: RequestValidationError | ValidationError) -> str:
     location = ".".join(str(item) for item in first.get("loc", []) if item != "body")
     prefix = f"{location}: " if location else ""
     return f"{prefix}{first.get('msg', 'Invalid request')}"
+
+
+def _build_langgraph_checkpointer():
+    try:
+        from langgraph.checkpoint.memory import InMemorySaver
+        from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+    except ImportError:
+        return None
+    serializer = JsonPlusSerializer(
+        allowed_msgpack_modules=[
+            ("job_agent.models", "CandidateProfile"),
+            ("job_agent.models", "JobAnalysis"),
+            ("job_agent.models", "MatchResult"),
+            ("job_agent.models", "Evidence"),
+            ("job_agent.models", "NegativeSignal"),
+        ]
+    )
+    return InMemorySaver(serde=serializer)
 
 
 def _validate_payload(model: type[PayloadModel], payload: PayloadModel | dict) -> PayloadModel:
@@ -391,7 +424,7 @@ def _starter_profile() -> str:
     ) + "\n"
 
 
-def _run_workflow_api(root: Path, payload: WorkflowRunRequest | dict) -> dict:
+def _run_workflow_api(root: Path, payload: WorkflowRunRequest | dict, checkpointer=None) -> dict:
     request = _validate_payload(WorkflowRunRequest, payload)
     job_path = _safe_job_path(root, request.job_path)
     profile_path = _safe_profile_path(root, request.profile_path)
@@ -405,6 +438,7 @@ def _run_workflow_api(root: Path, payload: WorkflowRunRequest | dict) -> dict:
 
     engine = _validate_workflow_engine(request.engine)
     _validate_llm_base_url(request.llm_provider, request.llm_base_url)
+    thread_id = request.thread_id or _new_workflow_thread_id()
     run_kwargs = {
         "job_path": job_path,
         "profile_path": profile_path,
@@ -419,12 +453,46 @@ def _run_workflow_api(root: Path, payload: WorkflowRunRequest | dict) -> dict:
         "llm_base_url": request.llm_base_url,
         "llm_api_key_env": request.llm_api_key_env,
         "engine": engine,
+        "thread_id": thread_id if engine == "langgraph" else None,
+        "checkpointer": checkpointer if engine == "langgraph" else None,
     }
     with WORKFLOW_LOCK:
         try:
             run = run_workflow(**run_kwargs)
         except WorkflowEngineError as exc:
             raise ApiError(400, str(exc)) from exc
+    return _workflow_response(root, run, engine)
+
+
+def _resume_workflow_api(root: Path, payload: WorkflowResumeRequest | dict, checkpointer=None) -> dict:
+    request = _validate_payload(WorkflowResumeRequest, payload)
+    if not checkpointer:
+        raise ApiError(400, "No active LangGraph checkpointer is available. Restart the workflow run.")
+    resume_payload = {
+        "approved": request.approved,
+        "comment": request.comment,
+        "checkpoint_id": request.checkpoint_id,
+        "checkpoint_kind": request.checkpoint_kind,
+    }
+    with WORKFLOW_LOCK:
+        try:
+            from .langgraph_workflow import resume_langgraph_workflow
+
+            run = resume_langgraph_workflow(
+                thread_id=request.thread_id,
+                checkpointer=checkpointer,
+                resume=resume_payload,
+            )
+        except WorkflowEngineError as exc:
+            raise ApiError(400, str(exc)) from exc
+        except KeyError as exc:
+            raise ApiError(400, "Workflow checkpoint could not be resumed. Start a new workflow run.") from exc
+        except ValueError as exc:
+            raise ApiError(400, str(exc)) from exc
+    return _workflow_response(root, run, "langgraph")
+
+
+def _workflow_response(root: Path, run, engine: str) -> dict:
     artifacts = {
         "decision": run.artifacts.decision,
         "report": run.artifacts.report,
@@ -434,12 +502,20 @@ def _run_workflow_api(root: Path, payload: WorkflowRunRequest | dict) -> dict:
         "llm_verification": run.artifacts.llm_verification,
         "memory": run.artifacts.memory,
     }
+    pending_checkpoint = run.pending_checkpoint.model_dump() if run.pending_checkpoint else None
     return {
         "ok": True,
         "status": run.status,
         "engine": engine,
+        "thread_id": run.thread_id,
+        "pending": pending_checkpoint is not None,
+        "pending_checkpoint": pending_checkpoint,
         "artifacts": _artifact_payload(root, run.artifacts.out_dir, artifacts),
     }
+
+
+def _new_workflow_thread_id() -> str:
+    return "workflow-" + uuid.uuid4().hex
 
 
 def main(argv: list[str] | None = None) -> int:

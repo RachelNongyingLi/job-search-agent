@@ -46,6 +46,15 @@ class WorkflowRunRequest(ApiModel):
     llm_model: str = ""
     llm_base_url: str = ""
     llm_api_key_env: str = "OPENAI_API_KEY"
+    thread_id: str | None = None
+
+
+class WorkflowResumeRequest(ApiModel):
+    thread_id: str
+    checkpoint_id: str | None = None
+    checkpoint_kind: str | None = None
+    approved: StrictBool
+    comment: str = ""
 
 
 class HealthResponse(ApiModel):
@@ -95,6 +104,9 @@ class WorkflowRunResponse(ApiModel):
     ok: bool
     status: str
     engine: Literal["langgraph", "classic"]
+    thread_id: str | None = None
+    pending: bool = False
+    pending_checkpoint: dict[str, Any] | None = None
     artifacts: ArtifactPayload
 
 

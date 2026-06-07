@@ -111,7 +111,8 @@ Backend API shape:
 - `POST /api/workspace/create` creates private folders, `memory.local.json`, a starter profile, and the output folder. Use `job_path`, `profile_path`, `cv_path` or `initial_cv_path`, `out_dir`, and `memory_path`.
 - `POST /api/files/base-cv` saves the uploaded baseline CV under `private_resumes/`. Use `cv_path`; `path` is accepted as an alias for operator ergonomics.
 - `POST /api/jobs/text` saves reviewed JD text under `inputs/jobs/`. Use `job_path` and `content`; `path` and `text` are accepted as aliases.
-- `POST /api/workflows/run` calls `run_workflow` with `job_path`, `profile_path`, `out_dir`, `memory_path`, company/title overrides, strict boolean `auto_approve`, `engine` (`langgraph` by default, `classic` for debugging), and optional local LLM flags.
+- `POST /api/workflows/run` calls `run_workflow` with `job_path`, `profile_path`, `out_dir`, `memory_path`, company/title overrides, strict boolean `auto_approve`, `engine` (`langgraph` by default, `classic` for debugging), and optional local LLM flags. In backend mode, LangGraph can pause and return `pending_checkpoint` plus `thread_id`.
+- `POST /api/workflows/resume` resumes the same LangGraph `thread_id` with an explicit approval or rejection payload. The current server uses an in-process checkpointer; restart the run if the server process is restarted.
 - `GET /api/artifacts?out_dir=outputs/private/<slug>` reloads existing workflow artifacts.
 
 The server rejects workspace escapes, non-private output paths, remote LLM base URLs in local backend mode, and string booleans such as `"true"` for `auto_approve`. It preserves JSON error shape as `{"ok": false, "error": "..."}` so the static interface can display failures consistently.
@@ -145,8 +146,11 @@ Current graph shape:
 intake
   -> gate
   -> report
-  -> cv_plan       # skipped on red_line_block
-  -> llm_draft     # only if cv_plan exists and LLM is enabled
+  -> cv_plan_checkpoint      # dynamic LangGraph interrupt before CV planning
+  -> cv_plan                 # skipped on red_line_block or rejected checkpoint
+  -> llm_draft               # only if cv_plan exists and LLM is enabled
+  -> public_output_checkpoint # skipped until a public-output builder is added
+  -> final_pdf_checkpoint     # skipped until a final PDF builder is added
   -> memory
   -> next_actions
 ```
@@ -154,18 +158,16 @@ intake
 Rules that must stay true in both engines:
 
 - `red_line_block` writes report, decision, memory when enabled, and next actions; it must not write `cv_plan.md` or `cv_plan.llm.md`.
-- `needs_verification` does not produce a CV plan unless the same confirmation policy allows it.
+- `needs_verification` and non-blocked CV planning pause at a human checkpoint in backend LangGraph mode before `cv_plan.md` is written.
 - LLM drafting runs only after deterministic CV planning exists.
 - `decision.json`, `report.md`, `next_actions.md`, optional `cv_plan.md`, optional `cv_plan.llm.md`, and optional `llm_verification.json` keep the same names and meanings.
-- LangGraph state and future checkpoints must stay local and private; do not send full profile, CV, JD, memory, or checkpoints to remote tracing by default.
+- LangGraph state and checkpoints must stay local and private; do not send full profile, CV, JD, memory, or checkpoints to remote tracing by default.
 
-Future durable-checkpoint mode should add a separate start/resume API instead of weakening the current run API:
+Current checkpoint contract:
 
-- `POST /api/workflows/start`: create a local graph run and stop at the first CV/public-output checkpoint.
-- `GET /api/workflows/<id>`: inspect gate, pending checkpoint, and artifacts.
-- `POST /api/workflows/<id>/resume`: continue only after explicit user approval.
-
-Until that API exists, LangGraph is the main local orchestrator and `classic` is only a debugging fallback.
+- CV plan generation uses a real `interrupt()` checkpoint and resumes with `Command(resume=...)`.
+- Public-output and final-PDF approval nodes are already in the graph. They skip today because the project has no public-output or PDF builder yet, but any future builder must route through those nodes before writing public materials or accepting the final one-page PDF.
+- The local FastAPI server keeps checkpoint state in memory. For a packaged multi-session app, replace this with a durable local checkpointer before promising resume after server restart.
 
 ### Mode 1: Codex Or Claude As Operator
 

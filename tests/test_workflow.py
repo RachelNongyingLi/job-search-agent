@@ -217,6 +217,87 @@ class WorkflowTest(unittest.TestCase):
             self.assertTrue((root / "graph/decision.json").exists())
             self.assertTrue((root / "graph/next_actions.md").exists())
 
+    def test_langgraph_interrupts_before_cv_plan_and_resumes(self):
+        if importlib.util.find_spec("langgraph") is None:
+            self.skipTest("LangGraph optional dependency is not installed.")
+        from job_agent.langgraph_workflow import _memory_checkpointer, resume_langgraph_workflow
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profile = root / "profile.local.json"
+            job = root / "job.txt"
+            out_dir = root / "graph"
+            profile.write_text(json.dumps(PROFILE_JSON), encoding="utf-8")
+            job.write_text(
+                "Build Python workflow automation with LLM agents, prompt engineering, documentation, Excel, and international stakeholders.",
+                encoding="utf-8",
+            )
+            checkpointer = _memory_checkpointer()
+
+            first = run_workflow(
+                job,
+                profile,
+                out_dir=out_dir,
+                auto_approve=False,
+                engine="langgraph",
+                thread_id="checkpoint-test",
+                checkpointer=checkpointer,
+            )
+
+            self.assertEqual(first.status, "ready_for_cv_plan")
+            self.assertIsNotNone(first.pending_checkpoint)
+            self.assertEqual(first.pending_checkpoint.kind, "cv_plan_approval")
+            self.assertFalse((out_dir / "cv_plan.md").exists())
+            self.assertFalse((out_dir / "next_actions.md").exists())
+
+            resumed = resume_langgraph_workflow(
+                thread_id="checkpoint-test",
+                checkpointer=checkpointer,
+                resume={"approved": True, "checkpoint_kind": "cv_plan_approval"},
+            )
+
+            self.assertIsNone(resumed.pending_checkpoint)
+            self.assertTrue((out_dir / "cv_plan.md").exists())
+            self.assertTrue((out_dir / "next_actions.md").exists())
+
+    def test_langgraph_rejected_checkpoint_withholds_cv_plan(self):
+        if importlib.util.find_spec("langgraph") is None:
+            self.skipTest("LangGraph optional dependency is not installed.")
+        from job_agent.langgraph_workflow import _memory_checkpointer, resume_langgraph_workflow
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profile = root / "profile.local.json"
+            job = root / "job.txt"
+            out_dir = root / "graph"
+            profile.write_text(json.dumps(PROFILE_JSON), encoding="utf-8")
+            job.write_text(
+                "Build Python workflow automation with LLM agents, prompt engineering, documentation, Excel, and international stakeholders.",
+                encoding="utf-8",
+            )
+            checkpointer = _memory_checkpointer()
+
+            first = run_workflow(
+                job,
+                profile,
+                out_dir=out_dir,
+                auto_approve=False,
+                engine="langgraph",
+                thread_id="reject-test",
+                checkpointer=checkpointer,
+            )
+            self.assertIsNotNone(first.pending_checkpoint)
+
+            resumed = resume_langgraph_workflow(
+                thread_id="reject-test",
+                checkpointer=checkpointer,
+                resume={"approved": False, "checkpoint_kind": "cv_plan_approval"},
+            )
+
+            self.assertIsNone(resumed.pending_checkpoint)
+            self.assertFalse((out_dir / "cv_plan.md").exists())
+            self.assertTrue((out_dir / "next_actions.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
