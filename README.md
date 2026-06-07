@@ -1,6 +1,8 @@
 # Apply Less, Fit More 🚀
 
 > **A local-first job search agent that kills resume spam and turns applications into evidence.**
+>
+> **"（Even tho the funny thing is that we knew all these job-hunting tips come from either people who landed a job a decade ago, or people(me) who haven't even found one yet. We literally have no good choices. :）"**
 
 Everyone is using AI now.
 
