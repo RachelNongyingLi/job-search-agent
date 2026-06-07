@@ -40,7 +40,17 @@ job-agent workflow run \
 
 ### Local Web Console
 
-The repo includes a static multilingual console at `web/index.html`.
+The repo includes a multilingual console at `web/index.html`. It can run in two modes.
+
+Backend mode:
+
+```bash
+PYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .
+```
+
+Then open `http://127.0.0.1:8765/web/index.html`. In this mode the HTML can call localhost APIs to save JD text, run `run_workflow`, and render returned artifacts.
+
+Static-only mode: open `web/index.html` directly or serve it with a generic static server. In this mode it can prepare commands, copy Codex prompts, scan/import local files when the browser allows it, and render artifacts, but it cannot execute Python.
 
 It is organized into three user-facing views:
 
@@ -55,12 +65,12 @@ Use it to:
 - scan the selected local workspace for expected files before asking for manual imports
 - choose a JD source type: website URL, PDF reference, TXT/Markdown, or direct JD text
 - prepare local paths for JD, profile, output, and memory
-- generate `job-agent workflow run` commands
+- run the workflow through the localhost backend, or generate `job-agent workflow run` commands as fallback
 - configure optional LLM flags without storing API keys
 - import `decision.json`, `report.md`, `next_actions.md`, `cv_plan.md`, and `llm_verification.json`
 - copy a Codex operator prompt
 
-Current boundary: static HTML cannot run the Python CLI, parse PDFs reliably, scrape websites, or build a final PDF CV. Website URLs and PDFs are source references until Codex or a localhost server extracts reviewed JD text. The CLI still runs from a local `.txt` or `.md` JD path.
+Current boundary: static-only HTML cannot run the Python CLI, parse PDFs reliably, scrape websites, or build a final PDF CV. Backend mode can call the local Python workflow but still treats website URLs and PDFs as source references until Codex or a localhost extractor turns them into reviewed JD text. The workflow still runs from a local `.txt` or `.md` JD path.
 
 The fixed workspace model is:
 
@@ -82,7 +92,18 @@ The frontend should follow this lookup order:
 4. Missing artifacts are marked red.
 5. Manual import controls remain available as fallback.
 
-Future boundary: a local server may wrap `run_workflow` behind localhost APIs, but it must keep allowlisted private directories, no remote upload by default, and explicit CV/public-output confirmation.
+Backend boundary: `job_agent.server` wraps `run_workflow` behind localhost APIs. It must keep paths inside the selected workspace, avoid remote upload by default, and preserve explicit CV/public-output confirmation.
+
+Backend API shape:
+
+- `GET /api/health` returns backend status and the resolved workspace root.
+- `POST /api/workspace/create` creates private folders, `memory.local.json`, a starter profile, and the output folder. Use `job_path`, `profile_path`, `cv_path` or `initial_cv_path`, `out_dir`, and `memory_path`.
+- `POST /api/files/base-cv` saves the uploaded baseline CV under `private_resumes/`. Use `cv_path`; `path` is accepted as an alias for operator ergonomics.
+- `POST /api/jobs/text` saves reviewed JD text under `inputs/jobs/`. Use `job_path` and `content`; `path` and `text` are accepted as aliases.
+- `POST /api/workflows/run` calls `run_workflow` with `job_path`, `profile_path`, `out_dir`, `memory_path`, company/title overrides, strict boolean `auto_approve`, and optional local LLM flags.
+- `GET /api/artifacts?out_dir=outputs/private/<slug>` reloads existing workflow artifacts.
+
+The server rejects workspace escapes, non-private output paths, remote LLM base URLs in local backend mode, and string booleans such as `"true"` for `auto_approve`.
 
 ### Mode 1: Codex Or Claude As Operator
 

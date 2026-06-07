@@ -35,11 +35,29 @@ Use `--yes` only when you want to approve non-blocking prompts for demos or scri
 
 ## Local Web Console
 
-You can also open the multilingual local console:
+You can run the multilingual local console with the Python backend:
+
+```bash
+PYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8765/web/index.html
+```
+
+If that port is already serving a static page, use another port and open the matching URL.
+
+This lets the HTML call local APIs to save reviewed JD text, run `run_workflow`, and load `decision.json`, `report.md`, `next_actions.md`, `cv_plan.md`, and `llm_verification.json`.
+
+You can still open the static file directly:
 
 ```text
 web/index.html
 ```
+
+In static-only mode, the page can prepare commands and import artifacts, but it cannot execute Python by itself.
 
 It has three views:
 
@@ -47,7 +65,7 @@ It has three views:
 - **First use**: create the local working setup, create `memory.local.json`, load the initial CV baseline, and copy the Codex prompt.
 - **Settings**: set the workspace paths and optional LLM API flags.
 
-It is static HTML: it does not upload data, store API keys, or directly run the Python CLI.
+The local server binds to `127.0.0.1`; it does not upload data, store API keys, or auto-apply.
 
 The console uses a fixed local workspace model:
 

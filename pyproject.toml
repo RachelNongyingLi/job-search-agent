@@ -13,6 +13,7 @@ dependencies = []
 
 [project.scripts]
 job-agent = "job_agent.cli:main"
+job-agent-web = "job_agent.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
