@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 from collections import Counter
-from dataclasses import asdict
 from datetime import date
 from pathlib import Path
 
@@ -21,7 +20,7 @@ def update_memory(path: str | Path, result: MatchResult) -> Path:
         "root_strengths": result.root_matches,
         "interview_upskill": result.upskill_matches,
         "market_risks": result.market_risks,
-        "negative_signals": [asdict(signal) for signal in result.negative_signals],
+        "negative_signals": [signal.model_dump() for signal in result.negative_signals],
         "gaps": result.gaps,
     }
     memory.setdefault("applications", []).append(entry)

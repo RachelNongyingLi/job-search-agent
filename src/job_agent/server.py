@@ -3,12 +3,30 @@ from __future__ import annotations
 import argparse
 import base64
 import json
-import mimetypes
 import threading
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from typing import TypeVar
+from urllib.parse import urlparse
 
+from fastapi import FastAPI, Query, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, RedirectResponse, Response
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, ValidationError
+
+from .api_models import (
+    ArtifactResponse,
+    BaseCVUploadRequest,
+    BaseCVUploadResponse,
+    HealthResponse,
+    JobTextRequest,
+    PathResponse,
+    WorkflowRunRequest,
+    WorkflowRunResponse,
+    WorkspaceCreateRequest,
+    WorkspaceCreateResponse,
+)
 from .workflow import (
     DEFAULT_WORKFLOW_ENGINE,
     WORKFLOW_ENGINES,
@@ -19,7 +37,9 @@ from .workflow import (
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
+MAX_REQUEST_BYTES = 25_000_000
 WORKFLOW_LOCK = threading.Lock()
+PayloadModel = TypeVar("PayloadModel", bound=BaseModel)
 
 
 class ApiError(Exception):
@@ -29,138 +49,120 @@ class ApiError(Exception):
         self.message = message
 
 
-class LocalJobAgentServer(ThreadingHTTPServer):
-    allow_reuse_address = True
+def build_app(workspace_root: str | Path = ".", web_root: str | Path = "web") -> FastAPI:
+    root = Path(workspace_root).resolve()
+    web = Path(web_root).resolve()
+    app = FastAPI(
+        title="Apply Less, Fit More Local API",
+        version="0.1.0",
+        responses={400: {"description": "Local API error"}, 404: {"description": "Not found"}},
+    )
+    app.state.workspace_root = root
+    app.state.web_root = web
 
-    def __init__(self, server_address: tuple[str, int], handler_class: type[BaseHTTPRequestHandler], workspace_root: Path, web_root: Path):
-        super().__init__(server_address, handler_class)
-        self.workspace_root = workspace_root.resolve()
-        self.web_root = web_root.resolve()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$",
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Content-Type"],
+    )
 
-
-class LocalJobAgentHandler(BaseHTTPRequestHandler):
-    server_version = "JobAgentLocal/0.1"
-
-    def do_OPTIONS(self) -> None:
-        self._send_empty(204)
-
-    def do_GET(self) -> None:
-        parsed = urlparse(self.path)
-        if parsed.path == "/api/health":
-            self._send_json({"ok": True, "workspace_root": str(self.server.workspace_root)})
-            return
-        if parsed.path == "/api/artifacts":
+    @app.middleware("http")
+    async def local_response_contract(request: Request, call_next):
+        length = request.headers.get("content-length")
+        if length:
             try:
-                query = parse_qs(parsed.query)
-                out_dir = _first(query, "out_dir") or "outputs/private"
-                self._send_json(_read_artifacts(self.server.workspace_root, out_dir))
-            except ApiError as exc:
-                self._send_error(exc.status, exc.message)
-            except Exception as exc:  # pragma: no cover - defensive boundary
-                self._send_error(500, str(exc))
-            return
-        self._serve_static(parsed.path)
+                if int(length) > MAX_REQUEST_BYTES:
+                    return _error_response(413, "Request body is too large")
+            except ValueError:
+                return _error_response(400, "Invalid Content-Length")
+        response = await call_next(request)
+        response.headers["Cache-Control"] = "no-store"
+        return response
 
-    def do_POST(self) -> None:
-        parsed = urlparse(self.path)
-        try:
-            if parsed.path == "/api/jobs/text":
-                payload = self._read_json()
-                path_value = payload.get("job_path") or payload.get("path") or "inputs/jobs/job.txt"
-                content = payload.get("content")
-                if content is None:
-                    content = payload.get("text")
-                path = _safe_job_path(self.server.workspace_root, str(path_value))
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(str(content or ""), encoding="utf-8")
-                self._send_json({"ok": True, "path": _relative_display(self.server.workspace_root, path)})
-                return
-            if parsed.path == "/api/workspace/create":
-                payload = self._read_json()
-                self._send_json(_create_workspace(self.server.workspace_root, payload))
-                return
-            if parsed.path == "/api/files/base-cv":
-                payload = self._read_json()
-                self._send_json(_write_base_cv(self.server.workspace_root, payload))
-                return
-            if parsed.path == "/api/workflows/run":
-                payload = self._read_json()
-                self._send_json(_run_workflow_api(self.server.workspace_root, payload))
-                return
-            raise ApiError(404, "Unknown API route")
-        except ApiError as exc:
-            self._send_error(exc.status, exc.message)
-        except Exception as exc:  # pragma: no cover - defensive boundary
-            self._send_error(500, str(exc))
+    @app.exception_handler(ApiError)
+    async def api_error_handler(_request: Request, exc: ApiError):
+        return _error_response(exc.status, exc.message)
 
-    def log_message(self, format: str, *args: object) -> None:
-        return
+    @app.exception_handler(RequestValidationError)
+    async def validation_error_handler(_request: Request, exc: RequestValidationError):
+        return _error_response(400, _validation_message(exc))
 
-    def _read_json(self) -> dict:
-        try:
-            length = int(self.headers.get("Content-Length", "0") or "0")
-        except ValueError as exc:
-            raise ApiError(400, "Invalid Content-Length") from exc
-        if length > 25_000_000:
-            raise ApiError(413, "Request body is too large")
-        raw = self.rfile.read(length).decode("utf-8") if length else "{}"
-        try:
-            payload = json.loads(raw)
-        except json.JSONDecodeError as exc:
-            raise ApiError(400, f"Invalid JSON: {exc}") from exc
-        if not isinstance(payload, dict):
-            raise ApiError(400, "Request body must be a JSON object")
+    @app.get("/api/health", response_model=HealthResponse)
+    async def health(request: Request):
+        return {"ok": True, "workspace_root": str(request.app.state.workspace_root)}
+
+    @app.get("/api/artifacts", response_model=ArtifactResponse)
+    async def artifacts(request: Request, out_dir: str = Query("outputs/private")):
+        return _read_artifacts(request.app.state.workspace_root, out_dir)
+
+    @app.post("/api/jobs/text", response_model=PathResponse)
+    async def jobs_text(request: Request, payload: JobTextRequest):
+        return _write_job_text(request.app.state.workspace_root, payload)
+
+    @app.post("/api/workspace/create", response_model=WorkspaceCreateResponse)
+    async def workspace_create(request: Request, payload: WorkspaceCreateRequest):
+        return _create_workspace(request.app.state.workspace_root, payload)
+
+    @app.post("/api/files/base-cv", response_model=BaseCVUploadResponse)
+    async def base_cv(request: Request, payload: BaseCVUploadRequest):
+        return _write_base_cv(request.app.state.workspace_root, payload)
+
+    @app.post("/api/workflows/run", response_model=WorkflowRunResponse)
+    async def workflows_run(request: Request, payload: WorkflowRunRequest):
+        return _run_workflow_api(request.app.state.workspace_root, payload)
+
+    @app.options("/{_path:path}", include_in_schema=False)
+    async def options_any(_path: str):
+        return Response(status_code=204)
+
+    @app.api_route("/api/{_path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"], include_in_schema=False)
+    async def unknown_api(_path: str):
+        raise ApiError(404, "Unknown API route")
+
+    @app.get("/", include_in_schema=False)
+    async def root_redirect():
+        return RedirectResponse("/web/index.html")
+
+    if web.is_dir():
+        app.mount("/web", StaticFiles(directory=str(web)), name="web")
+
+    return app
+
+
+def build_server(
+    host: str = DEFAULT_HOST,
+    port: int = DEFAULT_PORT,
+    workspace_root: str | Path = ".",
+    web_root: str | Path = "web",
+) -> FastAPI:
+    if not _is_loopback_host(host):
+        raise ValueError("Local backend must bind to localhost/127.0.0.1")
+    return build_app(workspace_root=workspace_root, web_root=web_root)
+
+
+def _error_response(status: int, message: str) -> JSONResponse:
+    return JSONResponse({"ok": False, "error": message}, status_code=status)
+
+
+def _validation_message(exc: RequestValidationError | ValidationError) -> str:
+    errors = exc.errors()
+    if not errors:
+        return "Invalid request"
+    first = errors[0]
+    location = ".".join(str(item) for item in first.get("loc", []) if item != "body")
+    prefix = f"{location}: " if location else ""
+    return f"{prefix}{first.get('msg', 'Invalid request')}"
+
+
+def _validate_payload(model: type[PayloadModel], payload: PayloadModel | dict) -> PayloadModel:
+    if isinstance(payload, model):
         return payload
-
-    def _serve_static(self, request_path: str) -> None:
-        path = request_path if request_path not in {"", "/"} else "/web/index.html"
-        if path.startswith("/web/"):
-            target = _safe_path(self.server.web_root.parent, path.lstrip("/"))
-        else:
-            self._send_error(404, "Not found")
-            return
-        if not target.is_file():
-            self._send_error(404, "Not found")
-            return
-        content_type = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
-        data = target.read_bytes()
-        self.send_response(200)
-        self._common_headers(content_type)
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
-    def _send_json(self, payload: dict, status: int = 200) -> None:
-        data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
-        self.send_response(status)
-        self._common_headers("application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
-    def _send_empty(self, status: int) -> None:
-        self.send_response(status)
-        self._common_headers("text/plain; charset=utf-8")
-        self.send_header("Content-Length", "0")
-        self.end_headers()
-
-    def _send_error(self, status: int, message: str) -> None:
-        self._send_json({"ok": False, "error": message}, status=status)
-
-    def _common_headers(self, content_type: str) -> None:
-        self.send_header("Content-Type", content_type)
-        origin = self.headers.get("Origin")
-        if origin and _is_local_origin(origin):
-            self.send_header("Access-Control-Allow-Origin", origin)
-            self.send_header("Vary", "Origin")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Cache-Control", "no-store")
-
-
-def _first(query: dict[str, list[str]], key: str) -> str:
-    values = query.get(key) or []
-    return values[0] if values else ""
+    try:
+        return model.model_validate(payload)
+    except ValidationError as exc:
+        raise ApiError(400, _validation_message(exc)) from exc
 
 
 def _safe_path(root: Path, value: str) -> Path:
@@ -221,26 +223,12 @@ def _require_child(root: Path, path: Path, prefix: str, message: str) -> None:
         raise ApiError(400, message) from exc
 
 
-def _parse_bool(payload: dict, key: str, default: bool = False) -> bool:
-    if key not in payload:
-        return default
-    value = payload[key]
-    if isinstance(value, bool):
-        return value
-    raise ApiError(400, f"{key} must be a boolean")
-
-
 def _validate_workflow_engine(value: object) -> str:
     engine = str(value or DEFAULT_WORKFLOW_ENGINE).strip().lower()
     if engine not in WORKFLOW_ENGINES:
         allowed = ", ".join(sorted(WORKFLOW_ENGINES))
         raise ApiError(400, f"Workflow engine must be one of: {allowed}")
     return engine
-
-
-def _is_local_origin(origin: str) -> bool:
-    parsed = urlparse(origin)
-    return parsed.scheme in {"http", "https"} and _is_loopback_host(parsed.hostname or "")
 
 
 def _is_loopback_host(host: str) -> bool:
@@ -305,17 +293,42 @@ def _read_artifacts(root: Path, out_dir_value: str) -> dict:
     return {"ok": True, "artifacts": _artifact_payload(root, out_dir, artifacts)}
 
 
-def _create_workspace(root: Path, payload: dict) -> dict:
-    job_path = _safe_job_path(root, str(payload.get("job_path") or "inputs/jobs/job.txt"))
-    profile_path = _safe_profile_path(root, str(payload.get("profile_path") or "profiles/me.local.json"))
-    cv_path_value = payload.get("cv_path") or payload.get("initial_cv_path") or payload.get("path") or "private_resumes/base_cv.pdf"
-    cv_path = _safe_cv_path(root, str(cv_path_value))
-    memory_path = _safe_memory_path(root, str(payload.get("memory_path") or "memory.local.json"))
-    out_dir = _safe_output_dir(root, str(payload.get("out_dir") or "outputs/private/default"))
+def _write_job_text(root: Path, payload: JobTextRequest | dict) -> dict:
+    request = _validate_payload(JobTextRequest, payload)
+    path_value = request.job_path or request.path or "inputs/jobs/job.txt"
+    content = request.content if request.content is not None else request.text
+    path = _safe_job_path(root, str(path_value))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(str(content or ""), encoding="utf-8")
+    return {"ok": True, "path": _relative_display(root, path)}
+
+
+def _create_workspace(root: Path, payload: WorkspaceCreateRequest | dict) -> dict:
+    request = _validate_payload(WorkspaceCreateRequest, payload)
+    job_path = _safe_job_path(root, request.job_path)
+    profile_path = _safe_profile_path(root, request.profile_path)
+    cv_path_value = request.cv_path or request.initial_cv_path or request.path or "private_resumes/base_cv.pdf"
+    cv_path = _safe_cv_path(root, cv_path_value)
+    memory_path = _safe_memory_path(root, request.memory_path)
+    out_dir = _safe_output_dir(root, request.out_dir)
     for path in [job_path.parent, profile_path.parent, cv_path.parent, memory_path.parent, out_dir]:
         path.mkdir(parents=True, exist_ok=True)
     if not memory_path.exists():
-        memory_path.write_text(json.dumps({"version": 1, "applications": [], "learned_filters": [], "recurring_red_lines": [], "do_not_claim": [], "notes": []}, indent=2) + "\n", encoding="utf-8")
+        memory_path.write_text(
+            json.dumps(
+                {
+                    "version": 1,
+                    "applications": [],
+                    "learned_filters": [],
+                    "recurring_red_lines": [],
+                    "do_not_claim": [],
+                    "notes": [],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
     if not profile_path.exists():
         profile_path.write_text(_starter_profile(), encoding="utf-8")
     return {
@@ -330,14 +343,14 @@ def _create_workspace(root: Path, payload: dict) -> dict:
     }
 
 
-def _write_base_cv(root: Path, payload: dict) -> dict:
-    cv_path_value = payload.get("cv_path") or payload.get("initial_cv_path") or payload.get("path") or "private_resumes/base_cv.pdf"
-    cv_path = _safe_cv_path(root, str(cv_path_value))
-    raw = str(payload.get("content_base64") or "")
-    if not raw:
+def _write_base_cv(root: Path, payload: BaseCVUploadRequest | dict) -> dict:
+    request = _validate_payload(BaseCVUploadRequest, payload)
+    cv_path_value = request.cv_path or request.initial_cv_path or request.path or "private_resumes/base_cv.pdf"
+    cv_path = _safe_cv_path(root, cv_path_value)
+    if not request.content_base64:
         raise ApiError(400, "content_base64 is required")
     try:
-        data = base64.b64decode(raw, validate=True)
+        data = base64.b64decode(request.content_base64, validate=True)
     except ValueError as exc:
         raise ApiError(400, "content_base64 is not valid base64") from exc
     cv_path.parent.mkdir(parents=True, exist_ok=True)
@@ -378,35 +391,33 @@ def _starter_profile() -> str:
     ) + "\n"
 
 
-def _run_workflow_api(root: Path, payload: dict) -> dict:
-    job_path = _safe_job_path(root, str(payload.get("job_path") or ""))
-    profile_path = _safe_profile_path(root, str(payload.get("profile_path") or "profiles/me.local.json"))
-    out_dir = _safe_output_dir(root, str(payload.get("out_dir") or f"outputs/private/{job_path.stem}"))
-    memory_raw = str(payload.get("memory_path") or "").strip()
+def _run_workflow_api(root: Path, payload: WorkflowRunRequest | dict) -> dict:
+    request = _validate_payload(WorkflowRunRequest, payload)
+    job_path = _safe_job_path(root, request.job_path)
+    profile_path = _safe_profile_path(root, request.profile_path)
+    out_dir = _safe_output_dir(root, request.out_dir or f"outputs/private/{job_path.stem}")
+    memory_raw = str(request.memory_path or "").strip()
     memory_path = _safe_memory_path(root, memory_raw) if memory_raw else None
     if not job_path.exists():
         raise ApiError(400, f"JD file not found: {_relative_display(root, job_path)}")
     if not profile_path.exists():
         raise ApiError(400, f"Profile file not found: {_relative_display(root, profile_path)}")
 
-    auto_approve = _parse_bool(payload, "auto_approve", default=False)
-    engine = _validate_workflow_engine(payload.get("engine"))
-    llm_provider = str(payload.get("llm_provider") or "none")
-    llm_base_url = str(payload.get("llm_base_url") or "")
-    _validate_llm_base_url(llm_provider, llm_base_url)
+    engine = _validate_workflow_engine(request.engine)
+    _validate_llm_base_url(request.llm_provider, request.llm_base_url)
     run_kwargs = {
         "job_path": job_path,
         "profile_path": profile_path,
         "out_dir": out_dir,
         "memory_path": memory_path,
-        "company": str(payload.get("company") or ""),
-        "title": str(payload.get("title") or ""),
-        "auto_approve": auto_approve,
+        "company": request.company,
+        "title": request.title,
+        "auto_approve": request.auto_approve,
         "input_fn": (lambda _prompt: "n"),
-        "llm_provider": llm_provider,
-        "llm_model": str(payload.get("llm_model") or ""),
-        "llm_base_url": llm_base_url,
-        "llm_api_key_env": str(payload.get("llm_api_key_env") or "OPENAI_API_KEY"),
+        "llm_provider": request.llm_provider,
+        "llm_model": request.llm_model,
+        "llm_base_url": request.llm_base_url,
+        "llm_api_key_env": request.llm_api_key_env,
         "engine": engine,
     }
     with WORKFLOW_LOCK:
@@ -431,14 +442,6 @@ def _run_workflow_api(root: Path, payload: dict) -> dict:
     }
 
 
-def build_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, workspace_root: str | Path = ".", web_root: str | Path = "web") -> LocalJobAgentServer:
-    if not _is_loopback_host(host):
-        raise ValueError("Local backend must bind to localhost/127.0.0.1")
-    root = Path(workspace_root).resolve()
-    web = Path(web_root).resolve()
-    return LocalJobAgentServer((host, port), LocalJobAgentHandler, root, web)
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Serve the local job-agent web UI and API")
     parser.add_argument("--host", default=DEFAULT_HOST)
@@ -446,15 +449,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--workspace", default=".")
     parser.add_argument("--web-root", default="web")
     args = parser.parse_args(argv)
-    server = build_server(host=args.host, port=args.port, workspace_root=args.workspace, web_root=args.web_root)
+    if not _is_loopback_host(args.host):
+        raise ValueError("Local backend must bind to localhost/127.0.0.1")
+
+    app = build_app(workspace_root=args.workspace, web_root=args.web_root)
     print(f"Serving job-agent UI: http://{args.host}:{args.port}/web/index.html")
-    print(f"Workspace root: {server.workspace_root}")
+    print(f"Workspace root: {Path(args.workspace).resolve()}")
     try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nShutting down.")
-    finally:
-        server.server_close()
+        import uvicorn
+    except ImportError as exc:
+        raise WorkflowEngineError("FastAPI server requires uvicorn. Install with: pip install -e .") from exc
+    uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
     return 0
 
 

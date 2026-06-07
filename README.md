@@ -65,6 +65,8 @@ source .venv/bin/activate
 pip install -e .
 ```
 
+Use the virtual environment. The app depends on FastAPI, LangGraph, Pydantic, and Uvicorn; installing those into a shared Python environment can conflict with unrelated LangChain packages.
+
 Start the local backend:
 
 ```bash
@@ -172,19 +174,15 @@ Do not bypass red lines, private evidence rules, or the one-page CV contract.
 
 Codex reads `AGENTS.md`. Claude Code reads `CLAUDE.md`, which points back to the same rules.
 
-## Optional LangGraph Engine
+## Modern Local Stack
 
-The default workflow engine is `classic`. It is simpler, has no extra dependency, and is recommended for normal release users.
+The app now uses a modern local AI stack:
 
-Use `langgraph` only if you want graph-style orchestration as the project grows toward resumable human checkpoints.
+- **FastAPI** serves the localhost API and the web interface.
+- **LangGraph** is the default workflow engine.
+- **Pydantic** validates API payloads and core job/profile/match schemas.
 
-Install the optional extra:
-
-```bash
-pip install -e ".[langgraph]"
-```
-
-Then choose **LangGraph** in the interface, or run:
+Classic linear workflow remains available only as a debugging fallback. To run the default graph workflow from the terminal:
 
 ```bash
 job-agent workflow run \
@@ -195,7 +193,7 @@ job-agent workflow run \
   --engine langgraph
 ```
 
-This does not change scoring, red lines, privacy rules, or artifact names. It only changes the workflow orchestrator.
+This does not loosen scoring, red lines, privacy rules, or artifact names. LangGraph coordinates the steps; the deterministic gate remains authoritative.
 
 ## Terminal Fallback
 

@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Callable
+
+from pydantic import BaseModel, ConfigDict
 
 from .generator import build_report, write_report
 from .job_parser import parse_job_file
@@ -17,7 +18,7 @@ from .profile import load_profile
 
 
 InputFn = Callable[[str], str]
-DEFAULT_WORKFLOW_ENGINE = "classic"
+DEFAULT_WORKFLOW_ENGINE = "langgraph"
 WORKFLOW_ENGINES = {"classic", "langgraph"}
 
 
@@ -25,8 +26,9 @@ class WorkflowEngineError(RuntimeError):
     """Raised when a requested workflow orchestrator cannot run."""
 
 
-@dataclass(frozen=True)
-class WorkflowArtifacts:
+class WorkflowArtifacts(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     out_dir: Path
     report: Path
     decision: Path
@@ -37,8 +39,9 @@ class WorkflowArtifacts:
     memory: Path | None = None
 
 
-@dataclass(frozen=True)
-class WorkflowRun:
+class WorkflowRun(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     status: str
     result: MatchResult
     artifacts: WorkflowArtifacts
@@ -356,7 +359,7 @@ def _decision_payload(result: MatchResult) -> dict:
         "score": result.score,
         "decision": result.decision,
         "market_risks": result.market_risks,
-        "negative_signals": [asdict(signal) for signal in result.negative_signals],
+        "negative_signals": [signal.model_dump() for signal in result.negative_signals],
         "root_strengths": result.root_matches,
         "interview_upskill": result.upskill_matches,
         "do_not_claim": result.irrelevant_or_low_signal,
@@ -455,7 +458,7 @@ def _slug(value: str) -> str:
 
 
 def _llm_verification_payload(verification: LLMVerification, provider: str, model: str) -> dict:
-    payload = asdict(verification)
+    payload = verification.model_dump()
     payload["provider"] = provider
     payload["model"] = model
     return payload

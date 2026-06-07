@@ -1205,7 +1205,7 @@
             <div class="subsection-title">
               <div>
                 <h3 data-i18n="baselineCvTitle">Initial CV baseline</h3>
-                <p data-i18n="baselineCvDesc">Require one original CV before the first real application so Codex or a future local server can understand existing evidence.</p>
+                <p data-i18n="baselineCvDesc">Require one original CV before the first real application so Codex and later CV steps have a private evidence baseline.</p>
               </div>
               <span class="pill warn" data-i18n="requiredBeforeCv">Required before CV work</span>
             </div>
@@ -1275,7 +1275,7 @@
             <div class="subsection-title">
               <div>
                 <h3 data-i18n="runConfigTitle">2. Get fit analysis</h3>
-                <p data-i18n="runConfigDesc">The local backend reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.</p>
+                <p data-i18n="runConfigDesc">The local backend runs the JD, profile, and memory workflow. The baseline CV stays as private evidence for later CV work.</p>
               </div>
             </div>
             <div class="grid-3">
@@ -1290,15 +1290,15 @@
               <div class="field">
                 <label for="workflowEngine" data-i18n="workflowEngineLabel">Workflow engine</label>
                 <select id="workflowEngine">
+                  <option value="langgraph" selected data-i18n="engineLangGraph">LangGraph</option>
                   <option value="classic" data-i18n="engineClassic">Classic</option>
-                  <option value="langgraph" data-i18n="engineLangGraph">LangGraph</option>
                 </select>
-                <p data-i18n="workflowEngineNote">Classic is the default. LangGraph requires the optional install extra.</p>
+                <p data-i18n="workflowEngineNote">LangGraph is the default. Classic remains available for debugging.</p>
               </div>
             </div>
 
             <div class="mode-help" style="margin-top: 14px;">
-              <strong data-i18n="aiReadsTitle">Backend reads these local files</strong>
+              <strong data-i18n="aiReadsTitle">Local evidence and outputs</strong>
               <div class="path-summary" aria-label="AI input and output files">
                 <div class="path-item"><span>JD</span><code id="aiReadJob">inputs/jobs/company_role_YYYY-MM-DD.txt</code></div>
                 <div class="path-item"><span>CV</span><code id="aiReadCv">private_resumes/base_cv.pdf</code></div>
@@ -1524,7 +1524,7 @@
             <div>
               <p class="eyebrow" data-i18n="guidesEyebrow">Operator guide</p>
               <h2 data-i18n="guidesTitle">Codex prompt and local API notes</h2>
-              <p data-i18n="guidesDesc">Use Codex as the operator around the CLI. A future local server can wrap run_workflow behind localhost APIs.</p>
+              <p data-i18n="guidesDesc">Use Codex as the operator around the same local FastAPI and LangGraph workflow.</p>
             </div>
           </div>
           <div class="grid-2">
@@ -1536,7 +1536,7 @@
               </div>
             </div>
             <div>
-              <h3 data-i18n="apiNotesTitle">Future localhost API shape</h3>
+              <h3 data-i18n="apiNotesTitle">Local API notes</h3>
               <div class="code-box">
                 <pre id="apiNotes"></pre>
               </div>
@@ -1550,7 +1550,7 @@
           <h3 data-i18n="privacyTitle">Privacy defaults</h3>
           <ul>
             <li data-i18n="privacyOne">Keep real profiles, CVs, reports, memory, PDFs, and application history in ignored private paths.</li>
-            <li data-i18n="privacyTwo">This static page does not upload data and does not store secrets.</li>
+            <li data-i18n="privacyTwo">This local interface does not upload data and does not store secrets.</li>
             <li data-i18n="privacyThree">Never paste API keys here; use an env var name.</li>
           </ul>
         </section>
@@ -1625,7 +1625,7 @@
         slugLabel: "Application slug",
         baseCvPathLabel: "Initial CV path",
         baselineCvTitle: "Initial CV baseline",
-        baselineCvDesc: "Require one original CV before the first real application so Codex or a future local server can understand existing evidence.",
+        baselineCvDesc: "Require one original CV before the first real application so Codex and later CV steps have a private evidence baseline.",
         requiredBeforeCv: "Required before CV work",
         baseCvFileLabel: "Initial CV file",
         baseCvEmpty: "No baseline CV loaded yet.",
@@ -1634,7 +1634,7 @@
         jobEvidenceTitle: "1. Upload job information",
         jobEvidenceDesc: "Choose one source. Website, PDF, TXT/MD, and pasted text should become reviewed local JD evidence before analysis.",
         runConfigTitle: "2. Get fit analysis",
-        runConfigDesc: "The local backend reads the JD, profile, memory, and baseline CV, runs the workflow, then shows the artifacts below.",
+        runConfigDesc: "The local backend runs the JD, profile, and memory workflow. The baseline CV stays as private evidence for later CV work.",
         sourceWebsite: "Website",
         sourcePdf: "PDF",
         sourceText: "TXT / MD",
@@ -1664,8 +1664,8 @@
         workflowEngineLabel: "Workflow engine",
         engineClassic: "Classic",
         engineLangGraph: "LangGraph",
-        workflowEngineNote: "Classic is the default. LangGraph requires: pip install -e '.[langgraph]'",
-        aiReadsTitle: "Backend reads these local files",
+        workflowEngineNote: "LangGraph is the default. Classic remains available for debugging.",
+        aiReadsTitle: "Local evidence and outputs",
         aiReadsNote: "Expected outputs: decision.json, report.md, next_actions.md, cv_plan.md, and llm_verification.json when a model draft is enabled.",
         advancedCliTitle: "Terminal fallback",
         advancedCliDesc: "Open this only if the local backend is unavailable or you want to run the CLI manually. Backend mode does not require copying this command.",
@@ -1673,9 +1673,9 @@
         runWithBackend: "Run fit analysis",
         checkBackend: "Check backend",
         backendChecking: "Checking local backend...",
-        backendEyebrow: "Local server",
+        backendEyebrow: "FastAPI local server",
         backendTitle: "Backend connection",
-        backendDesc: "Run the local Python server to let this HTML create files, run workflow, and load artifacts without copying terminal commands.",
+        backendDesc: "Run the local FastAPI server to create files, run the LangGraph workflow, and load artifacts without copying terminal commands.",
         backendUrlLabel: "Backend URL",
         backendActionLabel: "Connection",
         backendOnline: "Backend connected",
@@ -1690,7 +1690,7 @@
         cvPlanWithheld: "No CV plan returned; the gate may have withheld it.",
         verificationMissing: "No LLM verification returned.",
         loadBackendArtifacts: "Reload results",
-        serverCommand: "Start the local backend from the repo root:\n\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\nThen open:\nhttp://127.0.0.1:8765/web/index.html",
+        serverCommand: "Start the local FastAPI backend from the repo root:\n\njob-agent-web --host 127.0.0.1 --port 8765 --workspace .\n\nFallback if the command is unavailable:\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\nThen open:\nhttp://127.0.0.1:8765/web/index.html",
         copy: "Copy",
         copied: "Copied.",
         llmEyebrow: "Optional model layer",
@@ -1727,19 +1727,19 @@
         cvBoundary: "Memory can remember facts. Human confirmation is still required before editing CV bullets, turning private facts into public wording, sending materials, or accepting the final one-page PDF.",
         guidesEyebrow: "First-use tutorial",
         guidesTitle: "Codex prompt and local API notes",
-        guidesDesc: "Use this after choosing a workspace and baseline CV. Codex operates the CLI now; a future local server can wrap run_workflow behind localhost APIs.",
+        guidesDesc: "Use this after choosing a workspace and baseline CV. Codex operates around the same local FastAPI and LangGraph workflow.",
         codexPromptTitle: "Prompt for Codex",
-        apiNotesTitle: "Future localhost API shape",
+        apiNotesTitle: "Local API notes",
         privacyTitle: "Privacy defaults",
         privacyOne: "Keep real profiles, CVs, reports, memory, PDFs, and application history in ignored private paths.",
-        privacyTwo: "This static page does not upload data and does not store secrets.",
+        privacyTwo: "This local interface does not upload data and does not store secrets.",
         privacyThree: "Never paste API keys here; use an env var name.",
         memoryVsTitle: "Memory vs checkpoint",
         memoryVsBody: "Memory learns recurring filters and fact status. Human confirmation is for CV edits, public wording, sending messages, and final PDF acceptance.",
         gateTitle: "Gate logic",
         gateBody: "A blocked workflow means no substitute CV bullets, cover letter, or recruiter message.",
         futureCv: "Future command only: job-agent cv build is not implemented yet.\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
-        apiNotes: "Local server contract, bound to 127.0.0.1 only:\n\nGET /api/health\n  Check backend status and workspace root.\n\nPOST /api/workspace/create\n  Create private folders, memory.local.json, profile draft, and output directory.\n\nPOST /api/files/base-cv\n  Save the uploaded baseline CV inside private_resumes/.\n\nPOST /api/jobs/text\n  Save reviewed JD text into inputs/jobs/.\n\nPOST /api/workflows/run\n  Calls run_workflow with engine classic or langgraph and returns artifacts.\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  Load existing artifacts from the output directory.\n\nPOST /api/cv/build\n  Future only. Requires cv_plan.md, one-page PDF QA, verifier pass, and human confirmation.",
+        apiNotes: "FastAPI local server contract, bound to 127.0.0.1 only:\n\nGET /api/health\n  Check backend status and workspace root.\n\nPOST /api/workspace/create\n  Create private folders, memory.local.json, profile draft, and output directory.\n\nPOST /api/files/base-cv\n  Save the uploaded baseline CV inside private_resumes/.\n\nPOST /api/jobs/text\n  Save reviewed JD text into inputs/jobs/.\n\nPOST /api/workflows/run\n  Calls run_workflow with LangGraph by default and returns artifacts.\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  Load existing artifacts from the output directory.\n\nPOST /api/cv/build\n  Future only. Requires cv_plan.md, one-page PDF QA, verifier pass, and human confirmation.",
         codexPrompt: "Please read README.md and AGENTS.md.\nAct as the local operator for this application round.\nRead the reviewed JD at {jobPath}, my profile at {profilePath}, memory at {memoryPath}, and my initial CV baseline at {cvPath}.\nUse the baseline CV only as private evidence for understanding my current CV. Do not tailor my CV until the gate allows it.\nRun the deterministic workflow:\n\n{command}\n\nThen read the output folder {outDir}: decision.json, report.md, next_actions.md, cv_plan.md if it exists, and llm_verification.json if present.\nSummarize the fit gate, red lines, do-not-claim items, and next actions back to me. If cv_plan.md is missing, treat it as an intentional gate result unless the command failed.\nDo not bypass red lines, memory privacy, or the one-page CV contract.",
         invalidJson: "Could not parse JSON.",
         reportLoaded: "Report loaded locally.",
@@ -1821,7 +1821,7 @@
         slugLabel: "投递 slug",
         baseCvPathLabel: "初始 CV 路径",
         baselineCvTitle: "初始 CV baseline",
-        baselineCvDesc: "第一次真实投递前必须提供一份原始 CV，让 Codex 或未来本地 server 理解已有证据。",
+        baselineCvDesc: "第一次真实投递前必须提供一份原始 CV，作为 Codex 和后续 CV 步骤的私有证据基准。",
         requiredBeforeCv: "改 CV 前必需",
         baseCvFileLabel: "初始 CV 文件",
         baseCvEmpty: "尚未加载初始 CV。",
@@ -1830,7 +1830,7 @@
         jobEvidenceTitle: "1. 上传职位信息",
         jobEvidenceDesc: "选择一种来源。网站、PDF、TXT/MD 和粘贴文本都应先变成确认过的本地 JD 证据，再进入分析。",
         runConfigTitle: "2. 获取匹配信息",
-        runConfigDesc: "本地后端读取 JD、profile、memory 和初始 CV，运行 workflow，然后在下方展示产物。",
+        runConfigDesc: "本地后端运行 JD、profile 和 memory workflow。初始 CV 作为后续 CV 工作的私有证据保留。",
         sourceWebsite: "网站",
         sourcePdf: "PDF",
         sourceText: "TXT / MD",
@@ -1860,8 +1860,8 @@
         workflowEngineLabel: "Workflow engine",
         engineClassic: "Classic",
         engineLangGraph: "LangGraph",
-        workflowEngineNote: "默认使用 Classic。LangGraph 需要先安装：pip install -e '.[langgraph]'",
-        aiReadsTitle: "后端会读取这些本地文件",
+        workflowEngineNote: "默认使用 LangGraph。Classic 仅作为调试兜底保留。",
+        aiReadsTitle: "本地证据和输出",
         aiReadsNote: "预期输出：decision.json、report.md、next_actions.md、cv_plan.md；开启模型草稿时还有 llm_verification.json。",
         advancedCliTitle: "终端兜底",
         advancedCliDesc: "只有本地后端不可用，或者你想手动运行 CLI 时才打开这里。后端模式不需要复制这段命令。",
@@ -1869,9 +1869,9 @@
         runWithBackend: "运行匹配分析",
         checkBackend: "检测后端",
         backendChecking: "正在检测本地后端...",
-        backendEyebrow: "本地 server",
+        backendEyebrow: "FastAPI 本地 server",
         backendTitle: "后端连接",
-        backendDesc: "启动本地 Python server 后，HTML 可以创建文件、运行 workflow、加载产物，不再需要复制终端命令。",
+        backendDesc: "启动本地 FastAPI server 后，HTML 可以创建文件、运行 LangGraph workflow、加载产物，不再需要复制终端命令。",
         backendUrlLabel: "后端 URL",
         backendActionLabel: "连接",
         backendOnline: "后端已连接",
@@ -1886,7 +1886,7 @@
         cvPlanWithheld: "没有返回 CV plan；可能是 gate 有意拦截。",
         verificationMissing: "没有返回 LLM verification。",
         loadBackendArtifacts: "重新加载结果",
-        serverCommand: "在 repo root 启动本地后端：\n\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\n然后打开：\nhttp://127.0.0.1:8765/web/index.html",
+        serverCommand: "在 repo root 启动本地 FastAPI 后端：\n\njob-agent-web --host 127.0.0.1 --port 8765 --workspace .\n\n如果命令不可用，使用兜底：\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\n然后打开：\nhttp://127.0.0.1:8765/web/index.html",
         copy: "复制",
         copied: "已复制。",
         llmEyebrow: "可选模型层",
@@ -1923,19 +1923,19 @@
         cvBoundary: "Memory 可以记住事实。改 CV bullet、把私密事实写成公开表达、发送材料、接受最终一页 PDF 之前仍需要人工确认。",
         guidesEyebrow: "第一次使用教程",
         guidesTitle: "Codex 提示词与本地 API 说明",
-        guidesDesc: "设置工作路径和初始 CV 后使用这里。现在由 Codex 操作 CLI；未来本地 server 可以把 run_workflow 包成本机 API。",
+        guidesDesc: "设置工作路径和初始 CV 后使用这里。Codex 围绕同一个本地 FastAPI 和 LangGraph workflow 工作。",
         codexPromptTitle: "复制给 Codex 的提示词",
-        apiNotesTitle: "未来 localhost API 形状",
+        apiNotesTitle: "本地 API 说明",
         privacyTitle: "隐私默认规则",
         privacyOne: "真实 profile、CV、报告、memory、PDF 和申请历史都放在 ignored private 路径。",
-        privacyTwo: "这个静态页面不上传数据，也不存储密钥。",
+        privacyTwo: "这个本地界面不上传数据，也不存储密钥。",
         privacyThree: "不要在这里粘贴 API key；使用环境变量名。",
         memoryVsTitle: "Memory vs 人工确认",
         memoryVsBody: "Memory 学习反复出现的过滤项和事实状态。人工确认只用于改 CV、公开表述、发送消息和最终 PDF。",
         gateTitle: "Gate 逻辑",
         gateBody: "被红线阻断时，不补写 CV bullet、cover letter 或 recruiter message。",
         futureCv: "仅未来命令：job-agent cv build 还没有实现。\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
-        apiNotes: "本地 server 契约，只绑定 127.0.0.1：\n\nGET /api/health\n  检测后端状态和真实 workspace root。\n\nPOST /api/workspace/create\n  创建 private 文件夹、memory.local.json、profile 草稿和输出目录。\n\nPOST /api/files/base-cv\n  把上传的初始 CV 保存到 private_resumes/。\n\nPOST /api/jobs/text\n  把用户确认过的 JD 文本保存到 inputs/jobs/。\n\nPOST /api/workflows/run\n  用 classic 或 langgraph engine 调用 run_workflow 并返回产物。\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  从输出目录加载已有产物。\n\nPOST /api/cv/build\n  仅未来功能。需要 cv_plan.md、一页 PDF QA、verifier 通过和人工确认。",
+        apiNotes: "FastAPI 本地 server 契约，只绑定 127.0.0.1：\n\nGET /api/health\n  检测后端状态和真实 workspace root。\n\nPOST /api/workspace/create\n  创建 private 文件夹、memory.local.json、profile 草稿和输出目录。\n\nPOST /api/files/base-cv\n  把上传的初始 CV 保存到 private_resumes/。\n\nPOST /api/jobs/text\n  把用户确认过的 JD 文本保存到 inputs/jobs/。\n\nPOST /api/workflows/run\n  默认用 LangGraph 调用 run_workflow 并返回产物。\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  从输出目录加载已有产物。\n\nPOST /api/cv/build\n  仅未来功能。需要 cv_plan.md、一页 PDF QA、verifier 通过和人工确认。",
         codexPrompt: "请阅读 README.md 和 AGENTS.md。\n你作为这一轮投递的本地 operator 工作。\n读取已确认 JD：{jobPath}，profile：{profilePath}，memory：{memoryPath}，以及初始 CV baseline：{cvPath}。\n初始 CV 只能作为私有证据来理解我当前 CV；不要在 gate 允许前修改 CV。\n运行 deterministic workflow：\n\n{command}\n\n然后读取输出目录 {outDir} 里的 decision.json、report.md、next_actions.md、如果存在的 cv_plan.md，以及如果存在的 llm_verification.json。\n把 fit gate、红线、do-not-claim 和下一步动作总结给我。如果 cv_plan.md 缺失，先判断是否是 gate 有意拦截，不要自行补写 CV bullet。\n不要绕过红线、memory 隐私或一页 CV 规则。",
         invalidJson: "无法解析 JSON。",
         reportLoaded: "Report 已在本地加载。",
@@ -2017,7 +2017,7 @@
         slugLabel: "Bewerbungs-Slug",
         baseCvPathLabel: "Pfad zum Basis-CV",
         baselineCvTitle: "Initialer Basis-CV",
-        baselineCvDesc: "Vor der ersten echten Bewerbung ist ein Original-CV erforderlich, damit Codex oder ein zukünftiger lokaler Server vorhandene Belege verstehen kann.",
+        baselineCvDesc: "Vor der ersten echten Bewerbung ist ein Original-CV als private Evidenzbasis für Codex und spätere CV-Schritte erforderlich.",
         requiredBeforeCv: "Vor CV-Arbeit erforderlich",
         baseCvFileLabel: "Basis-CV-Datei",
         baseCvEmpty: "Noch kein Basis-CV geladen.",
@@ -2026,7 +2026,7 @@
         jobEvidenceTitle: "1. Jobinformationen hochladen",
         jobEvidenceDesc: "Wähle eine Quelle. Website, PDF, TXT/MD und eingefügter Text sollen vor der Analyse zu geprüfter lokaler JD-Evidenz werden.",
         runConfigTitle: "2. Fit-Analyse erhalten",
-        runConfigDesc: "Das lokale Backend liest JD, Profil, Memory und Basis-CV, führt den Workflow aus und zeigt die Artefakte unten.",
+        runConfigDesc: "Das lokale Backend führt den JD-, Profil- und Memory-Workflow aus. Der Basis-CV bleibt private Evidenz für spätere CV-Arbeit.",
         sourceWebsite: "Website",
         sourcePdf: "PDF",
         sourceText: "TXT / MD",
@@ -2056,8 +2056,8 @@
         workflowEngineLabel: "Workflow-Engine",
         engineClassic: "Classic",
         engineLangGraph: "LangGraph",
-        workflowEngineNote: "Classic ist Standard. LangGraph erfordert: pip install -e '.[langgraph]'",
-        aiReadsTitle: "Backend liest diese lokalen Dateien",
+        workflowEngineNote: "LangGraph ist Standard. Classic bleibt zum Debuggen verfügbar.",
+        aiReadsTitle: "Lokale Evidenz und Outputs",
         aiReadsNote: "Erwartete Outputs: decision.json, report.md, next_actions.md, cv_plan.md und llm_verification.json, wenn ein Modellentwurf aktiviert ist.",
         advancedCliTitle: "Terminal-Fallback",
         advancedCliDesc: "Öffne dies nur, wenn das lokale Backend nicht verfügbar ist oder du die CLI manuell ausführen willst. Im Backend-Modus musst du diesen Befehl nicht kopieren.",
@@ -2065,9 +2065,9 @@
         runWithBackend: "Fit-Analyse starten",
         checkBackend: "Backend prüfen",
         backendChecking: "Lokales Backend wird geprüft...",
-        backendEyebrow: "Lokaler Server",
+        backendEyebrow: "Lokaler FastAPI-Server",
         backendTitle: "Backend-Verbindung",
-        backendDesc: "Starte den lokalen Python-Server, damit dieses HTML Dateien erstellen, den Workflow ausführen und Artefakte laden kann.",
+        backendDesc: "Starte den lokalen FastAPI-Server, damit dieses HTML Dateien erstellen, den LangGraph-Workflow ausführen und Artefakte laden kann.",
         backendUrlLabel: "Backend-URL",
         backendActionLabel: "Verbindung",
         backendOnline: "Backend verbunden",
@@ -2082,7 +2082,7 @@
         cvPlanWithheld: "Kein CV-Plan zurückgegeben; das Gate hat ihn möglicherweise zurückgehalten.",
         verificationMissing: "Keine LLM-Verifikation zurückgegeben.",
         loadBackendArtifacts: "Ergebnisse neu laden",
-        serverCommand: "Lokales Backend im Repo-Root starten:\n\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\nDann öffnen:\nhttp://127.0.0.1:8765/web/index.html",
+        serverCommand: "Lokales FastAPI-Backend im Repo-Root starten:\n\njob-agent-web --host 127.0.0.1 --port 8765 --workspace .\n\nFallback, falls der Befehl nicht verfügbar ist:\nPYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .\n\nDann öffnen:\nhttp://127.0.0.1:8765/web/index.html",
         copy: "Kopieren",
         copied: "Kopiert.",
         llmEyebrow: "Optionale Modellschicht",
@@ -2119,19 +2119,19 @@
         cvBoundary: "Memory kann Fakten merken. Menschliche Bestätigung bleibt erforderlich, bevor CV-Bullets bearbeitet, private Fakten öffentlich formuliert, Materialien gesendet oder die finale Ein-Seiten-PDF akzeptiert wird.",
         guidesEyebrow: "Erstnutzungs-Tutorial",
         guidesTitle: "Codex-Prompt und lokale API-Notizen",
-        guidesDesc: "Nutze dies nach Workspace- und Basis-CV-Setup. Codex bedient aktuell die CLI; ein zukünftiger lokaler Server kann run_workflow über localhost-APIs kapseln.",
+        guidesDesc: "Nutze dies nach Workspace- und Basis-CV-Setup. Codex arbeitet um denselben lokalen FastAPI- und LangGraph-Workflow herum.",
         codexPromptTitle: "Prompt für Codex",
-        apiNotesTitle: "Zukünftige localhost-API-Form",
+        apiNotesTitle: "Lokale API-Notizen",
         privacyTitle: "Datenschutz-Defaults",
         privacyOne: "Halte echte Profile, CVs, Reports, Memory, PDFs und Bewerbungshistorie in ignorierten privaten Pfaden.",
-        privacyTwo: "Diese statische Seite lädt keine Daten hoch und speichert keine Secrets.",
+        privacyTwo: "Diese lokale Oberfläche lädt keine Daten hoch und speichert keine Secrets.",
         privacyThree: "Füge hier niemals API-Schlüssel ein; nutze den Namen einer Umgebungsvariable.",
         memoryVsTitle: "Memory vs. Checkpoint",
         memoryVsBody: "Memory lernt wiederkehrende Filter und Faktenstatus. Menschliche Bestätigung gilt für CV-Änderungen, öffentliche Formulierungen, Nachrichtenversand und finale PDF-Abnahme.",
         gateTitle: "Gate-Logik",
         gateBody: "Ein blockierter Workflow bedeutet: keine Ersatz-CV-Bullets, kein Cover Letter und keine Recruiter-Nachricht.",
         futureCv: "Nur zukünftiger Befehl: job-agent cv build ist noch nicht implementiert.\n\njob-agent cv build \\\n  --job {jobPath} \\\n  --profile {profilePath} \\\n  --source-cv {cvPath} \\\n  --template templates/cv.tex \\\n  --out outputs/private/company_role_cv.pdf",
-        apiNotes: "Lokaler Server-Vertrag, nur an 127.0.0.1 gebunden:\n\nGET /api/health\n  Prüft Backend-Status und Workspace-Root.\n\nPOST /api/workspace/create\n  Erstellt private Ordner, memory.local.json, Profilentwurf und Ausgabeverzeichnis.\n\nPOST /api/files/base-cv\n  Speichert den hochgeladenen Basis-CV in private_resumes/.\n\nPOST /api/jobs/text\n  Speichert geprüften JD-Text in inputs/jobs/.\n\nPOST /api/workflows/run\n  Ruft run_workflow mit Engine classic oder langgraph auf und gibt Artefakte zurück.\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  Lädt vorhandene Artefakte aus dem Ausgabeverzeichnis.\n\nPOST /api/cv/build\n  Nur zukünftig. Erfordert cv_plan.md, Ein-Seiten-PDF-QA, bestandene Verifikation und menschliche Bestätigung.",
+        apiNotes: "Lokaler FastAPI-Server-Vertrag, nur an 127.0.0.1 gebunden:\n\nGET /api/health\n  Prüft Backend-Status und Workspace-Root.\n\nPOST /api/workspace/create\n  Erstellt private Ordner, memory.local.json, Profilentwurf und Ausgabeverzeichnis.\n\nPOST /api/files/base-cv\n  Speichert den hochgeladenen Basis-CV in private_resumes/.\n\nPOST /api/jobs/text\n  Speichert geprüften JD-Text in inputs/jobs/.\n\nPOST /api/workflows/run\n  Ruft run_workflow standardmäßig mit LangGraph auf und gibt Artefakte zurück.\n\nGET /api/artifacts?out_dir=outputs/private/<slug>\n  Lädt vorhandene Artefakte aus dem Ausgabeverzeichnis.\n\nPOST /api/cv/build\n  Nur zukünftig. Erfordert cv_plan.md, Ein-Seiten-PDF-QA, bestandene Verifikation und menschliche Bestätigung.",
         codexPrompt: "Bitte lies README.md und AGENTS.md.\nHandle als lokaler Operator für diese Bewerbungsrunde.\nLies die geprüfte Stellenanzeige unter {jobPath}, mein Profil unter {profilePath}, Memory unter {memoryPath} und meinen Basis-CV unter {cvPath}.\nNutze den Basis-CV nur als private Evidenz, um meinen aktuellen CV zu verstehen. Passe meinen CV nicht an, bevor das Gate es erlaubt.\nFühre den deterministischen Workflow aus:\n\n{command}\n\nLies danach den Ausgabeordner {outDir}: decision.json, report.md, next_actions.md, cv_plan.md falls vorhanden und llm_verification.json falls vorhanden.\nFasse Fit-Gate, rote Linien, Do-not-claim-Punkte und nächste Schritte für mich zusammen. Wenn cv_plan.md fehlt, behandle das zuerst als beabsichtigtes Gate-Ergebnis, außer der Befehl ist fehlgeschlagen.\nUmgehe keine roten Linien, Memory-Privatsphäre oder den Ein-Seiten-CV-Vertrag.",
         invalidJson: "JSON konnte nicht geparst werden.",
         reportLoaded: "Report lokal geladen.",

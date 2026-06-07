@@ -72,11 +72,15 @@ class ReleaseBuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             _write_minimal_repo(root)
+            egg_info = root / "src/personal_job_search_agent.egg-info/PKG-INFO"
+            egg_info.parent.mkdir(parents=True)
+            egg_info.write_text("generated metadata\n", encoding="utf-8")
 
             build = release.build_release(root, root / "dist/releases", version="0.0.1", dry_run=True)
 
             self.assertIn("README.md", build.files)
             self.assertIn("web/index.html", build.files)
+            self.assertNotIn("src/personal_job_search_agent.egg-info/PKG-INFO", build.files)
             self.assertFalse(build.archive_path.exists())
 
 

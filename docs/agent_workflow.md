@@ -26,8 +26,8 @@ Internally, the workflow is split into small agents:
 
 The public entry point remains `run_workflow()`. It currently supports two engines:
 
-- `classic`: the default linear orchestrator with no optional dependencies.
-- `langgraph`: an optional graph orchestrator that preserves the same gate logic, artifacts, and privacy boundaries.
+- `langgraph`: the default graph orchestrator for state, branching, and future human-in-the-loop checkpoints.
+- `classic`: a linear fallback kept for debugging and regression comparison.
 
 The workflow uses memory to learn recurring filters, risks, and evidence patterns across applications. Human confirmation is reserved for CV/public-output boundaries such as generating a CV plan, drafting application text, or accepting a final one-page PDF. A red-line block stops CV planning even if `--yes` is passed.
 
@@ -48,6 +48,12 @@ job-agent workflow run \
 The repo includes a multilingual console at `web/index.html`. It can run in two modes.
 
 Backend mode:
+
+```bash
+job-agent-web --host 127.0.0.1 --port 8765 --workspace .
+```
+
+Fallback during development:
 
 ```bash
 PYTHONPATH=src python3 -m job_agent.server --host 127.0.0.1 --port 8765 --workspace .
@@ -87,7 +93,7 @@ memory.local.json                  # private cross-application memory
 outputs/private/<application>/     # workflow artifacts
 ```
 
-The initial CV baseline is required for real CV work because it lets Codex or a future local server understand existing evidence before changing role-specific wording. It is private evidence, not public output, and it does not bypass claim-evidence checks.
+The initial CV baseline is required for real CV work because it gives Codex and the future local CV builder a private reference before changing role-specific wording. The current fit gate reads reviewed JD text, profile, and memory; the baseline CV is saved as private evidence for the CV stage and does not bypass claim-evidence checks.
 
 The frontend should follow this lookup order:
 
@@ -97,7 +103,7 @@ The frontend should follow this lookup order:
 4. Missing artifacts are marked red.
 5. Manual import controls remain available as fallback.
 
-Backend boundary: `job_agent.server` wraps `run_workflow` behind localhost APIs. It must keep paths inside the selected workspace, avoid remote upload by default, and preserve explicit CV/public-output confirmation.
+Backend boundary: `job_agent.server` is a FastAPI app that wraps `run_workflow` behind localhost APIs. Pydantic request and response models live in `job_agent.api_models`, while core profile/job/match data models live in `job_agent.models`. The backend must keep paths inside the selected workspace, avoid remote upload by default, and preserve explicit CV/public-output confirmation.
 
 Backend API shape:
 
@@ -105,22 +111,24 @@ Backend API shape:
 - `POST /api/workspace/create` creates private folders, `memory.local.json`, a starter profile, and the output folder. Use `job_path`, `profile_path`, `cv_path` or `initial_cv_path`, `out_dir`, and `memory_path`.
 - `POST /api/files/base-cv` saves the uploaded baseline CV under `private_resumes/`. Use `cv_path`; `path` is accepted as an alias for operator ergonomics.
 - `POST /api/jobs/text` saves reviewed JD text under `inputs/jobs/`. Use `job_path` and `content`; `path` and `text` are accepted as aliases.
-- `POST /api/workflows/run` calls `run_workflow` with `job_path`, `profile_path`, `out_dir`, `memory_path`, company/title overrides, strict boolean `auto_approve`, optional `engine` (`classic` or `langgraph`), and optional local LLM flags.
+- `POST /api/workflows/run` calls `run_workflow` with `job_path`, `profile_path`, `out_dir`, `memory_path`, company/title overrides, strict boolean `auto_approve`, `engine` (`langgraph` by default, `classic` for debugging), and optional local LLM flags.
 - `GET /api/artifacts?out_dir=outputs/private/<slug>` reloads existing workflow artifacts.
 
-The server rejects workspace escapes, non-private output paths, remote LLM base URLs in local backend mode, and string booleans such as `"true"` for `auto_approve`.
+The server rejects workspace escapes, non-private output paths, remote LLM base URLs in local backend mode, and string booleans such as `"true"` for `auto_approve`. It preserves JSON error shape as `{"ok": false, "error": "..."}` so the static interface can display failures consistently.
 
-## Optional LangGraph Orchestration
+## LangGraph Orchestration
 
-LangGraph is useful once the workflow needs explicit state, conditional edges, durable resume, and human-in-the-loop interruption. The project should not use it as a new source of truth for scoring. The deterministic matcher and negative-ability gate remain authoritative.
+LangGraph is now the default because the workflow needs explicit state, conditional edges, durable resume, and human-in-the-loop interruption as it grows. The project should not use it as a new source of truth for scoring. The deterministic matcher and negative-ability gate remain authoritative.
 
-Install it only when needed:
+Install the project dependencies in a virtual environment:
 
 ```bash
-pip install -e ".[langgraph]"
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
 ```
 
-Run the same workflow with a different orchestrator:
+Run the graph workflow:
 
 ```bash
 job-agent workflow run \
@@ -157,7 +165,7 @@ Future durable-checkpoint mode should add a separate start/resume API instead of
 - `GET /api/workflows/<id>`: inspect gate, pending checkpoint, and artifacts.
 - `POST /api/workflows/<id>/resume`: continue only after explicit user approval.
 
-Until that API exists, the LangGraph engine is an optional orchestrator, not a different product mode.
+Until that API exists, LangGraph is the main local orchestrator and `classic` is only a debugging fallback.
 
 ### Mode 1: Codex Or Claude As Operator
 

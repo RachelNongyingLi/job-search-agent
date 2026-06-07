@@ -20,6 +20,7 @@ from .workflow import (
     _write_llm_failure,
 )
 
+
 class WorkflowState(TypedDict, total=False):
     job_path: str | Path
     profile_path: str | Path
@@ -100,7 +101,7 @@ def _compile_graph():
     try:
         from langgraph.graph import END, StateGraph
     except ImportError as exc:
-        raise WorkflowEngineError("LangGraph engine requires: pip install -e '.[langgraph]'") from exc
+        raise WorkflowEngineError("LangGraph engine requires project dependencies. Install with: pip install -e .") from exc
 
     graph = StateGraph(WorkflowState)
     graph.add_node("intake", _intake_node)

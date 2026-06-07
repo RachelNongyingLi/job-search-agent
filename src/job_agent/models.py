@@ -1,29 +1,29 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from pydantic import BaseModel, ConfigDict, Field
 
 
-@dataclass(frozen=True)
-class Evidence:
+class Evidence(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     label: str
     source: str
     weight: int = 1
 
 
-@dataclass
-class CandidateProfile:
+class CandidateProfile(BaseModel):
     name: str
     headline: str
-    target_roles: list[str]
-    locations: list[str]
-    education: list[dict]
-    skills: dict[str, list[str]]
-    experiences: list[dict]
-    projects: list[dict]
-    languages: list[str]
-    market_facts: dict = field(default_factory=dict)
-    ability_model: dict = field(default_factory=dict)
-    notes: list[str] = field(default_factory=list)
+    target_roles: list[str] = Field(default_factory=list)
+    locations: list[str] = Field(default_factory=list)
+    education: list[dict] = Field(default_factory=list)
+    skills: dict[str, list[str]] = Field(default_factory=dict)
+    experiences: list[dict] = Field(default_factory=list)
+    projects: list[dict] = Field(default_factory=list)
+    languages: list[str] = Field(default_factory=list)
+    market_facts: dict = Field(default_factory=dict)
+    ability_model: dict = Field(default_factory=dict)
+    notes: list[str] = Field(default_factory=list)
 
     @property
     def all_keywords(self) -> dict[str, list[Evidence]]:
@@ -33,7 +33,7 @@ class CandidateProfile:
             key = term.lower().strip()
             if not key:
                 return
-            buckets.setdefault(key, []).append(Evidence(term, source, weight))
+            buckets.setdefault(key, []).append(Evidence(label=term, source=source, weight=weight))
 
         for group, values in self.skills.items():
             for value in values:
@@ -85,8 +85,9 @@ def _aliases(term: str) -> list[str]:
     return aliases.get(lower, [])
 
 
-@dataclass(frozen=True)
-class JobAnalysis:
+class JobAnalysis(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     title: str
     company: str
     keywords: list[str]
@@ -95,8 +96,9 @@ class JobAnalysis:
     raw_text: str
 
 
-@dataclass(frozen=True)
-class NegativeSignal:
+class NegativeSignal(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     code: str
     severity: str
     category: str
@@ -106,8 +108,9 @@ class NegativeSignal:
     score_cap: int
 
 
-@dataclass(frozen=True)
-class MatchResult:
+class MatchResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     score: int
     decision: str
     matched: list[tuple[str, list[Evidence]]]
@@ -118,7 +121,7 @@ class MatchResult:
     market_risks: list[str]
     memory_updates: list[str]
     job: JobAnalysis
-    negative_signals: list[NegativeSignal] = field(default_factory=list)
+    negative_signals: list[NegativeSignal] = Field(default_factory=list)
 
 
 def _important_phrases(text: str) -> list[str]:

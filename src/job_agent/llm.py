@@ -4,16 +4,18 @@ import json
 import os
 import urllib.error
 import urllib.request
-from dataclasses import dataclass
 from typing import Protocol
+
+from pydantic import BaseModel, ConfigDict
 
 
 class LLMProviderError(RuntimeError):
     """Raised when an optional LLM provider cannot return a usable response."""
 
 
-@dataclass(frozen=True)
-class LLMResponse:
+class LLMResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     text: str
     provider: str
     model: str

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
 
 from .llm import LLMClient
 from .models import MatchResult
+from pydantic import BaseModel, ConfigDict
 
 
 SYSTEM_PROMPT = """You are a cautious CV planning assistant.
@@ -14,8 +14,9 @@ If evidence is missing, label the item as interview prep, needs verification, or
 """
 
 
-@dataclass(frozen=True)
-class LLMVerification:
+class LLMVerification(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     passed: bool
     warnings: list[str]
     checked_rules: list[str]

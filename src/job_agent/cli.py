@@ -9,7 +9,7 @@ from .matcher import match_profile_to_job
 from .memory import update_memory
 from .profile import load_profile
 from .tracker import add_application, list_applications
-from .workflow import WORKFLOW_ENGINES, run_workflow
+from .workflow import DEFAULT_WORKFLOW_ENGINE, WORKFLOW_ENGINES, run_workflow
 
 
 DEFAULT_PROFILE = Path("profiles/sample_candidate.json")
@@ -53,8 +53,8 @@ def main(argv: list[str] | None = None) -> int:
     workflow_run.add_argument(
         "--engine",
         choices=sorted(WORKFLOW_ENGINES),
-        default="classic",
-        help="Workflow orchestrator. Use langgraph only after installing the optional extra.",
+        default=DEFAULT_WORKFLOW_ENGINE,
+        help="Workflow orchestrator. Default: langgraph.",
     )
     workflow_run.add_argument("--yes", action="store_true", help="Approve non-blocking workflow prompts")
     workflow_run.add_argument(

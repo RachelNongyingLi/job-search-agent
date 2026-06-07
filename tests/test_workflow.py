@@ -194,7 +194,7 @@ class WorkflowTest(unittest.TestCase):
             root = Path(tmp)
             with self.assertRaises(RuntimeError) as raised:
                 run_workflow(root / "job.txt", root / "profile.json", out_dir=root / "out", engine="langgraph")
-            self.assertIn("pip install -e '.[langgraph]'", str(raised.exception))
+            self.assertIn("pip install -e .", str(raised.exception))
 
     def test_langgraph_engine_matches_classic_when_installed(self):
         if importlib.util.find_spec("langgraph") is None:
@@ -209,7 +209,7 @@ class WorkflowTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            classic = run_workflow(job, profile, out_dir=root / "classic", auto_approve=True)
+            classic = run_workflow(job, profile, out_dir=root / "classic", auto_approve=True, engine="classic")
             graph = run_workflow(job, profile, out_dir=root / "graph", auto_approve=True, engine="langgraph")
 
             self.assertEqual(graph.status, classic.status)

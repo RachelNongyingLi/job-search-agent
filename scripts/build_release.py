@@ -113,7 +113,8 @@ def is_included(path: str) -> bool:
 
 
 def is_ignored(path: Path) -> bool:
-    return any(part in IGNORED_PARTS for part in path.parts) or path.name == ".DS_Store" or path.suffix == ".pyc"
+    generated_part = any(part in IGNORED_PARTS or part.endswith(".egg-info") for part in path.parts)
+    return generated_part or path.name == ".DS_Store" or path.suffix == ".pyc"
 
 
 def audit_release_path(rel_path: str) -> list[str]:
