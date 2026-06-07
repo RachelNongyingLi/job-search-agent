@@ -56,6 +56,62 @@ class WorkflowTest(unittest.TestCase):
             self.assertEqual(decision["agent_status"], "ready_for_cv_plan")
             self.assertIn("root_strengths", decision)
 
+    def test_workflow_generates_verified_mock_llm_plan_after_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profile = root / "profile.local.json"
+            job = root / "job.txt"
+            out_dir = root / "out"
+            profile.write_text(json.dumps(PROFILE_JSON), encoding="utf-8")
+            job.write_text(
+                "Build Python workflow automation with LLM agents, prompt engineering, documentation, Excel, and international stakeholders.",
+                encoding="utf-8",
+            )
+
+            run = run_workflow(
+                job,
+                profile,
+                out_dir=out_dir,
+                auto_approve=True,
+                llm_provider="mock",
+                llm_model="mock-local",
+            )
+
+            self.assertEqual(run.status, "ready_for_cv_plan")
+            self.assertTrue((out_dir / "cv_plan.md").exists())
+            self.assertTrue((out_dir / "cv_plan.llm.md").exists())
+            self.assertTrue((out_dir / "llm_verification.json").exists())
+            verification = json.loads((out_dir / "llm_verification.json").read_text(encoding="utf-8"))
+            self.assertTrue(verification["passed"])
+            self.assertEqual(verification["provider"], "mock")
+
+    def test_workflow_keeps_deterministic_plan_when_llm_config_is_invalid(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profile = root / "profile.local.json"
+            job = root / "job.txt"
+            out_dir = root / "out"
+            profile.write_text(json.dumps(PROFILE_JSON), encoding="utf-8")
+            job.write_text(
+                "Build Python workflow automation with LLM agents, prompt engineering, documentation, Excel, and international stakeholders.",
+                encoding="utf-8",
+            )
+
+            run = run_workflow(
+                job,
+                profile,
+                out_dir=out_dir,
+                auto_approve=True,
+                llm_provider="openai-compatible",
+            )
+
+            self.assertEqual(run.status, "ready_for_cv_plan")
+            self.assertTrue((out_dir / "cv_plan.md").exists())
+            self.assertFalse((out_dir / "cv_plan.llm.md").exists())
+            verification = json.loads((out_dir / "llm_verification.json").read_text(encoding="utf-8"))
+            self.assertFalse(verification["passed"])
+            self.assertEqual(verification["provider"], "openai-compatible")
+
     def test_workflow_blocks_cv_plan_for_red_line(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -73,6 +129,30 @@ class WorkflowTest(unittest.TestCase):
             self.assertEqual(run.status, "red_line_block")
             self.assertFalse((out_dir / "cv_plan.md").exists())
             self.assertIn("Stop Before Tailoring", (out_dir / "next_actions.md").read_text(encoding="utf-8"))
+
+    def test_workflow_skips_llm_plan_for_red_line(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profile = root / "profile.local.json"
+            job = root / "job.txt"
+            out_dir = root / "out"
+            profile.write_text(json.dumps(PROFILE_JSON), encoding="utf-8")
+            job.write_text(
+                "AI automation intern. Proof of mandatory internship is required. Work with Python and LLM agents.",
+                encoding="utf-8",
+            )
+
+            run = run_workflow(
+                job,
+                profile,
+                out_dir=out_dir,
+                auto_approve=True,
+                llm_provider="mock",
+            )
+
+            self.assertEqual(run.status, "red_line_block")
+            self.assertFalse((out_dir / "cv_plan.llm.md").exists())
+            self.assertFalse((out_dir / "llm_verification.json").exists())
 
 
 if __name__ == "__main__":

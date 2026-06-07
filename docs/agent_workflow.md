@@ -20,6 +20,7 @@ Internally, the workflow is split into small agents:
 - `DecisionGateAgent`: runs matching, market filters, and negative red-line checks.
 - `ReportAgent`: writes `report.md` and `decision.json`.
 - `CVPlanAgent`: writes `cv_plan.md` only when the gate allows it.
+- `LLMDraftAgent`: optionally asks a local/OpenAI-compatible LLM for wording help after CV planning is allowed, then verifies the draft before accepting it.
 - `MemoryAgent`: updates `memory.local.json` only when requested and confirmed.
 - `NextActionsAgent`: writes `next_actions.md`.
 
@@ -35,12 +36,84 @@ job-agent workflow run \
   --yes
 ```
 
-## Codex And Claude
+## Two Operating Modes
+
+### Mode 1: Codex Or Claude As Operator
+
+This is the current recommended mode.
 
 - Codex reads `AGENTS.md`.
 - Claude Code reads `CLAUDE.md`, which imports `AGENTS.md`.
-- Required project behavior belongs in checked-in instruction files, not only in platform memory.
-- Local private facts belong in ignored files such as `profiles/me.local.json`, `data/private/*.local.json`, and `memory.local.json`.
+- The operator runs `job-agent workflow run`, reads the artifacts, and reasons with the user.
+- The operator can compare roles, explain tradeoffs, and plan CV edits after the gate allows it.
+- The operator must not raise scores, ignore red lines, or convert missing evidence into CV claims.
+
+This mode does not require the project code to call an LLM. The LLM is the operator around the CLI.
+
+#### Operator Contract
+
+Required sequence:
+
+1. Read `README.md` and `AGENTS.md` or `CLAUDE.md`.
+2. Read the JD, selected profile, and relevant local memory.
+3. Run `job-agent workflow run`.
+4. Read `decision.json`, `report.md`, and `next_actions.md`.
+5. Produce CV or cover-letter planning only if the workflow status allows it.
+
+The operator may be more conservative than the CLI. It must not be less conservative than the CLI. A missing `cv_plan.md` should be treated as an intentional gate result unless the command failed.
+
+### Mode 2: Local LLM Drafting
+
+This mode is for a local app, local server, or scripted deployment that wants model-assisted wording.
+
+```bash
+job-agent workflow run \
+  --job inputs/jobs/company_role_YYYY-MM-DD.txt \
+  --profile profiles/me.local.json \
+  --out-dir outputs/private/company_role \
+  --llm-provider openai-compatible \
+  --llm-base-url http://localhost:11434/v1 \
+  --llm-model your-local-model \
+  --yes
+```
+
+The local LLM layer is deliberately late in the pipeline:
+
+```text
+JD + profile
+  -> deterministic matcher
+  -> market and negative ability gate
+  -> human confirmation
+  -> deterministic cv_plan.md
+  -> optional LLM draft
+  -> verifier
+  -> cv_plan.llm.md only if accepted
+```
+
+The LLM receives a compact analysis summary, not the full private profile by default. It can suggest wording, but `llm_verification.json` must pass before `cv_plan.llm.md` is treated as usable.
+
+For test and demos without network:
+
+```bash
+job-agent workflow run \
+  --job examples/ai_automation_jd.txt \
+  --out-dir outputs/private/mock_llm_demo \
+  --llm-provider mock \
+  --yes
+```
+
+## Why This Is Still An Agent
+
+The project is an agentic workflow because it has specialized agents, persistent memory, explicit gates, generated artifacts, and human confirmation points. It is not yet an autonomous auto-apply bot, and it should not become one by default.
+
+The key design choice is separation:
+
+- Deterministic agents decide fit, risks, and claim safety.
+- Codex/Claude operator mode adds human-facing reasoning around files and CLI output.
+- Local LLM mode adds optional wording help after the gate.
+- The verifier decides whether an LLM draft is acceptable.
+
+Required project behavior belongs in checked-in instruction files, code, and tests, not only in platform memory. Local private facts belong in ignored files such as `profiles/me.local.json`, `data/private/*.local.json`, and `memory.local.json`.
 
 ## Suggested Prompt For A New Job
 

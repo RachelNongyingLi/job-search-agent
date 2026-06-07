@@ -2,29 +2,7 @@
 
 A local-first job-search assistant for deciding whether a role is worth tailoring.
 
-It does **not** auto-apply. It does **not** invent experience. It helps you answer:
-
-- Is this role a real fit?
-- Is there a hard blocker, such as language, location, work authorization, commute, or mandatory internship proof?
-- Which strengths are evidence-backed?
-- Which gaps are learnable before interview?
-- What should not be claimed on the CV?
-
-## What It Does
-
-- Reads a local job description.
-- Matches it against a structured candidate profile.
-- Produces a Markdown report with:
-  - fit score
-  - apply / verify-first / skip decision
-  - market hard filters
-  - red-line risks
-  - root strengths
-  - interview-upskill items
-  - do-not-claim items
-  - resume targeting advice
-- Optionally updates a private local memory file.
-- Tracks applications in a local CSV.
+It does not auto-apply. It does not invent experience. It helps you find hard blockers, evidence-backed strengths, interview-upskill items, and things that must not be claimed on the CV.
 
 ## Quick Start
 
@@ -35,7 +13,7 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-Run the human-in-the-loop workflow:
+Run the main workflow:
 
 ```bash
 job-agent workflow run \
@@ -44,57 +22,78 @@ job-agent workflow run \
   --memory memory.local.json
 ```
 
-The workflow writes:
+It writes:
 
 ```text
-report.md        # full match report
-decision.json    # machine-readable decision
-next_actions.md  # what to do next
-cv_plan.md       # only when the gate allows CV planning
+report.md            # human-readable fit report
+decision.json        # machine-readable gate result
+next_actions.md      # what to do next
+cv_plan.md           # only when the gate allows CV planning
 ```
 
-For scripting or demos, approve non-blocking prompts:
+Use `--yes` only when you want to approve non-blocking prompts for demos or scripting.
+
+## Two Ways To Use It
+
+### 1. Codex Or Claude As Operator
+
+This is the recommended mode right now.
+
+Open the repo in Codex or Claude Code and ask it to run the workflow. Codex reads `AGENTS.md`; Claude reads `CLAUDE.md`, which points back to the same rules.
+
+Good prompt:
+
+```text
+Read AGENTS.md and README.md.
+Run job-agent workflow for this JD.
+Do not tailor my CV until the gate says it is allowed.
+Use the report and decision.json for judgment.
+```
+
+Codex or Claude may reason over the CLI output, compare roles, and help plan CV edits. It must not bypass red lines, private evidence checks, or one-page CV rules.
+
+### 2. Local LLM Drafting
+
+By default, the CLI uses no language model. To add a local or self-hosted model, use an OpenAI-compatible endpoint after the deterministic gate:
 
 ```bash
 job-agent workflow run \
   --job examples/ai_automation_jd.txt \
   --out-dir outputs/private/example_ai_automation \
-  --memory memory.local.json \
+  --llm-provider openai-compatible \
+  --llm-base-url http://localhost:11434/v1 \
+  --llm-model your-local-model \
   --yes
 ```
 
-Use the lower-level analyzer when you only want a report:
+If accepted, the optional model draft is written to:
 
-```bash
-job-agent analyze \
-  --job examples/ai_automation_jd.txt \
-  --out outputs/example_report.md
+```text
+cv_plan.llm.md
+llm_verification.json
 ```
 
-Analyze and update local memory:
+The model draft is wording help only. It cannot override red-line blocks, missing proof, unsupported claims, or verifier failures.
 
-```bash
-job-agent analyze \
-  --job examples/ai_automation_jd.txt \
-  --out outputs/example_report.md \
-  --memory memory.local.json
-```
+## Human Checkpoints
 
-Run tests:
+Before tailoring or sending anything, confirm:
 
-```bash
-PYTHONPATH=src python3 -m unittest discover -s tests
-```
+- Mandatory internship proof exists when the JD requires it.
+- Commute, relocation, location, language, and work authorization are real and safe to state.
+- Every CV bullet has profile, project, current CV, or report evidence.
+- A red-line block means no CV bullets, cover letter, or recruiter message yet.
+- A final LaTeX CV must compile cleanly to exactly one page.
 
-## Use Your Own Profile
+## Your Own Profile
 
-The public sample profile is anonymized:
+The public profile is only a demo:
 
 ```text
 profiles/sample_candidate.json
 ```
 
-For real use, create a local private copy:
+For real use:
 
 ```bash
 cp profiles/sample_candidate.json profiles/me.local.json
@@ -110,99 +109,19 @@ job-agent workflow run \
   --memory memory.local.json
 ```
 
-Keep real job descriptions in `inputs/jobs/` and real reports in `outputs/private/`.
-
-## Track Applications
-
-```bash
-job-agent track add \
-  --company "Example Company" \
-  --role "AI Automation Intern" \
-  --status "tailoring" \
-  --notes "Verify location before CV tailoring"
-
-job-agent track list
-```
-
-## Codex Or Claude
-
-This repo includes agent instructions:
-
-```text
-AGENTS.md      # Codex instructions
-CLAUDE.md      # Claude Code instructions
-```
-
-Use Codex or Claude to review reports, plan CV edits, or compare multiple roles. The important rule:
-
-```text
-Run the workflow first. Do not tailor the CV until hard filters and red lines are checked.
-```
-
-Advanced prompts and the planned one-page LaTeX CV workflow are in [docs/agent_workflow.md](docs/agent_workflow.md).
-
 ## Privacy
 
-Do not commit private job-search material:
+Do not commit private job-search material: real CVs, cover letters, `memory.local.json`, `applications.csv`, `*.local.json`, PDFs, DOCX files, transcripts, certificates, visa details, address, commute, or work authorization.
 
-- real CVs
-- cover letters
-- `memory.local.json`
-- `applications.csv`
-- `*.local.json`
-- PDFs / DOCX files
-- transcripts or certificates
-- visa, address, commute, or work-authorization details
+Keep real job descriptions in `inputs/jobs/` and real outputs in `outputs/private/`.
 
-Ignored by default:
+## Useful Commands
 
-```text
-data/private/
-inputs/jobs/
-private_resumes/
-outputs/private/
-outputs/
-applications.csv
-memory.local.json
-*.local.json
-CLAUDE.local.md
-*.docx
-*.pdf
-*.xlsx
-*.xls
+```bash
+job-agent analyze --job examples/ai_automation_jd.txt
+job-agent track add --company "Example Company" --role "AI Automation Intern" --status "saved"
+job-agent track list
+PYTHONPATH=src python3 -m unittest discover -s tests
 ```
 
-Rule of thumb: if you would not paste it into a public GitHub issue, do not put it in a tracked file.
-
-## Project Structure
-
-```text
-job-search-agent/
-├── AGENTS.md
-├── CLAUDE.md
-├── docs/
-│   ├── agent_workflow.md
-│   └── analysis_zh.md
-├── examples/
-│   └── ai_automation_jd.txt
-├── profiles/
-│   └── sample_candidate.json
-├── src/job_agent/
-│   ├── cli.py
-│   ├── generator.py
-│   ├── job_parser.py
-│   ├── matcher.py
-│   ├── memory.py
-│   ├── models.py
-│   ├── negative_ability.py
-│   ├── profile.py
-│   └── tracker.py
-└── tests/
-    ├── test_generator.py
-    ├── test_matcher.py
-    └── test_memory.py
-```
-
-## Status
-
-MVP. Useful for local triage and truthful application planning. Not a replacement for judgment.
+More detailed Codex/Claude, local LLM, and one-page LaTeX CV notes are in [docs/agent_workflow.md](docs/agent_workflow.md).

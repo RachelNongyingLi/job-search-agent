@@ -51,6 +51,23 @@ def main(argv: list[str] | None = None) -> int:
     workflow_run.add_argument("--out-dir", default="", help="Directory for workflow artifacts")
     workflow_run.add_argument("--memory", default="", help="Optional ignored local JSON memory file to update")
     workflow_run.add_argument("--yes", action="store_true", help="Approve non-blocking workflow prompts")
+    workflow_run.add_argument(
+        "--llm-provider",
+        choices=["none", "mock", "openai-compatible"],
+        default="none",
+        help="Optional LLM drafting provider. Default: none",
+    )
+    workflow_run.add_argument("--llm-model", default="", help="Model name for the optional LLM provider")
+    workflow_run.add_argument(
+        "--llm-base-url",
+        default="",
+        help="Base URL for OpenAI-compatible providers, e.g. http://localhost:11434/v1",
+    )
+    workflow_run.add_argument(
+        "--llm-api-key-env",
+        default="OPENAI_API_KEY",
+        help="Environment variable containing an API key when the provider needs one",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "analyze":
@@ -116,6 +133,10 @@ def _cmd_workflow(args: argparse.Namespace) -> int:
             company=args.company,
             title=args.title,
             auto_approve=args.yes,
+            llm_provider=args.llm_provider,
+            llm_model=args.llm_model,
+            llm_base_url=args.llm_base_url,
+            llm_api_key_env=args.llm_api_key_env,
         )
         print(f"Workflow status: {run.status}")
         print(f"Wrote report: {run.artifacts.report}")
@@ -123,6 +144,10 @@ def _cmd_workflow(args: argparse.Namespace) -> int:
         print(f"Wrote next actions: {run.artifacts.next_actions}")
         if run.artifacts.cv_plan:
             print(f"Wrote CV plan: {run.artifacts.cv_plan}")
+        if run.artifacts.llm_cv_plan:
+            print(f"Wrote optional LLM CV plan: {run.artifacts.llm_cv_plan}")
+        if run.artifacts.llm_verification:
+            print(f"Wrote LLM verification: {run.artifacts.llm_verification}")
         if run.artifacts.memory:
             print(f"Updated memory: {run.artifacts.memory}")
         return 0

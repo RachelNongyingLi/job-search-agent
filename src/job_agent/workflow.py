@@ -8,6 +8,8 @@ from typing import Callable
 
 from .generator import build_report, write_report
 from .job_parser import parse_job_file
+from .llm import LLMClient, LLMProviderError, build_llm_client
+from .llm_drafting import LLMVerification, draft_cv_plan_with_llm
 from .matcher import match_profile_to_job
 from .memory import update_memory
 from .models import CandidateProfile, JobAnalysis, MatchResult
@@ -24,6 +26,8 @@ class WorkflowArtifacts:
     decision: Path
     next_actions: Path
     cv_plan: Path | None = None
+    llm_cv_plan: Path | None = None
+    llm_verification: Path | None = None
     memory: Path | None = None
 
 
@@ -138,9 +142,17 @@ class CVPlanAgent:
 class NextActionsAgent:
     name = "next_actions"
 
-    def write(self, status: str, result: MatchResult, out_dir: Path, cv_plan_path: Path | None) -> Path:
+    def write(
+        self,
+        status: str,
+        result: MatchResult,
+        out_dir: Path,
+        cv_plan_path: Path | None,
+        llm_cv_plan_path: Path | None = None,
+        llm_verification_path: Path | None = None,
+    ) -> Path:
         path = out_dir / "next_actions.md"
-        actions = _next_actions(status, result, cv_plan_path)
+        actions = _next_actions(status, result, cv_plan_path, llm_cv_plan_path, llm_verification_path)
         path.write_text("\n".join(actions) + "\n", encoding="utf-8")
         return path
 
@@ -152,6 +164,35 @@ class MemoryAgent:
         return update_memory(memory_path, result)
 
 
+class LLMDraftAgent:
+    name = "llm_draft"
+
+    def write(self, result: MatchResult, out_dir: Path, client: LLMClient) -> tuple[Path | None, Path]:
+        verification_path = out_dir / "llm_verification.json"
+        try:
+            text, verification = draft_cv_plan_with_llm(result, client)
+        except (LLMProviderError, ValueError) as exc:
+            payload = _llm_verification_payload(
+                LLMVerification(
+                    passed=False,
+                    warnings=[str(exc)],
+                    checked_rules=["provider returned usable response"],
+                ),
+                provider=getattr(client, "provider", "unknown"),
+                model=getattr(client, "model", "unknown"),
+            )
+            verification_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+            return None, verification_path
+
+        payload = _llm_verification_payload(verification, provider=client.provider, model=client.model)
+        verification_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+        if not verification.passed:
+            return None, verification_path
+        draft_path = out_dir / "cv_plan.llm.md"
+        draft_path.write_text(text, encoding="utf-8")
+        return draft_path, verification_path
+
+
 def run_workflow(
     job_path: str | Path,
     profile_path: str | Path,
@@ -161,6 +202,11 @@ def run_workflow(
     title: str = "",
     auto_approve: bool = False,
     input_fn: InputFn = input,
+    llm_provider: str = "none",
+    llm_model: str = "",
+    llm_base_url: str = "",
+    llm_api_key_env: str = "OPENAI_API_KEY",
+    llm_client: LLMClient | None = None,
 ) -> WorkflowRun:
     out = Path(out_dir) if out_dir else Path("outputs/private") / _slug(Path(job_path).stem)
     out.mkdir(parents=True, exist_ok=True)
@@ -171,6 +217,7 @@ def run_workflow(
     cv_planner = CVPlanAgent()
     next_actions = NextActionsAgent()
     memory_agent = MemoryAgent()
+    llm_drafter = LLMDraftAgent()
 
     profile, job = intake.load(job_path, profile_path, company=company, title=title)
     result = gate.evaluate(profile, job)
@@ -187,17 +234,36 @@ def run_workflow(
         if _confirm("Generate CV targeting plan?", default=True, auto_approve=auto_approve, input_fn=input_fn):
             cv_plan_path = cv_planner.write(result, out)
 
+    llm_cv_plan_path: Path | None = None
+    llm_verification_path: Path | None = None
+    should_attempt_llm = llm_client is not None or (llm_provider or "none").strip().lower() != "none"
+    if cv_plan_path and should_attempt_llm:
+        try:
+            client = llm_client or build_llm_client(
+                provider=llm_provider,
+                model=llm_model,
+                base_url=llm_base_url,
+                api_key_env=llm_api_key_env,
+            )
+        except ValueError as exc:
+            llm_verification_path = _write_llm_failure(out, str(exc), provider=llm_provider, model=llm_model)
+        else:
+            if client is not None:
+                llm_cv_plan_path, llm_verification_path = llm_drafter.write(result, out, client)
+
     memory_written: Path | None = None
     if memory_path and _confirm("Update local application memory?", default=True, auto_approve=auto_approve, input_fn=input_fn):
         memory_written = memory_agent.update(memory_path, result)
 
-    next_actions_path = next_actions.write(status, result, out, cv_plan_path)
+    next_actions_path = next_actions.write(status, result, out, cv_plan_path, llm_cv_plan_path, llm_verification_path)
     artifacts = WorkflowArtifacts(
         out_dir=out,
         report=report_path,
         decision=decision_path,
         next_actions=next_actions_path,
         cv_plan=cv_plan_path,
+        llm_cv_plan=llm_cv_plan_path,
+        llm_verification=llm_verification_path,
         memory=memory_written,
     )
     return WorkflowRun(status=status, result=result, artifacts=artifacts)
@@ -229,10 +295,17 @@ def _decision_payload(result: MatchResult) -> dict:
         "interview_upskill": result.upskill_matches,
         "do_not_claim": result.irrelevant_or_low_signal,
         "gaps": result.gaps,
+        "llm_policy": "Optional LLM drafts may assist wording only after the gate allows CV planning; they cannot override red lines or verifier failures.",
     }
 
 
-def _next_actions(status: str, result: MatchResult, cv_plan_path: Path | None) -> list[str]:
+def _next_actions(
+    status: str,
+    result: MatchResult,
+    cv_plan_path: Path | None,
+    llm_cv_plan_path: Path | None = None,
+    llm_verification_path: Path | None = None,
+) -> list[str]:
     lines = [
         f"# Next Actions: {result.job.title} at {result.job.company}",
         "",
@@ -267,6 +340,27 @@ def _next_actions(status: str, result: MatchResult, cv_plan_path: Path | None) -
                 "- Confirm each bullet is evidence-backed before editing the real CV.",
             ]
         )
+        if llm_cv_plan_path:
+            lines.extend(
+                [
+                    "",
+                    "## Optional LLM Draft Ready",
+                    "",
+                    f"- Review `{llm_cv_plan_path}` only as wording assistance.",
+                    f"- Keep `{llm_verification_path}` with the application artifacts.",
+                    "- The LLM draft cannot override the deterministic gate, red lines, or private evidence checks.",
+                ]
+            )
+        elif llm_verification_path:
+            lines.extend(
+                [
+                    "",
+                    "## Optional LLM Draft Not Accepted",
+                    "",
+                    f"- Review `{llm_verification_path}` for the rejection or provider error.",
+                    "- Use the deterministic CV plan instead.",
+                ]
+            )
     else:
         lines.extend(
             [
@@ -292,3 +386,25 @@ def _unique_sources(evidence) -> list[str]:
 def _slug(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "_", value).strip("_").lower()
     return slug or "job_workflow"
+
+
+def _llm_verification_payload(verification: LLMVerification, provider: str, model: str) -> dict:
+    payload = asdict(verification)
+    payload["provider"] = provider
+    payload["model"] = model
+    return payload
+
+
+def _write_llm_failure(out_dir: Path, warning: str, provider: str, model: str) -> Path:
+    path = out_dir / "llm_verification.json"
+    payload = _llm_verification_payload(
+        LLMVerification(
+            passed=False,
+            warnings=[warning],
+            checked_rules=["provider configuration"],
+        ),
+        provider=provider or "unknown",
+        model=model or "unknown",
+    )
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    return path

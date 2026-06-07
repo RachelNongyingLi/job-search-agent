@@ -9,7 +9,16 @@ This repo is a local-first precision job-search agent. The goal is not to make a
 - Read `profiles/sample_candidate.json` for public-safe demo behavior.
 - If present and explicitly relevant, read local private files such as `profiles/*.local.json`, `data/private/*.local.json`, `memory.local.json`, and the latest private report under `outputs/private/`.
 - Run `job-agent analyze` before CV tailoring when the user is judging a new role.
+- Prefer `job-agent workflow run` for new roles because it writes the gate, next actions, CV plan, optional LLM verification, and memory artifacts together.
 - Do not rely only on chat context or platform memory for application facts.
+
+## Operating Modes
+
+- Codex/Claude as operator: read these instructions, run the CLI, inspect `report.md`, `decision.json`, and `next_actions.md`, then help the user decide. You may add reasoning on top of CLI output, but you must not bypass the workflow gate.
+- Local LLM drafting: use `job-agent workflow run --llm-provider ...` only when the user explicitly wants model-assisted drafting. LLM output is optional wording help, not a source of truth.
+- In both modes, the deterministic matcher, negative ability check, human confirmation, verifier, privacy rules, and one-page CV contract remain mandatory.
+- Missing `cv_plan.md` is often intentional gate output, not a generation failure. Do not write substitute CV bullets when the gate withheld the plan.
+- You may be more conservative than the CLI. You must not be less conservative than the CLI.
 
 ## Privacy Rules
 
@@ -35,8 +44,18 @@ This repo is a local-first precision job-search agent. The goal is not to make a
 - Do not invent metrics, company names, deployment, leadership, users, revenue impact, certifications, language proficiency, authorization status, or eligibility proof.
 - If evidence is missing, mark it as `interview-upskill`, `verify-first`, `unsupported`, or `do-not-claim`.
 
+## LLM Integration Rules
+
+- The default workflow should run with `--llm-provider none`.
+- Do not call a local or remote LLM before the gate allows CV planning.
+- A block-level red line forbids deterministic CV planning and optional LLM drafting, even when `--yes` is passed.
+- A local LLM draft is acceptable only when `llm_verification.json` has `"passed": true`.
+- If the verifier rejects the draft, use `cv_plan.md` and explain why the LLM draft was not accepted.
+- Never let LLM output add unsupported eligibility, commute, relocation, language, production, leadership, deployment, metrics, or work-authorization claims.
+
 ## CV Tailoring Rules
 
+- LaTeX CV work is the final step after `report.md`, `decision.json`, and an allowed `cv_plan.md`; do not start by editing `.tex` directly for a new role.
 - For LaTeX CV work, preserve a one-page contract: the final PDF must be exactly one page.
 - Prefer reordering, shortening, and evidence-first wording over adding new claims.
 - Every proposed bullet should be labeled `safe`, `needs verification`, or `too strong / do not use`.
@@ -56,4 +75,4 @@ This repo is a local-first precision job-search agent. The goal is not to make a
 
 - Run tests with `PYTHONPATH=src python3 -m unittest discover -s tests`.
 - Compile-check Python with `python3 -m compileall src tests`.
-- For a sample report, run `PYTHONPATH=src python3 -m job_agent.cli analyze --job examples/ai_automation_jd.txt`.
+- For a sample workflow, run `PYTHONPATH=src python3 -m job_agent.cli workflow run --job examples/ai_automation_jd.txt --out-dir outputs/private/sample_workflow --yes`.
